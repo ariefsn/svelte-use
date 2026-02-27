@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="svelte-use logo">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1630;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f0f1a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8e8e8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a78bfa;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c4b5fd;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="96" fill="url(#bgGrad)" stroke="#3b2d6e" stroke-width="2"/>
+
+  <!-- Outer ring accent -->
+  <circle cx="100" cy="100" r="88" fill="none" stroke="#2d1f5e" stroke-width="1" stroke-dasharray="4 6"/>
+
+  <!-- Lightning bolt / S shape - stylized "S" with bolt -->
+  <g filter="url(#glow)">
+    <!-- Main lightning bolt shape -->
+    <path d="M115 42 L78 98 L100 98 L85 158 L122 102 L100 102 Z"
+          fill="url(#boltGrad)"
+          stroke="#c4b5fd"
+          stroke-width="1.5"
+          stroke-linejoin="round"/>
+  </g>
+
+  <!-- "svelte-use" text -->
+  <text x="100" y="178"
+        font-family="'Courier New', Courier, monospace"
+        font-size="14"
+        font-weight="700"
+        fill="url(#textGrad)"
+        text-anchor="middle"
+        letter-spacing="1">svelte-use</text>
+</svg>

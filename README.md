@@ -1,6 +1,39 @@
-# @ariefsn/svelte-use
+<div align="center">
+  <img src="./static/logo.svg" alt="svelte-use logo" width="120" height="120" />
 
-Svelte 5 runes-first utility library. No stores, no external deps, SSR-safe, tree-shakable.
+  <h1>@ariefsn/svelte-use</h1>
+
+  <p>A collection of <strong>50+</strong> Svelte 5 runes-first utility composables.<br/>No stores. No external dependencies. SSR-safe. Fully typed.</p>
+
+  <p>
+    <a href="https://github.com/ariefsn/svelte-use">
+      <img src="https://img.shields.io/badge/GitHub-ariefsn%2Fsvelte--use-181717?logo=github&logoColor=white" alt="GitHub" />
+    </a>
+    <a href="https://www.npmjs.com/package/@ariefsn/svelte-use">
+      <img src="https://img.shields.io/npm/v/@ariefsn/svelte-use?color=a78bfa&logo=npm&logoColor=white" alt="npm version" />
+    </a>
+    <a href="https://www.npmjs.com/package/@ariefsn/svelte-use">
+      <img src="https://img.shields.io/npm/dm/@ariefsn/svelte-use?color=a78bfa" alt="npm downloads" />
+    </a>
+    <img src="https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white" alt="Svelte 5" />
+    <img src="https://img.shields.io/badge/TypeScript-first-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
+  </p>
+</div>
+
+---
+
+## Features
+
+| | |
+|---|---|
+| ⚡ **Svelte 5 Runes** | Built for `$state`, `$derived`, `$effect` — no stores |
+| 🌲 **Tree-shakable** | Import only what you use |
+| 🔒 **Fully typed** | First-class TypeScript, no `any` |
+| 🌐 **SSR safe** | All browser APIs are guarded |
+| 📦 **Zero deps** | No runtime dependencies |
+| 🧹 **Auto cleanup** | Listeners removed on component destroy |
+
+---
 
 ## Installation
 
@@ -18,6 +51,33 @@ bun add @ariefsn/svelte-use
 
 ## Utilities
 
+### Animation
+
+| Composable       | Description                                      |
+| ---------------- | ------------------------------------------------ |
+| `useAnimate`     | Reactive Web Animations API wrapper              |
+| `useParallax`    | Parallax effect based on pointer or device tilt  |
+| `useTransition`  | Animated numeric transitions with easing         |
+
+### Async
+
+| Composable      | Description                                      |
+| --------------- | ------------------------------------------------ |
+| `useFetch`      | Reactive fetch with loading/error state          |
+| `useWebSocket`  | Reactive WebSocket with auto-reconnect           |
+
+### Time
+
+| Composable         | Description                                      |
+| ------------------ | ------------------------------------------------ |
+| `useInterval`      | Reactive interval counter                        |
+| `useIntervalFn`    | Run a callback on an interval                    |
+| `useNow`           | Reactive current Date                            |
+| `useTimeout`       | Reactive timeout flag                            |
+| `useTimeoutFn`     | Run a callback after a delay                     |
+| `useTimeoutPoll`   | Poll a callback with timeout-based intervals     |
+| `useTimestamp`     | Reactive current timestamp (ms)                  |
+
 ### State
 
 | Composable     | Description                                 |
@@ -30,6 +90,12 @@ bun add @ariefsn/svelte-use
 | `useCountdown` | Countdown timer with start/stop/reset       |
 | `useTimeAgo`   | Human-readable relative time string         |
 
+### Reactivity
+
+| Composable    | Description                          |
+| ------------- | ------------------------------------ |
+| `useDebounce` | Debounce any reactive getter         |
+
 ### Browser – Keyboard & Scroll
 
 | Composable       | Description                                               |
@@ -37,6 +103,7 @@ bun add @ariefsn/svelte-use
 | `useMagicKeys`   | Reactive keyboard state via Proxy — single keys or combos |
 | `useKeyModifier` | Track Ctrl/Shift/Alt/Meta state                           |
 | `useScroll`      | Scroll position, direction, edge arrival                  |
+| `useScrollLock`  | Lock/unlock body scroll                                   |
 
 ### Browser – Pointer & Drag
 
@@ -57,19 +124,57 @@ bun add @ariefsn/svelte-use
 
 ### Browser – Sensors
 
-| Composable       | Description                                            |
-| ---------------- | ------------------------------------------------------ |
-| `useIdle`        | Detect user idle state                                 |
-| `useNetwork`     | Network Information API (downlink, RTT, effectiveType) |
-| `useGeolocation` | Reactive geolocation via watchPosition                 |
+| Composable              | Description                                            |
+| ----------------------- | ------------------------------------------------------ |
+| `useIdle`               | Detect user idle state                                 |
+| `useNetwork`            | Network Information API (downlink, RTT, effectiveType) |
+| `useGeolocation`        | Reactive geolocation via watchPosition                 |
+| `useBreakpoints`        | Reactive responsive breakpoints                        |
+| `useBrowserLocation`    | Reactive browser location (URL, hash, search)          |
+| `useNavigatorLanguage`  | Reactive navigator language                            |
+| `useOnline`             | Reactive online/offline status                         |
+| `usePageLeave`          | Detect when user leaves the page                       |
 
-### Reactivity / Time / Async
+### Browser – Storage
+
+| Composable          | Description                                         |
+| ------------------- | --------------------------------------------------- |
+| `useLocalStorage`   | Reactive localStorage with SSR safety               |
+| `useIndexedDB`      | Reactive IndexedDB with CRUD & querying             |
+| `useBase64`         | Reactive Base64 encode/decode                       |
+| `useObjectUrl`      | Reactive object URL from Blob/File                  |
+| `useSessionStorage` | Reactive sessionStorage with SSR safety             |
+
+### Browser – Interaction
+
+| Composable          | Description                                         |
+| ------------------- | --------------------------------------------------- |
+| `useClickOutside`   | Detect clicks outside an element                    |
+| `useDropZone`       | Drag-and-drop zone with file/data support           |
+| `useElementHover`   | Detect hover state of an element                    |
+| `useFocus`          | Reactive focus state of an element                  |
+
+### Performance
 
 | Composable        | Description                             |
 | ----------------- | --------------------------------------- |
-| `useDebounce`     | Debounce any reactive getter            |
-| `useLocalStorage` | Reactive localStorage with SSR safety   |
-| `useIndexedDB`    | Reactive IndexedDB with CRUD & querying |
+| `useFps`          | Reactive frames-per-second counter      |
+| `useThrottleFn`   | Throttle any function                   |
+| `useDebounceFn`   | Debounce any function                   |
+
+### Virtualization
+
+| Composable        | Description                             |
+| ----------------- | --------------------------------------- |
+| `useVirtualList`  | Efficient virtual list rendering        |
+
+### Web APIs
+
+| Composable            | Description                             |
+| --------------------- | --------------------------------------- |
+| `useClipboard`        | Reactive clipboard read/write           |
+| `useBattery`          | Reactive Battery Status API             |
+| `useSpeechRecognition`| Reactive Web Speech Recognition API     |
 
 ---
 
@@ -511,6 +616,171 @@ geo.isSupported(); // → boolean
 
 ---
 
+### `useFetch`
+
+Reactive fetch wrapper with loading/error state.
+
+```ts
+import { useFetch } from '@ariefsn/svelte-use';
+
+const { data, loading, error, execute } = useFetch<User[]>('/api/users');
+// data() → User[] | null
+// loading() → boolean
+// error() → Error | null
+```
+
+---
+
+### `useWebSocket`
+
+Reactive WebSocket with auto-reconnect.
+
+```ts
+import { useWebSocket } from '@ariefsn/svelte-use';
+
+const ws = useWebSocket('wss://echo.example.com');
+ws.send('hello');
+ws.data(); // → last received message
+ws.status(); // → 'OPEN' | 'CLOSED' | 'CONNECTING'
+```
+
+---
+
+### `useAnimate`
+
+Reactive Web Animations API wrapper.
+
+```ts
+import { useAnimate } from '@ariefsn/svelte-use';
+
+const { animate, stop } = useAnimate(() => el);
+animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
+```
+
+---
+
+### `useParallax`
+
+Parallax effect based on pointer position or device tilt.
+
+```ts
+import { useParallax } from '@ariefsn/svelte-use';
+
+const { tilt, roll } = useParallax(() => containerEl);
+// tilt() → number  (−0.5 to 0.5)
+// roll() → number  (−0.5 to 0.5)
+```
+
+---
+
+### `useTransition`
+
+Animated numeric transitions with easing.
+
+```ts
+import { useTransition } from '@ariefsn/svelte-use';
+
+let target = $state(0);
+const animated = useTransition(() => target, { duration: 500 });
+// animated() smoothly interpolates to target
+```
+
+---
+
+### `useInterval`
+
+Reactive interval counter.
+
+```ts
+import { useInterval } from '@ariefsn/svelte-use';
+
+const { counter, pause, resume } = useInterval(1000);
+counter(); // → increments every second
+```
+
+---
+
+### `useNow`
+
+Reactive current `Date`.
+
+```ts
+import { useNow } from '@ariefsn/svelte-use';
+
+const now = useNow();
+now(); // → Date (updated every second by default)
+```
+
+---
+
+### `useTimestamp`
+
+Reactive current timestamp in milliseconds.
+
+```ts
+import { useTimestamp } from '@ariefsn/svelte-use';
+
+const ts = useTimestamp();
+ts(); // → number (ms since epoch)
+```
+
+---
+
+### `useBreakpoints`
+
+Reactive responsive breakpoints.
+
+```ts
+import { useBreakpoints } from '@ariefsn/svelte-use';
+
+const bp = useBreakpoints({ sm: 640, md: 768, lg: 1024 });
+bp.lg(); // → true if viewport ≥ 1024px
+bp.between('sm', 'lg')(); // → boolean
+```
+
+---
+
+### `useClipboard`
+
+Reactive clipboard read/write.
+
+```ts
+import { useClipboard } from '@ariefsn/svelte-use';
+
+const { text, copy, copied } = useClipboard();
+copy('Hello!');
+copied(); // → true for 1.5s after copy
+```
+
+---
+
+### `useBattery`
+
+Reactive Battery Status API.
+
+```ts
+import { useBattery } from '@ariefsn/svelte-use';
+
+const battery = useBattery();
+battery.level(); // → 0–1
+battery.charging(); // → boolean
+```
+
+---
+
+### `useVirtualList`
+
+Efficient virtual list rendering for large datasets.
+
+```ts
+import { useVirtualList } from '@ariefsn/svelte-use';
+
+const { list, containerProps, wrapperProps } = useVirtualList(items, { itemHeight: 40 });
+// list() → only the visible slice of items
+```
+
+---
+
 ## Developing
 
 ```sh
@@ -533,6 +803,11 @@ bun run build
 # publish to npm
 npm publish --access public
 ```
+
+## Links
+
+- 📦 **npm**: https://www.npmjs.com/package/@ariefsn/svelte-use
+- 🐙 **GitHub**: https://github.com/ariefsn/svelte-use
 
 ## License
 
