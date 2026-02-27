@@ -1726,6 +1726,558 @@ const obj = useSessionStorage('my-obj', {}, {
 		]
 	},
 
+	// --------------------------------------------------------------- Browser – Storage (legacy)
+	'use-local-storage': {
+		slug: 'use-local-storage',
+		title: 'useLocalStorage',
+		description:
+			'Reactive `localStorage` utility with SSR safety. Values are serialised with `JSON.stringify` / `JSON.parse`. Falls back to `initial` in non-browser environments or on parse errors.',
+		usage: `import { useLocalStorage } from '@ariefsn/svelte-use';
+
+const theme = useLocalStorage<'light' | 'dark'>('theme', 'light');
+theme.set('dark'); // persists to localStorage
+theme.value;       // 'dark'`,
+		params: [
+			{ name: 'key', type: 'string', description: '`localStorage` key' },
+			{
+				name: 'initial',
+				type: 'T',
+				description: 'Fallback value when the key is absent or during SSR'
+			}
+		],
+		returns: [
+			{
+				name: 'value',
+				type: 'T',
+				description: 'Reactive stored value (property accessor, not a function)'
+			},
+			{ name: 'set', type: '(v: T) => void', description: 'Update and persist the value' }
+		],
+		example: `<script lang="ts">
+  import { useLocalStorage } from '@ariefsn/svelte-use';
+
+  const theme = useLocalStorage<'light' | 'dark'>('theme', 'light');
+</script>
+
+<p>Theme: {theme.value}</p>
+<button onclick={() => theme.set('dark')}>Dark</button>
+<button onclick={() => theme.set('light')}>Light</button>`,
+		notes: [
+			'`value` is a reactive property accessor (`get value()`), not a getter function. Use `store.value` directly in templates.',
+			'Values are serialised with `JSON.stringify` / `JSON.parse`; parse errors silently fall back to `initial`.',
+			'SSR-safe — storage reads and writes are skipped on the server.'
+		]
+	},
+
+	// --------------------------------------------------------------- Browser – Storage (legacy)
+	'use-indexed-db': {
+		slug: 'use-indexed-db',
+		title: 'useIndexedDB',
+		description:
+			'Reactive IndexedDB utility with full CRUD, querying, and filtering. SSR-safe — all operations are no-ops on the server. Values survive page refreshes and browser restarts.',
+		usage: `import { useIndexedDB } from '@ariefsn/svelte-use';
+
+interface Note { id?: number; text: string; done: boolean }
+const db = useIndexedDB<Note>('my-app', 'notes');
+
+// CRUD
+await db.add({ text: 'Buy milk', done: false }); // returns generated key
+await db.get(1);          // Note | undefined
+await db.getAll();        // Note[]
+await db.update({ id: 1, text: 'Buy milk', done: true });
+await db.remove(1);
+await db.clear();         // delete all records
+
+// Reactive state
+db.items;    // Note[] — all records
+db.loading;  // boolean
+db.error;    // Error | null
+
+// Filtering
+const pending = await db.query((n) => !n.done); // Note[]`,
+		params: [
+			{ name: 'dbName', type: 'string', description: 'IndexedDB database name' },
+			{ name: 'storeName', type: 'string', description: 'Object store name' }
+		],
+		options: [
+			{
+				name: 'version',
+				type: 'number',
+				default: '1',
+				description: 'Schema version (increment to migrate)'
+			},
+			{
+				name: 'keyPath',
+				type: 'string',
+				default: "'id'",
+				description: 'Primary key field name'
+			},
+			{
+				name: 'autoIncrement',
+				type: 'boolean',
+				default: 'true',
+				description: 'Auto-generate numeric keys'
+			}
+		],
+		returns: [
+			{
+				name: 'items',
+				type: 'T[]',
+				description: 'Reactive array of all records; refreshed after every mutation'
+			},
+			{
+				name: 'loading',
+				type: 'boolean',
+				description: '`true` while an async operation is in flight'
+			},
+			{ name: 'error', type: 'Error | null', description: 'Last error, or `null`' },
+			{
+				name: 'add(record)',
+				type: 'Promise<IDBValidKey | undefined>',
+				description: 'Insert record; returns generated key'
+			},
+			{
+				name: 'get(key)',
+				type: 'Promise<T | undefined>',
+				description: 'Fetch single record by primary key'
+			},
+			{
+				name: 'getAll()',
+				type: 'Promise<T[]>',
+				description: 'Fetch all records and sync `items`'
+			},
+			{
+				name: 'update(record)',
+				type: 'Promise<void>',
+				description: 'Replace record (must include key field)'
+			},
+			{ name: 'remove(key)', type: 'Promise<void>', description: 'Delete record by primary key' },
+			{
+				name: 'query(filter)',
+				type: 'Promise<T[]>',
+				description: "Return records matching a predicate (doesn't modify `items`)"
+			},
+			{ name: 'clear()', type: 'Promise<void>', description: 'Delete all records' }
+		],
+		example: `<script lang="ts">
+  import { useIndexedDB } from '@ariefsn/svelte-use';
+
+  interface Note { id?: number; text: string; done: boolean }
+  const db = useIndexedDB<Note>('demo', 'notes');
+  let input = $state('');
+</script>
+
+<input bind:value={input} placeholder="New note…" />
+<button onclick={() => { db.add({ text: input, done: false }); input = ''; }}>Add</button>
+
+{#each db.items as note (note.id)}
+  <p>{note.text}</p>
+{/each}`,
+		notes: [
+			'`items`, `loading`, and `error` are reactive property accessors — use them directly in templates.',
+			'SSR-safe — all operations are guarded by `isBrowser` checks.',
+			'The store is opened lazily on the first operation.',
+			'`query()` reads directly from IndexedDB and does not update `items`.'
+		]
+	},
+
+	// --------------------------------------------------------------- Browser – Interaction
+	'use-click-outside': {
+		slug: 'use-click-outside',
+		title: 'useClickOutside',
+		description:
+			'Calls a handler whenever a pointer event fires outside of the target element. Useful for closing dropdowns, modals, and menus.',
+		usage: `import { useClickOutside } from '@ariefsn/svelte-use';
+
+let el: HTMLElement;
+useClickOutside(() => el, () => {
+  open = false;
+});
+
+// Custom event type
+useClickOutside(() => el, handler, { event: 'click' });`,
+		params: [
+			{
+				name: 'target',
+				type: '() => HTMLElement | null | undefined',
+				description: 'Reactive getter returning the element to watch'
+			},
+			{
+				name: 'handler',
+				type: '(event: MouseEvent | TouchEvent) => void',
+				description: 'Callback invoked when a click occurs outside the target'
+			}
+		],
+		options: [
+			{
+				name: 'event',
+				type: "'click' | 'mousedown' | 'pointerdown'",
+				default: "'pointerdown'",
+				description: 'DOM event type to listen for'
+			}
+		],
+		returns: [],
+		example: `<script lang="ts">
+  import { useClickOutside } from '@ariefsn/svelte-use';
+
+  let menu: HTMLElement;
+  let open = $state(false);
+
+  useClickOutside(() => menu, () => { open = false; });
+</script>
+
+<button onclick={() => (open = true)}>Open menu</button>
+
+{#if open}
+  <div bind:this={menu} class="menu">
+    Menu content — click outside to close
+  </div>
+{/if}`,
+		notes: [
+			'The listener is attached to `document` in capture phase, so it fires before the element\'s own handlers.',
+			'SSR-safe — no listeners are added when `document` is unavailable.',
+			'Cleanup is handled automatically when the component is destroyed.'
+		]
+	},
+
+	'use-drop-zone': {
+		slug: 'use-drop-zone',
+		title: 'useDropZone',
+		description:
+			'Turns any element into a file drop zone. Tracks whether a drag is currently over the element and calls `onDrop` with the dropped `File` objects.',
+		usage: `import { useDropZone } from '@ariefsn/svelte-use';
+
+let zone: HTMLElement;
+const { isOver } = useDropZone(() => zone, (files) => {
+  console.log('Dropped:', files);
+});
+
+isOver() // → true while dragging over the element`,
+		params: [
+			{
+				name: 'target',
+				type: '() => HTMLElement | null | undefined',
+				description: 'Reactive getter returning the drop-zone element'
+			},
+			{
+				name: 'onDrop',
+				type: '(files: File[]) => void',
+				default: 'undefined',
+				description: 'Optional callback invoked with the dropped files array'
+			}
+		],
+		returns: [
+			{
+				name: 'isOver',
+				type: '() => boolean',
+				description: '`true` while a drag is over the element'
+			}
+		],
+		example: `<script lang="ts">
+  import { useDropZone } from '@ariefsn/svelte-use';
+
+  let zone: HTMLElement;
+  let dropped = $state<string[]>([]);
+
+  const { isOver } = useDropZone(() => zone, (files) => {
+    dropped = files.map((f) => f.name);
+  });
+</script>
+
+<div
+  bind:this={zone}
+  style="padding:2rem; border:2px dashed {isOver() ? '#a78bfa' : '#444'};"
+>
+  {isOver() ? 'Release to drop' : 'Drop files here'}
+</div>
+
+{#each dropped as name}<p>{name}</p>{/each}`,
+		notes: [
+			'Uses a counter to track enter/leave depth, preventing false `dragleave` events when moving over child elements.',
+			'Default browser drop behavior is suppressed (`preventDefault` on `dragover` and `drop`).',
+			'SSR-safe — no listeners are added when `document` is unavailable.',
+			'Cleanup is handled automatically when the component is destroyed.'
+		]
+	},
+
+	'use-element-hover': {
+		slug: 'use-element-hover',
+		title: 'useElementHover',
+		description:
+			'Tracks whether the pointer is currently hovering over a specific element via `mouseenter` and `mouseleave` events.',
+		usage: `import { useElementHover } from '@ariefsn/svelte-use';
+
+let el: HTMLElement;
+const { hovering } = useElementHover(() => el);
+hovering() // → true while the cursor is over el`,
+		params: [
+			{
+				name: 'target',
+				type: '() => HTMLElement | null | undefined',
+				description: 'Reactive getter returning the element to observe'
+			}
+		],
+		returns: [
+			{
+				name: 'hovering',
+				type: '() => boolean',
+				description: '`true` while the pointer is over the element'
+			}
+		],
+		example: `<script lang="ts">
+  import { useElementHover } from '@ariefsn/svelte-use';
+
+  let card: HTMLElement;
+  const { hovering } = useElementHover(() => card);
+</script>
+
+<div
+  bind:this={card}
+  style="padding:1rem; background:{hovering() ? '#2a1f4e' : '#1e1e1e'};"
+>
+  {hovering() ? 'Hovered!' : 'Hover over me'}
+</div>`,
+		notes: [
+			'Uses `mouseenter` / `mouseleave`, which do not bubble — only the exact target element triggers a state change.',
+			'SSR-safe — no listeners are added when `document` is unavailable.',
+			'Cleanup is handled automatically when the component is destroyed.'
+		]
+	},
+
+	'use-focus': {
+		slug: 'use-focus',
+		title: 'useFocus',
+		description:
+			'Tracks whether a specific element currently holds keyboard focus via `focus` and `blur` events.',
+		usage: `import { useFocus } from '@ariefsn/svelte-use';
+
+let input: HTMLInputElement;
+const { focused } = useFocus(() => input);
+focused() // → true while input has focus`,
+		params: [
+			{
+				name: 'target',
+				type: '() => HTMLElement | null | undefined',
+				description: 'Reactive getter returning the element to observe'
+			}
+		],
+		returns: [
+			{
+				name: 'focused',
+				type: '() => boolean',
+				description: '`true` while the element holds keyboard focus'
+			}
+		],
+		example: `<script lang="ts">
+  import { useFocus } from '@ariefsn/svelte-use';
+
+  let input: HTMLInputElement;
+  const { focused } = useFocus(() => input);
+</script>
+
+<input
+  bind:this={input}
+  placeholder="Click to focus"
+  style="border-color: {focused() ? '#a78bfa' : '#444'};"
+/>
+<p>{focused() ? 'Focused' : 'Not focused'}</p>`,
+		notes: [
+			'Uses native `focus` and `blur` events — these do not bubble, so only direct focus/blur on the element is detected (not child elements).',
+			'SSR-safe — no listeners are added when `document` is unavailable.',
+			'Cleanup is handled automatically when the component is destroyed.'
+		]
+	},
+
+	// --------------------------------------------------------------- Browser – Sensors
+	'use-breakpoints': {
+		slug: 'use-breakpoints',
+		title: 'useBreakpoints',
+		description:
+			'Reactive breakpoint matcher. Tracks which named min-width breakpoints are currently matched using `window.matchMedia`. Updates automatically when the viewport is resized.',
+		usage: `import { useBreakpoints } from '@ariefsn/svelte-use';
+
+const bp = useBreakpoints({ sm: 640, md: 768, lg: 1024, xl: 1280 });
+
+bp.active(); // → ['sm', 'md'] on a 900px viewport
+bp.is('lg'); // → false
+bp.is('sm'); // → true`,
+		params: [
+			{
+				name: 'breakpoints',
+				type: 'Record<string, number>',
+				description: 'Map of breakpoint names to their min-width pixel values'
+			}
+		],
+		returns: [
+			{
+				name: 'active',
+				type: '() => string[]',
+				description: 'Getter returning names of all currently matched breakpoints'
+			},
+			{
+				name: 'is',
+				type: '(key: string) => boolean',
+				description: '`true` when the named breakpoint is currently matched'
+			}
+		],
+		example: `<script lang="ts">
+  import { useBreakpoints } from '@ariefsn/svelte-use';
+
+  const bp = useBreakpoints({ sm: 640, md: 768, lg: 1024 });
+</script>
+
+<p>Active: {bp.active().join(', ') || 'none'}</p>
+<p>Is lg: {bp.is('lg')}</p>`,
+		notes: [
+			'Each breakpoint maps to a `(min-width: Npx)` media query.',
+			'SSR-safe — `active()` returns `[]` and `is()` returns `false` on the server.',
+			'`MediaQueryList` listeners are removed automatically when the component is destroyed.'
+		]
+	},
+
+	'use-browser-location': {
+		slug: 'use-browser-location',
+		title: 'useBrowserLocation',
+		description:
+			'Reactive snapshot of `window.location`. Updates on `popstate` and `hashchange` events, keeping `href`, `pathname`, `search`, and `hash` in sync with navigation.',
+		usage: `import { useBrowserLocation } from '@ariefsn/svelte-use';
+
+const loc = useBrowserLocation();
+
+loc.pathname(); // → '/about'
+loc.hash();     // → '#section-1'
+loc.search();   // → '?tab=2'
+loc.href();     // → full URL string`,
+		returns: [
+			{ name: 'href', type: '() => string', description: '`window.location.href`' },
+			{ name: 'pathname', type: '() => string', description: '`window.location.pathname`' },
+			{
+				name: 'search',
+				type: '() => string',
+				description: '`window.location.search` (includes `?`)'
+			},
+			{
+				name: 'hash',
+				type: '() => string',
+				description: '`window.location.hash` (includes `#`)'
+			}
+		],
+		example: `<script lang="ts">
+  import { useBrowserLocation } from '@ariefsn/svelte-use';
+
+  const loc = useBrowserLocation();
+</script>
+
+<p>Path: {loc.pathname()}</p>
+<p>Hash: {loc.hash() || 'none'}</p>`,
+		notes: [
+			'Does not intercept `history.pushState` / `replaceState` — only responds to `popstate` and `hashchange` events.',
+			'SSR-safe — all getters return empty strings on the server.',
+			'Listeners are removed automatically when the component is destroyed.'
+		]
+	},
+
+	'use-navigator-language': {
+		slug: 'use-navigator-language',
+		title: 'useNavigatorLanguage',
+		description:
+			'Reactive browser language preference. Returns `navigator.language` as a BCP 47 language tag and updates on `languagechange` events. Falls back to `"en"` during SSR.',
+		usage: `import { useNavigatorLanguage } from '@ariefsn/svelte-use';
+
+const language = useNavigatorLanguage();
+language() // → 'en-US'`,
+		returns: [
+			{
+				name: '()',
+				type: '() => string',
+				description: 'Current BCP 47 language tag (e.g. `"en-US"`, `"fr"`, `"ja-JP"`)'
+			}
+		],
+		example: `<script lang="ts">
+  import { useNavigatorLanguage } from '@ariefsn/svelte-use';
+
+  const language = useNavigatorLanguage();
+</script>
+
+<p>Browser language: {language()}</p>`,
+		notes: [
+			'Returns `navigator.language` — the primary language of the user\'s browser UI.',
+			'SSR-safe — returns `"en"` when `navigator` is unavailable.',
+			'The `languagechange` event fires when the user changes their preferred language in browser settings.',
+			'Cleanup is handled automatically when the component is destroyed.'
+		]
+	},
+
+	'use-online': {
+		slug: 'use-online',
+		title: 'useOnline',
+		description:
+			'Reactive online/offline network status. Tracks `navigator.onLine` and updates on the browser\'s `online` / `offline` events. Returns `true` during SSR.',
+		usage: `import { useOnline } from '@ariefsn/svelte-use';
+
+const isOnline = useOnline();
+isOnline() // → true | false`,
+		returns: [
+			{
+				name: '()',
+				type: '() => boolean',
+				description:
+					'`true` when the browser reports an active network connection. Defaults to `true` on the server.'
+			}
+		],
+		example: `<script lang="ts">
+  import { useOnline } from '@ariefsn/svelte-use';
+
+  const isOnline = useOnline();
+</script>
+
+{#if isOnline()}
+  <p>Online</p>
+{:else}
+  <p>Offline — check your connection</p>
+{/if}`,
+		notes: [
+			'`navigator.onLine` can be unreliable — it detects local network connectivity but not internet reachability.',
+			'SSR-safe — defaults to `true` on the server.',
+			'Listens to `window` `online` and `offline` events.',
+			'Cleanup is handled automatically when the component is destroyed.'
+		]
+	},
+
+	'use-page-leave': {
+		slug: 'use-page-leave',
+		title: 'usePageLeave',
+		description:
+			'Detects when the mouse cursor leaves the browser viewport by listening to `document` `mouseleave` / `mouseenter` events. Useful for exit-intent popups or pausing background tasks.',
+		usage: `import { usePageLeave } from '@ariefsn/svelte-use';
+
+const hasLeft = usePageLeave();
+hasLeft() // → true when the cursor is outside the viewport`,
+		returns: [
+			{
+				name: '()',
+				type: '() => boolean',
+				description: '`true` when the mouse cursor has left the browser viewport'
+			}
+		],
+		example: `<script lang="ts">
+  import { usePageLeave } from '@ariefsn/svelte-use';
+
+  const hasLeft = usePageLeave();
+</script>
+
+{#if hasLeft()}
+  <div class="exit-banner">Wait, don't go!</div>
+{/if}
+
+<p>Cursor in page: {!hasLeft()}</p>`,
+		notes: [
+			'Detects viewport exit, not window blur — moving the cursor to the browser chrome also triggers it.',
+			'SSR-safe — no listeners are added when `document` is unavailable.',
+			'Cleanup is handled automatically when the component is destroyed.'
+		]
+	},
+
 	// --------------------------------------------------------------- Browser
 	'use-scroll-lock': {
 		slug: 'use-scroll-lock',

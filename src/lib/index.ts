@@ -10,3 +10,15 @@ export type { UseSessionStorageOptions } from './browser/storage/useSessionStora
 export { useObjectUrl } from './browser/storage/useObjectUrl.svelte.js';
 export { useBase64 } from './browser/storage/useBase64.svelte.js';
 export { useScrollLock } from './browser/input/useScrollLock.svelte.js';
+export { useClickOutside } from './browser/interaction/useClickOutside.svelte.js';
+export type { ClickOutsideEvent, UseClickOutsideOptions } from './browser/interaction/useClickOutside.svelte.js';
+export { useDropZone } from './browser/interaction/useDropZone.svelte.js';
+export { useElementHover } from './browser/interaction/useElementHover.svelte.js';
+export { useFocus } from './browser/interaction/useFocus.svelte.js';
+export { useBreakpoints } from './browser/sensors/useBreakpoints.svelte.js';
+export type { UseBreakpointsReturn } from './browser/sensors/useBreakpoints.svelte.js';
+export { useBrowserLocation } from './browser/sensors/useBrowserLocation.svelte.js';
+export type { UseBrowserLocationReturn } from './browser/sensors/useBrowserLocation.svelte.js';
+export { useNavigatorLanguage } from './browser/sensors/useNavigatorLanguage.svelte.js';
+export { useOnline } from './browser/sensors/useOnline.svelte.js';
+export { usePageLeave } from './browser/sensors/usePageLeave.svelte.js';

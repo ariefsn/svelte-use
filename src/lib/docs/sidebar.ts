@@ -56,15 +56,31 @@ export const sidebar: SidebarGroup[] = [
 		items: [
 			{ label: 'useIdle', slug: 'use-idle' },
 			{ label: 'useNetwork', slug: 'use-network' },
-			{ label: 'useGeolocation', slug: 'use-geolocation' }
+			{ label: 'useGeolocation', slug: 'use-geolocation' },
+			{ label: 'useBreakpoints', slug: 'use-breakpoints' },
+			{ label: 'useBrowserLocation', slug: 'use-browser-location' },
+			{ label: 'useNavigatorLanguage', slug: 'use-navigator-language' },
+			{ label: 'useOnline', slug: 'use-online' },
+			{ label: 'usePageLeave', slug: 'use-page-leave' }
 		]
 	},
 	{
 		title: 'Browser – Storage',
 		items: [
+			{ label: 'useLocalStorage', slug: 'use-local-storage' },
+			{ label: 'useIndexedDB', slug: 'use-indexed-db' },
 			{ label: 'useBase64', slug: 'use-base64' },
 			{ label: 'useObjectUrl', slug: 'use-object-url' },
 			{ label: 'useSessionStorage', slug: 'use-session-storage' }
+		]
+	},
+	{
+		title: 'Browser – Interaction',
+		items: [
+			{ label: 'useClickOutside', slug: 'use-click-outside' },
+			{ label: 'useDropZone', slug: 'use-drop-zone' },
+			{ label: 'useElementHover', slug: 'use-element-hover' },
+			{ label: 'useFocus', slug: 'use-focus' }
 		]
 	},
 	{
