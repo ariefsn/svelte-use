@@ -3,6 +3,18 @@
 	import { sidebar } from '$lib/docs/sidebar.js';
 
 	// ── Demo components ──────────────────────────────────────────────────────
+	import DemoUseAnimate from './demos/use-animate.svelte';
+	import DemoUseParallax from './demos/use-parallax.svelte';
+	import DemoUseTransition from './demos/use-transition.svelte';
+	import DemoUseFetch from './demos/use-fetch.svelte';
+	import DemoUseWebSocket from './demos/use-web-socket.svelte';
+	import DemoUseInterval from './demos/use-interval.svelte';
+	import DemoUseIntervalFn from './demos/use-interval-fn.svelte';
+	import DemoUseNow from './demos/use-now.svelte';
+	import DemoUseTimeout from './demos/use-timeout.svelte';
+	import DemoUseTimeoutFn from './demos/use-timeout-fn.svelte';
+	import DemoUseTimeoutPoll from './demos/use-timeout-poll.svelte';
+	import DemoUseTimestamp from './demos/use-timestamp.svelte';
 	import DemoUseSorted from './demos/use-sorted.svelte';
 	import DemoUseCycleList from './demos/use-cycle-list.svelte';
 	import DemoUseCountdown from './demos/use-countdown.svelte';
@@ -38,6 +50,18 @@
 
 	// ── Static slug → component map ──────────────────────────────────────────
 	const demoMap: Record<string, any> = {
+		'use-animate': DemoUseAnimate,
+		'use-parallax': DemoUseParallax,
+		'use-transition': DemoUseTransition,
+		'use-fetch': DemoUseFetch,
+		'use-web-socket': DemoUseWebSocket,
+		'use-interval': DemoUseInterval,
+		'use-interval-fn': DemoUseIntervalFn,
+		'use-now': DemoUseNow,
+		'use-timeout': DemoUseTimeout,
+		'use-timeout-fn': DemoUseTimeoutFn,
+		'use-timeout-poll': DemoUseTimeoutPoll,
+		'use-timestamp': DemoUseTimestamp,
 		'use-sorted': DemoUseSorted,
 		'use-cycle-list': DemoUseCycleList,
 		'use-countdown': DemoUseCountdown,
