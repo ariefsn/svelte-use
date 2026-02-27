@@ -5,3 +5,7 @@ export { useDebounce } from './reactivity/useDebounce.svelte.js';
 export { useLocalStorage } from './browser/useLocalStorage.svelte.js';
 export { useIndexedDB } from './browser/useIndexedDB.svelte.js';
 export type { UseIndexedDBOptions } from './browser/useIndexedDB.svelte.js';
+export { useSessionStorage } from './browser/storage/useSessionStorage.svelte.js';
+export type { UseSessionStorageOptions } from './browser/storage/useSessionStorage.svelte.js';
+export { useObjectUrl } from './browser/storage/useObjectUrl.svelte.js';
+export { useBase64 } from './browser/storage/useBase64.svelte.js';
