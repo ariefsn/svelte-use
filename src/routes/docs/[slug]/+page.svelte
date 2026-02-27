@@ -27,6 +27,7 @@
 	import DemoUseClipboard from './demos/use-clipboard.svelte';
 	import DemoUseBattery from './demos/use-battery.svelte';
 	import DemoUseSpeechRecognition from './demos/use-speech-recognition.svelte';
+	import DemoUseScrollLock from './demos/use-scroll-lock.svelte';
 
 	// ── Static slug → component map ──────────────────────────────────────────
 	const demoMap: Record<string, any> = {
@@ -53,7 +54,8 @@
 		'use-virtual-list': DemoUseVirtualList,
 		'use-clipboard': DemoUseClipboard,
 		'use-battery': DemoUseBattery,
-		'use-speech-recognition': DemoUseSpeechRecognition
+		'use-speech-recognition': DemoUseSpeechRecognition,
+		'use-scroll-lock': DemoUseScrollLock
 	};
 
 	// ── Page data + nav ───────────────────────────────────────────────────────

@@ -51,6 +51,17 @@ export interface UseVirtualListReturn<T> {
 	wrapperProps: {
 		style: string;
 	};
+	/**
+	 * Bind the scrollable container element to this ref so the hook can
+	 * measure its height immediately via `ResizeObserver`, enabling correct
+	 * rendering before the first scroll event fires.
+	 *
+	 * @example
+	 * ```svelte
+	 * <div bind:this={containerRef} ...>
+	 * ```
+	 */
+	containerRef: (el: HTMLElement | null) => void;
 }
 
 /**
@@ -67,7 +78,7 @@ export interface UseVirtualListReturn<T> {
  *
  * @param list - Reactive getter returning the full array of items.
  * @param options - `itemHeight` (required) and optional `overscan` count.
- * @returns An object containing `list`, `containerProps`, and `wrapperProps`.
+ * @returns An object containing `list`, `containerProps`, `wrapperProps`, and `containerRef`.
  *
  * @example
  * ```svelte
@@ -75,10 +86,10 @@ export interface UseVirtualListReturn<T> {
  *   import { useVirtualList } from '$lib/virtual/useVirtualList.svelte.js';
  *
  *   const items = Array.from({ length: 10_000 }, (_, i) => ({ id: i, label: `Item ${i}` }));
- *   const { list, containerProps, wrapperProps } = useVirtualList(() => items, { itemHeight: 40 });
+ *   const { list, containerProps, wrapperProps, containerRef } = useVirtualList(() => items, { itemHeight: 40 });
  * </script>
  *
- * <div style={containerProps.style} onscroll={containerProps.onscroll}>
+ * <div bind:this={containerRef} style={containerProps.style} onscroll={containerProps.onscroll}>
  *   <div style={wrapperProps.style}>
  *     {#each list() as row (row.index)}
  *       <div style={row.style}>{row.data.label}</div>
@@ -144,6 +155,34 @@ export function useVirtualList<T>(
 		containerHeight = target.clientHeight;
 	}
 
+	// ResizeObserver to keep containerHeight in sync whenever the container
+	// is resized (including on initial mount before the first scroll fires).
+	let resizeObserver: ResizeObserver | null = null;
+
+	function containerRef(el: HTMLElement | null): void {
+		// Tear down any previous observer.
+		resizeObserver?.disconnect();
+		resizeObserver = null;
+
+		if (!el || typeof ResizeObserver === 'undefined') return;
+
+		// Measure immediately so the list renders correctly on first paint.
+		containerHeight = el.clientHeight;
+		scrollTop = el.scrollTop;
+
+		resizeObserver = new ResizeObserver(() => {
+			containerHeight = el.clientHeight;
+		});
+		resizeObserver.observe(el);
+	}
+
+	$effect(() => {
+		return () => {
+			resizeObserver?.disconnect();
+			resizeObserver = null;
+		};
+	});
+
 	return {
 		list: () => visibleItems,
 		containerProps: {
@@ -154,6 +193,7 @@ export function useVirtualList<T>(
 			get style() {
 				return wrapperStyle;
 			}
-		}
+		},
+		containerRef
 	};
 }
