@@ -19,7 +19,12 @@ function makeEl(): HTMLElement {
 	return el;
 }
 
-function firePointerDown(target: HTMLElement, x: number, y: number, extras: PointerEventInit = {}): void {
+function firePointerDown(
+	target: HTMLElement,
+	x: number,
+	y: number,
+	extras: PointerEventInit = {}
+): void {
 	target.dispatchEvent(
 		new PointerEvent('pointerdown', {
 			clientX: x,
@@ -32,7 +37,12 @@ function firePointerDown(target: HTMLElement, x: number, y: number, extras: Poin
 	);
 }
 
-function firePointerMove(target: HTMLElement, x: number, y: number, extras: PointerEventInit = {}): void {
+function firePointerMove(
+	target: HTMLElement,
+	x: number,
+	y: number,
+	extras: PointerEventInit = {}
+): void {
 	target.dispatchEvent(
 		new PointerEvent('pointermove', {
 			clientX: x,
@@ -44,7 +54,12 @@ function firePointerMove(target: HTMLElement, x: number, y: number, extras: Poin
 	);
 }
 
-function firePointerUp(target: HTMLElement, x: number, y: number, extras: PointerEventInit = {}): void {
+function firePointerUp(
+	target: HTMLElement,
+	x: number,
+	y: number,
+	extras: PointerEventInit = {}
+): void {
 	target.dispatchEvent(
 		new PointerEvent('pointerup', {
 			clientX: x,

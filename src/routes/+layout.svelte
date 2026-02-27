@@ -39,7 +39,7 @@
 	<div class="mobile-topbar">
 		<a href="/" class="logo">
 			<img src="/logo.svg" alt="svelte-use logo" class="logo-img" width="28" height="28" />
-			<span class="logo-text">svelte-use</span>
+			<span class="logo-text">Svelte Use</span>
 		</a>
 		<button
 			class="hamburger"
@@ -49,11 +49,21 @@
 		>
 			{#if mobileMenuOpen}
 				<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-					<path d="M4 4L16 16M16 4L4 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+					<path
+						d="M4 4L16 16M16 4L4 16"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+					/>
 				</svg>
 			{:else}
 				<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-					<path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+					<path
+						d="M3 5h14M3 10h14M3 15h14"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+					/>
 				</svg>
 			{/if}
 		</button>
@@ -63,7 +73,7 @@
 	<nav class="sidebar" class:mobile-open={mobileMenuOpen} aria-label="Documentation navigation">
 		<a href="/" class="logo desktop-logo">
 			<img src="/logo.svg" alt="svelte-use logo" class="logo-img" width="28" height="28" />
-			<span class="logo-text">svelte-use</span>
+			<span class="logo-text">Svelte Use</span>
 		</a>
 
 		<div class="nav-section">
@@ -87,7 +97,13 @@
 						fill="none"
 						aria-hidden="true"
 					>
-						<path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+						<path
+							d="M2 4L6 8L10 4"
+							stroke="currentColor"
+							stroke-width="1.5"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
 					</svg>
 				</button>
 
@@ -170,7 +186,9 @@
 		align-items: center;
 		justify-content: center;
 		border-radius: 6px;
-		transition: color 0.15s, background 0.15s;
+		transition:
+			color 0.15s,
+			background 0.15s;
 	}
 
 	.hamburger:hover {
@@ -233,7 +251,9 @@
 		text-decoration: none;
 		color: #888;
 		font-size: 0.85rem;
-		transition: color 0.15s, background 0.15s;
+		transition:
+			color 0.15s,
+			background 0.15s;
 	}
 
 	.nav-home:hover {
@@ -267,7 +287,9 @@
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
 		cursor: pointer;
-		transition: color 0.15s, background 0.15s;
+		transition:
+			color 0.15s,
+			background 0.15s;
 		text-align: left;
 	}
 
@@ -306,7 +328,9 @@
 		color: #777;
 		font-size: 0.85rem;
 		font-family: monospace;
-		transition: color 0.15s, background 0.15s;
+		transition:
+			color 0.15s,
+			background 0.15s;
 	}
 
 	.nav-item:hover {

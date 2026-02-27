@@ -11,7 +11,9 @@
 		{#each ['sm', 'md', 'lg', 'xl'] as key}
 			<div class="chip" class:active={bp.is(key)}>
 				<span class="key">{key}</span>
-				<span class="px">{key === 'sm' ? '640' : key === 'md' ? '768' : key === 'lg' ? '1024' : '1280'}px</span>
+				<span class="px"
+					>{key === 'sm' ? '640' : key === 'md' ? '768' : key === 'lg' ? '1024' : '1280'}px</span
+				>
 				<span class="status">{bp.is(key) ? '✓' : '–'}</span>
 			</div>
 		{/each}
@@ -48,7 +50,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.15rem;
-		transition: border-color 0.15s, background 0.15s;
+		transition:
+			border-color 0.15s,
+			background 0.15s;
 	}
 	.chip.active {
 		background: #1a1630;

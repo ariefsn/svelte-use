@@ -5,14 +5,16 @@ import { useScroll } from './useScroll.svelte.js';
 /**
  * Creates a scrollable `HTMLElement` stub with configurable scroll metrics.
  */
-function makeScrollable(overrides: Partial<{
-	scrollLeft: number;
-	scrollTop: number;
-	scrollWidth: number;
-	scrollHeight: number;
-	clientWidth: number;
-	clientHeight: number;
-}> = {}): HTMLElement {
+function makeScrollable(
+	overrides: Partial<{
+		scrollLeft: number;
+		scrollTop: number;
+		scrollWidth: number;
+		scrollHeight: number;
+		clientWidth: number;
+		clientHeight: number;
+	}> = {}
+): HTMLElement {
 	const el = document.createElement('div');
 	Object.defineProperties(el, {
 		scrollLeft: { writable: true, value: overrides.scrollLeft ?? 0 },

@@ -42,10 +42,7 @@ function normalizeKey(key: string): string {
  * @param pressedKeys - Reactive `Set<string>` of currently-pressed canonical keys
  * @returns Getter that returns `true` when all combo keys are pressed
  */
-function makeComboPredicate(
-	combo: string,
-	pressedKeys: { value: Set<string> }
-): () => boolean {
+function makeComboPredicate(combo: string, pressedKeys: { value: Set<string> }): () => boolean {
 	const parts = combo
 		.toLowerCase()
 		.split('+')

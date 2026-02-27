@@ -18,7 +18,11 @@ describe('useOnline', () => {
 	});
 
 	test('returns false when navigator.onLine is false', () => {
-		Object.defineProperty(navigator, 'onLine', { value: false, writable: true, configurable: true });
+		Object.defineProperty(navigator, 'onLine', {
+			value: false,
+			writable: true,
+			configurable: true
+		});
 		const cleanup = $effect.root(() => {
 			const isOnline = useOnline();
 			expect(isOnline()).toBe(false);
@@ -41,7 +45,11 @@ describe('useOnline', () => {
 	});
 
 	test('updates to true when online event fires', () => {
-		Object.defineProperty(navigator, 'onLine', { value: false, writable: true, configurable: true });
+		Object.defineProperty(navigator, 'onLine', {
+			value: false,
+			writable: true,
+			configurable: true
+		});
 		const cleanup = $effect.root(() => {
 			const isOnline = useOnline();
 			flushSync();

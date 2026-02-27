@@ -1402,7 +1402,8 @@ speech.stop();`,
 	'use-toggle': {
 		slug: 'use-toggle',
 		title: 'useToggle',
-		description: 'A reactive boolean toggle. Flips between `true` and `false` with a `toggle()` call, or force a specific value with `set()`.',
+		description:
+			'A reactive boolean toggle. Flips between `true` and `false` with a `toggle()` call, or force a specific value with `set()`.',
 		usage: `import { useToggle } from '@ariefsn/svelte-use';
 
 const toggle = useToggle();        // starts false
@@ -1423,8 +1424,16 @@ const on = useToggle(true);`,
 			}
 		],
 		returns: [
-			{ name: 'value', type: 'boolean', description: 'Reactive boolean state (property accessor, not a function)' },
-			{ name: 'toggle', type: '() => void', description: 'Flip the value between `true` and `false`' },
+			{
+				name: 'value',
+				type: 'boolean',
+				description: 'Reactive boolean state (property accessor, not a function)'
+			},
+			{
+				name: 'toggle',
+				type: '() => void',
+				description: 'Flip the value between `true` and `false`'
+			},
 			{ name: 'set', type: '(v: boolean) => void', description: 'Set an explicit boolean value' }
 		],
 		example: `<script lang="ts">
@@ -1445,7 +1454,8 @@ const on = useToggle(true);`,
 	'use-counter': {
 		slug: 'use-counter',
 		title: 'useCounter',
-		description: 'A reactive integer counter with increment, decrement, and reset operations. Supports custom step deltas.',
+		description:
+			'A reactive integer counter with increment, decrement, and reset operations. Supports custom step deltas.',
 		usage: `import { useCounter } from '@ariefsn/svelte-use';
 
 const counter = useCounter(0);
@@ -1467,9 +1477,21 @@ counter.value  // → 0`,
 			}
 		],
 		returns: [
-			{ name: 'value', type: 'number', description: 'Reactive numeric state (property accessor, not a function)' },
-			{ name: 'inc', type: '(delta?: number) => void', description: 'Increment by `delta` (default `1`)' },
-			{ name: 'dec', type: '(delta?: number) => void', description: 'Decrement by `delta` (default `1`)' },
+			{
+				name: 'value',
+				type: 'number',
+				description: 'Reactive numeric state (property accessor, not a function)'
+			},
+			{
+				name: 'inc',
+				type: '(delta?: number) => void',
+				description: 'Increment by `delta` (default `1`)'
+			},
+			{
+				name: 'dec',
+				type: '(delta?: number) => void',
+				description: 'Decrement by `delta` (default `1`)'
+			},
 			{ name: 'reset', type: '() => void', description: 'Reset to the initial value' }
 		],
 		example: `<script lang="ts">
@@ -1491,7 +1513,8 @@ counter.value  // → 0`,
 	'use-previous': {
 		slug: 'use-previous',
 		title: 'usePrevious',
-		description: 'Tracks the previous value of a reactive getter. Returns `undefined` until the value changes for the first time.',
+		description:
+			'Tracks the previous value of a reactive getter. Returns `undefined` until the value changes for the first time.',
 		usage: `import { usePrevious } from '@ariefsn/svelte-use';
 
 let count = $state(0);
@@ -1538,7 +1561,8 @@ prev()  // → 1`,
 	'use-debounce': {
 		slug: 'use-debounce',
 		title: 'useDebounce',
-		description: 'Debounces a reactive getter value, delaying updates until the source stops changing for the specified duration.',
+		description:
+			'Debounces a reactive getter value, delaying updates until the source stops changing for the specified duration.',
 		usage: `import { useDebounce } from '@ariefsn/svelte-use';
 
 let query = $state('');
@@ -1562,7 +1586,8 @@ const debounced = useDebounce(() => query, 300);
 			{
 				name: '()',
 				type: '() => T',
-				description: 'Getter returning the debounced value; reflects the initial value immediately then delays subsequent updates'
+				description:
+					'Getter returning the debounced value; reflects the initial value immediately then delays subsequent updates'
 			}
 		],
 		example: `<script lang="ts">
@@ -1591,7 +1616,8 @@ const debounced = useDebounce(() => query, 300);
 	'use-base64': {
 		slug: 'use-base64',
 		title: 'useBase64',
-		description: 'Reactively converts a `string`, `ArrayBuffer`, or `Blob` to its Base64 representation. Returns `undefined` while an async Blob conversion is in-flight or on the server.',
+		description:
+			'Reactively converts a `string`, `ArrayBuffer`, or `Blob` to its Base64 representation. Returns `undefined` while an async Blob conversion is in-flight or on the server.',
 		usage: `import { useBase64 } from '@ariefsn/svelte-use';
 
 let data = $state<string | undefined>('hello');
@@ -1615,7 +1641,8 @@ const b64buf = useBase64(() => buffer);`,
 			{
 				name: '()',
 				type: '() => string | undefined',
-				description: 'Getter returning the Base64-encoded string, or `undefined` when the input is `undefined`, during async Blob reads, or on the server'
+				description:
+					'Getter returning the Base64-encoded string, or `undefined` when the input is `undefined`, during async Blob reads, or on the server'
 			}
 		],
 		example: `<script lang="ts">
@@ -1637,7 +1664,8 @@ const b64buf = useBase64(() => buffer);`,
 	'use-object-url': {
 		slug: 'use-object-url',
 		title: 'useObjectUrl',
-		description: 'Generates a reactive `blob:` URL for a `Blob`, `File`, or `MediaSource` object. Automatically revokes the previous URL when the source changes, preventing memory leaks.',
+		description:
+			'Generates a reactive `blob:` URL for a `Blob`, `File`, or `MediaSource` object. Automatically revokes the previous URL when the source changes, preventing memory leaks.',
 		usage: `import { useObjectUrl } from '@ariefsn/svelte-use';
 
 let file = $state<File | undefined>(undefined);
@@ -1657,7 +1685,8 @@ file = new File(['hello'], 'hello.txt');
 			{
 				name: '()',
 				type: '() => string | undefined',
-				description: 'Getter returning the current object URL, or `undefined` when the source is `undefined` or in SSR'
+				description:
+					'Getter returning the current object URL, or `undefined` when the source is `undefined` or in SSR'
 			}
 		],
 		example: `<script lang="ts">
@@ -1681,7 +1710,8 @@ file = new File(['hello'], 'hello.txt');
 	'use-session-storage': {
 		slug: 'use-session-storage',
 		title: 'useSessionStorage',
-		description: 'Reactive `sessionStorage` utility. Reads the stored value on init, persists changes automatically, and syncs across tabs via the `storage` event.',
+		description:
+			'Reactive `sessionStorage` utility. Reads the stored value on init, persists changes automatically, and syncs across tabs via the `storage` event.',
 		usage: `import { useSessionStorage } from '@ariefsn/svelte-use';
 
 const token = useSessionStorage('auth-token', '');
@@ -1696,7 +1726,11 @@ const obj = useSessionStorage('my-obj', {}, {
 });`,
 		params: [
 			{ name: 'key', type: 'string', description: '`sessionStorage` key' },
-			{ name: 'initial', type: 'T', description: 'Fallback value when the key is absent or during SSR' },
+			{
+				name: 'initial',
+				type: 'T',
+				description: 'Fallback value when the key is absent or during SSR'
+			},
 			{
 				name: 'options',
 				type: 'UseSessionStorageOptions<T>',
@@ -1705,9 +1739,21 @@ const obj = useSessionStorage('my-obj', {}, {
 			}
 		],
 		returns: [
-			{ name: 'value', type: 'T', description: 'Reactive stored value (property accessor, not a function)' },
-			{ name: 'set', type: '(v: T) => void', description: 'Update the value and persist to sessionStorage' },
-			{ name: 'remove', type: '() => void', description: 'Remove the key from sessionStorage and reset to `initial`' }
+			{
+				name: 'value',
+				type: 'T',
+				description: 'Reactive stored value (property accessor, not a function)'
+			},
+			{
+				name: 'set',
+				type: '(v: T) => void',
+				description: 'Update the value and persist to sessionStorage'
+			},
+			{
+				name: 'remove',
+				type: '() => void',
+				description: 'Remove the key from sessionStorage and reset to `initial`'
+			}
 		],
 		example: `<script lang="ts">
   import { useSessionStorage } from '@ariefsn/svelte-use';
@@ -1934,7 +1980,7 @@ useClickOutside(() => el, handler, { event: 'click' });`,
   </div>
 {/if}`,
 		notes: [
-			'The listener is attached to `document` in capture phase, so it fires before the element\'s own handlers.',
+			"The listener is attached to `document` in capture phase, so it fires before the element's own handlers.",
 			'SSR-safe — no listeners are added when `document` is unavailable.',
 			'Cleanup is handled automatically when the component is destroyed.'
 		]
@@ -2201,7 +2247,7 @@ language() // → 'en-US'`,
 
 <p>Browser language: {language()}</p>`,
 		notes: [
-			'Returns `navigator.language` — the primary language of the user\'s browser UI.',
+			"Returns `navigator.language` — the primary language of the user's browser UI.",
 			'SSR-safe — returns `"en"` when `navigator` is unavailable.',
 			'The `languagechange` event fires when the user changes their preferred language in browser settings.',
 			'Cleanup is handled automatically when the component is destroyed.'
@@ -2212,7 +2258,7 @@ language() // → 'en-US'`,
 		slug: 'use-online',
 		title: 'useOnline',
 		description:
-			'Reactive online/offline network status. Tracks `navigator.onLine` and updates on the browser\'s `online` / `offline` events. Returns `true` during SSR.',
+			"Reactive online/offline network status. Tracks `navigator.onLine` and updates on the browser's `online` / `offline` events. Returns `true` during SSR.",
 		usage: `import { useOnline } from '@ariefsn/svelte-use';
 
 const isOnline = useOnline();
@@ -2308,7 +2354,8 @@ const { play, pause, cancel, finish, isRunning } = useAnimate(
 				name: 'options',
 				type: '() => KeyframeAnimationOptions | undefined',
 				default: 'undefined',
-				description: 'Optional reactive getter returning animation options such as <code>duration</code>, <code>easing</code>, <code>iterations</code>'
+				description:
+					'Optional reactive getter returning animation options such as <code>duration</code>, <code>easing</code>, <code>iterations</code>'
 			}
 		],
 		returns: [
@@ -2335,7 +2382,8 @@ const { play, pause, cancel, finish, isRunning } = useAnimate(
 			{
 				name: 'isRunning',
 				type: '() => boolean',
-				description: '<code>true</code> while the animation <code>playState</code> is <code>"running"</code>'
+				description:
+					'<code>true</code> while the animation <code>playState</code> is <code>"running"</code>'
 			}
 		],
 		example: `<script lang="ts">
@@ -2396,14 +2444,16 @@ const { x, y } = useParallax(() => el, { speed: 0.05 });
 				name: 'speed',
 				type: 'number',
 				default: '0.1',
-				description: 'Multiplier applied to the raw pixel offset. Negative values invert the direction.'
+				description:
+					'Multiplier applied to the raw pixel offset. Negative values invert the direction.'
 			}
 		],
 		returns: [
 			{
 				name: 'x',
 				type: 'number',
-				description: 'Reactive getter — horizontal offset in pixels multiplied by <code>speed</code>'
+				description:
+					'Reactive getter — horizontal offset in pixels multiplied by <code>speed</code>'
 			},
 			{
 				name: 'y',
@@ -2427,7 +2477,7 @@ const { x, y } = useParallax(() => el, { speed: 0.05 });
 </div>`,
 		notes: [
 			'Attaches a single <code>mousemove</code> listener to <code>window</code>.',
-			'The offset is calculated relative to the centre of the element\'s bounding box.',
+			"The offset is calculated relative to the centre of the element's bounding box.",
 			'Listener is removed automatically when the owning component is destroyed or the target changes.',
 			'SSR-safe — no listener is attached when <code>window</code> is unavailable.'
 		]
@@ -2467,14 +2517,16 @@ const displayed = useTransition(() => target, { duration: 500 });
 				name: 'easing',
 				type: '(t: number) => number',
 				default: 'cubicInOut',
-				description: 'Easing function where <code>t</code> is in the range [0, 1]. Built-in options: <code>linear</code>, <code>cubicInOut</code>.'
+				description:
+					'Easing function where <code>t</code> is in the range [0, 1]. Built-in options: <code>linear</code>, <code>cubicInOut</code>.'
 			}
 		],
 		returns: [
 			{
 				name: '()',
 				type: '() => number',
-				description: 'Getter returning the current interpolated value. Read in a reactive context for live updates.'
+				description:
+					'Getter returning the current interpolated value. Read in a reactive context for live updates.'
 			}
 		],
 		example: `<script lang="ts">
@@ -2518,7 +2570,8 @@ const { data, error, isFetching, execute } = useFetch(
 			{
 				name: 'url',
 				type: '() => string | undefined',
-				description: 'Reactive getter returning the URL to fetch. Pass <code>undefined</code> to skip fetching.'
+				description:
+					'Reactive getter returning the URL to fetch. Pass <code>undefined</code> to skip fetching.'
 			},
 			{
 				name: 'options',
@@ -2532,20 +2585,23 @@ const { data, error, isFetching, execute } = useFetch(
 				name: 'immediate',
 				type: 'boolean',
 				default: 'true',
-				description: 'Whether to execute the fetch immediately and re-execute whenever the URL changes'
+				description:
+					'Whether to execute the fetch immediately and re-execute whenever the URL changes'
 			},
 			{
 				name: 'init',
 				type: 'RequestInit',
 				default: 'undefined',
-				description: 'Optional <code>RequestInit</code> options forwarded to every <code>fetch</code> call (headers, method, body, etc.)'
+				description:
+					'Optional <code>RequestInit</code> options forwarded to every <code>fetch</code> call (headers, method, body, etc.)'
 			}
 		],
 		returns: [
 			{
 				name: 'data',
 				type: '() => T | null',
-				description: 'Parsed JSON response, or <code>null</code> before the first successful response'
+				description:
+					'Parsed JSON response, or <code>null</code> before the first successful response'
 			},
 			{
 				name: 'error',
@@ -2560,7 +2616,8 @@ const { data, error, isFetching, execute } = useFetch(
 			{
 				name: 'execute',
 				type: '() => Promise<void>',
-				description: 'Manually trigger a fetch. Aborts any in-flight request before starting a new one.'
+				description:
+					'Manually trigger a fetch. Aborts any in-flight request before starting a new one.'
 			}
 		],
 		example: `<script lang="ts">
@@ -2613,7 +2670,8 @@ const { data, status, send, close } = useWebSocket(
 			{
 				name: 'url',
 				type: '() => string | undefined',
-				description: 'Reactive getter returning the WebSocket URL. Pass <code>undefined</code> to stay disconnected.'
+				description:
+					'Reactive getter returning the WebSocket URL. Pass <code>undefined</code> to stay disconnected.'
 			},
 			{
 				name: 'options',
@@ -2639,7 +2697,8 @@ const { data, status, send, close } = useWebSocket(
 				name: 'reconnectInterval',
 				type: 'number',
 				default: '1000',
-				description: 'Milliseconds to wait between reconnection attempts (requires <code>autoReconnect: true</code>)'
+				description:
+					'Milliseconds to wait between reconnection attempts (requires <code>autoReconnect: true</code>)'
 			}
 		],
 		returns: [
@@ -2661,7 +2720,8 @@ const { data, status, send, close } = useWebSocket(
 			{
 				name: 'send',
 				type: '(data: string | ArrayBufferLike | Blob | ArrayBufferView) => void',
-				description: 'Send data through the WebSocket. No-ops when the socket is not <code>OPEN</code>.'
+				description:
+					'Send data through the WebSocket. No-ops when the socket is not <code>OPEN</code>.'
 			},
 			{
 				name: 'close',

@@ -152,7 +152,10 @@ describe('useTimeout', () => {
 	test('SSR safe: no error when window is undefined', () => {
 		const cleanup = $effect.root(() => {
 			expect(() => {
-				useTimeout(() => {}, () => 500);
+				useTimeout(
+					() => {},
+					() => 500
+				);
 			}).not.toThrow();
 		});
 		cleanup();

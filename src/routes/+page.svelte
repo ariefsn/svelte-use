@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { sidebar } from '$lib/docs/sidebar.js';
 	import {
 		useCounter,
 		useDebounce,
@@ -8,6 +7,7 @@
 		usePrevious,
 		useToggle
 	} from '$lib';
+	import { sidebar } from '$lib/docs/sidebar.js';
 
 	// --- useToggle ---
 	const toggle = useToggle();
@@ -63,7 +63,11 @@
 	}
 
 	const features = [
-		{ icon: '⚡', label: 'Svelte 5 Runes', desc: 'Built for $state, $derived, $effect — no stores' },
+		{
+			icon: '⚡',
+			label: 'Svelte 5 Runes',
+			desc: 'Built for $state, $derived, $effect — no stores'
+		},
 		{ icon: '🌲', label: 'Tree-shakable', desc: 'Import only what you use' },
 		{ icon: '🔒', label: 'Fully typed', desc: 'First-class TypeScript, no any' },
 		{ icon: '🌐', label: 'SSR safe', desc: 'All browser APIs are guarded' },
@@ -95,7 +99,11 @@
 					rel="noopener"
 					aria-label="View on npm"
 				>
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 0v24h24V0H0zm19.2 19.2H4.8V4.8h14.4v14.4z"/><path d="M7.2 7.2h9.6v9.6h-2.4V9.6H12v7.2H7.2z"/></svg>
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
+						><path d="M0 0v24h24V0H0zm19.2 19.2H4.8V4.8h14.4v14.4z" /><path
+							d="M7.2 7.2h9.6v9.6h-2.4V9.6H12v7.2H7.2z"
+						/></svg
+					>
 					npm
 				</a>
 				<a
@@ -105,20 +113,24 @@
 					rel="noopener"
 					aria-label="View on GitHub"
 				>
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
+						><path
+							d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+						/></svg
+					>
 					GitHub
 				</a>
 			</div>
 		</div>
-		<h1>svelte-use</h1>
+		<h1>Svelte Use</h1>
 		<p class="hero-desc">
-			A collection of <strong>{totalComposables}+</strong> Svelte 5 runes-first utility composables.<br />
+			A collection of <strong>{totalComposables}+</strong> Svelte 5 runes-first utility composables.<br
+			/>
 			No stores. No external dependencies. SSR-safe. Fully typed.
 		</p>
 
 		<div class="hero-actions">
 			<a href="/docs/use-toggle" class="btn btn-primary">Browse Docs</a>
-			<a href="#demos" class="btn btn-secondary">Live Demos</a>
 			<a
 				href="https://github.com/ariefsn/svelte-use"
 				class="btn btn-ghost"
@@ -137,11 +149,13 @@
 	<!-- ─── Install ─── -->
 	<section class="section">
 		<h2 class="section-title">Installation</h2>
-		<pre class="code-block"><code>{`npm install @ariefsn/svelte-use
+		<pre class="code-block"><code
+				>{`npm install @ariefsn/svelte-use
 # or
 pnpm add @ariefsn/svelte-use
 # or
-bun add @ariefsn/svelte-use`}</code></pre>
+bun add @ariefsn/svelte-use`}</code
+			></pre>
 		<p class="note">Requires <strong>Svelte 5</strong> as a peer dependency.</p>
 	</section>
 
@@ -154,7 +168,8 @@ bun add @ariefsn/svelte-use`}</code></pre>
 			>
 			backed by <code>$state</code> — call them in templates or <code>$derived</code> to read reactively.
 		</p>
-		<pre class="code-block"><code>{`import { useMouse, useScroll, useCountdown } from '@ariefsn/svelte-use';
+		<pre class="code-block"><code
+				>{`import { useMouse, useScroll, useCountdown } from '@ariefsn/svelte-use';
 
 // Tracks pointer position
 const mouse = useMouse();
@@ -169,7 +184,8 @@ scroll.arrivedState.bottom() // → boolean
 // Countdown timer
 const timer = useCountdown(60);
 timer.start();
-timer.count()    // → 60, 59, 58 …`}</code></pre>
+timer.count()    // → 60, 59, 58 …`}</code
+			></pre>
 	</section>
 
 	<!-- ─── Features ─── -->
@@ -205,252 +221,37 @@ timer.count()    // → 60, 59, 58 …`}</code></pre>
 		</div>
 	</section>
 
-	<!-- ─── Runes Pattern ─── -->
-	<section class="section">
-		<h2 class="section-title">Runes-first Pattern</h2>
-		<p class="section-desc">
-			Every composable exposes state as <strong>getter functions</strong> rather than raw reactive
-			variables or Svelte stores. This means you always have a stable reference — safe to pass as
-			props, store in objects, and use in <code>$derived</code>.
-		</p>
-		<pre class="code-block"><code>{`// ✅ Getter function — stable reference, works everywhere
-const mouse = useMouse();
-const dist = $derived(Math.sqrt(mouse.x() ** 2 + mouse.y() ** 2));
-
-// The getter itself is not reactive — calling it inside $derived
-// or a Svelte template establishes the reactive dependency automatically.`}</code></pre>
-	</section>
-
-	<!-- ─── Interactive Demos ─── -->
-	<section class="section demos-section" id="demos">
-		<h2 class="section-title">Interactive Demos</h2>
-		<p class="section-desc">
-			Try these composables live. Browse the full demo collection in the
-			<a href="/docs/use-toggle" class="inline-link">docs</a>.
-		</p>
-
-		<div class="grid">
-			<!-- useToggle -->
-			<section class="card">
-				<h2>useToggle</h2>
-				<p class="description">Reactive boolean toggle.</p>
-
-				<div class="demo">
-					<span class="badge" class:on={toggle.value}>{toggle.value ? 'ON' : 'OFF'}</span>
-					<div class="actions">
-						<button onclick={() => toggle.toggle()}>Toggle</button>
-						<button onclick={() => toggle.set(true)}>Set true</button>
-						<button onclick={() => toggle.set(false)}>Set false</button>
-					</div>
-				</div>
-
-				<pre><code>{`import { useToggle } from '@ariefsn/svelte-use';
-
-const { value, toggle, set } = useToggle();
-toggle();     // value → true
-set(false);   // value → false`}</code></pre>
-			</section>
-
-			<!-- useCounter -->
-			<section class="card">
-				<h2>useCounter</h2>
-				<p class="description">Reactive counter with increment, decrement and reset.</p>
-
-				<div class="demo">
-					<span class="count">{counter.value}</span>
-					<div class="actions">
-						<button onclick={() => counter.inc()}>+1</button>
-						<button onclick={() => counter.inc(5)}>+5</button>
-						<button onclick={() => counter.dec()}>−1</button>
-						<button onclick={() => counter.dec(5)}>−5</button>
-						<button onclick={() => counter.reset()}>Reset</button>
-					</div>
-				</div>
-
-				<pre><code>{`import { useCounter } from '@ariefsn/svelte-use';
-
-const { value, inc, dec, reset } = useCounter(0);
-inc();     // value → 1
-inc(5);    // value → 6
-dec(3);    // value → 3
-reset();   // value → 0`}</code></pre>
-			</section>
-
-			<!-- usePrevious -->
-			<section class="card">
-				<h2>usePrevious</h2>
-				<p class="description">
-					Tracks the previous value of any reactive getter. Returns <code>undefined</code> until the first
-					change.
-				</p>
-
-				<div class="demo">
-					<div class="kv-row">
-						<span class="label">current</span>
-						<span class="value">{prevSource}</span>
-					</div>
-					<div class="kv-row">
-						<span class="label">previous</span>
-						<span class="value muted">{previous() ?? '—'}</span>
-					</div>
-					<div class="actions">
-						<button onclick={() => prevSource++}>Increment source</button>
-						<button onclick={() => (prevSource = 0)}>Reset to 0</button>
-					</div>
-				</div>
-
-				<pre><code>{`import { usePrevious } from '@ariefsn/svelte-use';
-
-let count = $state(0);
-const prev = usePrevious(() => count);
-// prev() → undefined  (before first change)
-count = 1;
-// prev() → 0
-count = 2;
-// prev() → 1`}</code></pre>
-			</section>
-
-			<!-- useDebounce -->
-			<section class="card">
-				<h2>useDebounce</h2>
-				<p class="description">
-					Delays a reactive value until the source stops changing for the given duration (500 ms
-					here).
-				</p>
-
-				<div class="demo">
-					<input type="text" placeholder="Type something…" bind:value={query} />
-					<div class="kv-row">
-						<span class="label">raw</span>
-						<span class="value">{query || '—'}</span>
-					</div>
-					<div class="kv-row">
-						<span class="label">debounced</span>
-						<span class="value muted">{debouncedQuery() || '—'}</span>
-					</div>
-				</div>
-
-				<pre><code>{`import { useDebounce } from '@ariefsn/svelte-use';
-
-let query = $state('');
-const debounced = useDebounce(() => query, 500);
-// debounced() updates only after 500 ms of inactivity`}</code></pre>
-			</section>
-
-			<!-- useLocalStorage -->
-			<section class="card">
-				<h2>useLocalStorage</h2>
-				<p class="description">
-					Reactive <code>localStorage</code> with SSR safety. Value persists across page refreshes.
-				</p>
-
-				<div class="demo">
-					<div class="kv-row">
-						<span class="label">stored theme</span>
-						<span class="value">{theme.value}</span>
-					</div>
-					<div class="actions">
-						<button onclick={() => theme.set('light')}>Light</button>
-						<button onclick={() => theme.set('dark')}>Dark</button>
-					</div>
-					<p class="hint">Refresh the page — the value survives.</p>
-				</div>
-
-				<pre><code>{`import { useLocalStorage } from '@ariefsn/svelte-use';
-
-const theme = useLocalStorage('theme', 'light');
-theme.set('dark');  // persists to localStorage
-theme.value;        // 'dark'`}</code></pre>
-			</section>
-
-			<!-- useIndexedDB -->
-			<section class="card">
-				<h2>useIndexedDB</h2>
-				<p class="description">
-					Reactive IndexedDB with full CRUD, querying, and filtering. Data persists across sessions.
-				</p>
-
-				<div class="demo">
-					<div class="idb-row">
-						<input
-							type="text"
-							placeholder="New note…"
-							bind:value={noteInput}
-							onkeydown={(e) => e.key === 'Enter' && addNote()}
-						/>
-						<button onclick={addNote}>Add</button>
-					</div>
-
-					<input type="text" placeholder="Filter notes…" bind:value={filterText} />
-
-					{#if db.loading}
-						<span class="muted">Loading…</span>
-					{:else if db.error}
-						<span style="color:#f87171">Error: {db.error.message}</span>
-					{:else if visibleNotes.length === 0}
-						<span class="muted">No notes yet.</span>
-					{:else}
-						<ul class="note-list">
-							{#each visibleNotes as note (note.id)}
-								<li class="note-item">
-									<button
-										class="toggle-btn"
-										class:done={note.done}
-										onclick={() => toggleNote(note)}
-										title="Toggle done"
-									>
-										{note.done ? '✓' : '○'}
-									</button>
-									<span class="note-text" class:done={note.done}>{note.text}</span>
-									<button class="remove-btn" onclick={() => removeNote(note.id!)}>×</button>
-								</li>
-							{/each}
-						</ul>
-					{/if}
-
-					<div class="idb-footer">
-						<span class="muted">{db.items.length} total · {visibleNotes.length} shown</span>
-						<div class="actions">
-							<button onclick={runQuery}>Query pending</button>
-							<button onclick={() => db.clear()}>Clear all</button>
-						</div>
-					</div>
-
-					{#if queryResults.length > 0}
-						<div class="kv-row">
-							<span class="label">pending</span>
-							<span class="value muted">{queryResults.map((n) => n.text).join(', ')}</span>
-						</div>
-					{/if}
-				</div>
-
-				<pre><code>{`import { useIndexedDB } from '@ariefsn/svelte-use';
-
-interface Note { id?: number; text: string; done: boolean }
-const db = useIndexedDB<Note>('my-app', 'notes');
-
-await db.add({ text: 'Buy milk', done: false });
-db.items;                              // reactive T[]
-await db.update({ id: 1, done: true });
-await db.remove(1);
-const pending = await db.query(n => !n.done);`}</code></pre>
-			</section>
-		</div>
-	</section>
-
 	<!-- ─── Footer ─── -->
 	<footer class="footer">
 		<div class="footer-logo">
 			<img src="/logo.svg" alt="svelte-use logo" width="24" height="24" />
-			<span>svelte-use</span>
+			<span>Svelte Use</span>
 		</div>
 		<div class="footer-links">
-			<a href="https://github.com/ariefsn/svelte-use" target="_blank" rel="noopener" class="footer-link">
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+			<a
+				href="https://github.com/ariefsn/svelte-use"
+				target="_blank"
+				rel="noopener"
+				class="footer-link"
+			>
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
+					><path
+						d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+					/></svg
+				>
 				GitHub
 			</a>
-			<a href="https://www.npmjs.com/package/@ariefsn/svelte-use" target="_blank" rel="noopener" class="footer-link">
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 0v24h24V0H0zm19.2 19.2H4.8V4.8h14.4v14.4z"/><path d="M7.2 7.2h9.6v9.6h-2.4V9.6H12v7.2H7.2z"/></svg>
+			<a
+				href="https://www.npmjs.com/package/@ariefsn/svelte-use"
+				target="_blank"
+				rel="noopener"
+				class="footer-link"
+			>
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
+					><path d="M0 0v24h24V0H0zm19.2 19.2H4.8V4.8h14.4v14.4z" /><path
+						d="M7.2 7.2h9.6v9.6h-2.4V9.6H12v7.2H7.2z"
+					/></svg
+				>
 				npm
 			</a>
 		</div>
@@ -506,7 +307,9 @@ const pending = await db.query(n => !n.done);`}</code></pre>
 
 	.hero-badge-link {
 		text-decoration: none;
-		transition: background 0.15s, border-color 0.15s;
+		transition:
+			background 0.15s,
+			border-color 0.15s;
 	}
 
 	.hero-badge-link:hover {

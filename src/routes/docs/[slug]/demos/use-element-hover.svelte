@@ -15,9 +15,7 @@
 	</div>
 
 	<div class="row">
-		<button bind:this={btn} class:btn-hovered={hoverBtn()}>
-			Hover over this button
-		</button>
+		<button bind:this={btn} class:btn-hovered={hoverBtn()}> Hover over this button </button>
 		<span class="muted">{hoverBtn() ? 'Button hovered!' : ''}</span>
 	</div>
 </div>
@@ -35,7 +33,9 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		transition: border-color 0.15s, background 0.15s;
+		transition:
+			border-color 0.15s,
+			background 0.15s;
 		font-size: 0.9rem;
 		color: #aaa;
 		cursor: default;

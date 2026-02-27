@@ -11,7 +11,9 @@
 </script>
 
 <div class="demo-wrap">
-	<p class="hint">Pick a file to generate a blob URL. The URL is automatically revoked when the file changes.</p>
+	<p class="hint">
+		Pick a file to generate a blob URL. The URL is automatically revoked when the file changes.
+	</p>
 
 	<input type="file" {onchange} />
 

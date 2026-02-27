@@ -44,7 +44,8 @@ export function useNetwork(): UseNetworkReturn {
 		: null;
 
 	function snapshot() {
-		if (!connection) return { downlink: undefined, effectiveType: undefined, rtt: undefined, saveData: undefined };
+		if (!connection)
+			return { downlink: undefined, effectiveType: undefined, rtt: undefined, saveData: undefined };
 		return {
 			downlink: connection.downlink,
 			effectiveType: connection.effectiveType,

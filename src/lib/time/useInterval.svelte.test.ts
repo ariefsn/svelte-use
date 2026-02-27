@@ -140,7 +140,10 @@ describe('useInterval', () => {
 	test('SSR safe: no error when window is undefined', () => {
 		const cleanup = $effect.root(() => {
 			expect(() => {
-				useInterval(() => {}, () => 500);
+				useInterval(
+					() => {},
+					() => 500
+				);
 			}).not.toThrow();
 		});
 		cleanup();

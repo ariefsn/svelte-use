@@ -24,10 +24,7 @@
  * const sorted = useSorted(() => nums, (a, b) => b - a);
  * ```
  */
-export function useSorted<T>(
-	source: () => T[],
-	compareFn?: (a: T, b: T) => number
-): () => T[] {
+export function useSorted<T>(source: () => T[], compareFn?: (a: T, b: T) => number): () => T[] {
 	const sorted = $derived([...source()].sort(compareFn));
 	return () => sorted;
 }

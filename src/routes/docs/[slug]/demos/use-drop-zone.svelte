@@ -13,11 +13,7 @@
 </script>
 
 <div class="demo-root">
-	<div
-		bind:this={zone}
-		class="zone"
-		class:over={isOver()}
-	>
+	<div bind:this={zone} class="zone" class:over={isOver()}>
 		{#if isOver()}
 			Release to drop
 		{:else}
@@ -48,7 +44,10 @@
 		text-align: center;
 		font-size: 0.9rem;
 		color: #666;
-		transition: border-color 0.15s, color 0.15s, background 0.15s;
+		transition:
+			border-color 0.15s,
+			color 0.15s,
+			background 0.15s;
 		cursor: default;
 		user-select: none;
 	}

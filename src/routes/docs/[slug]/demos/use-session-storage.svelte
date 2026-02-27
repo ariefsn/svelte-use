@@ -9,7 +9,9 @@
 </script>
 
 <div class="demo-wrap">
-	<p class="hint">Value is persisted to <code>sessionStorage</code> — it survives page navigation within the same tab.</p>
+	<p class="hint">
+		Value is persisted to <code>sessionStorage</code> — it survives page navigation within the same tab.
+	</p>
 
 	<input type="text" value={store.value} {oninput} placeholder="Type a value to persist…" />
 
@@ -22,5 +24,7 @@
 		<button onclick={() => store.remove()}>remove()</button>
 	</div>
 
-	<p class="hint">Clicking remove() clears the key from sessionStorage and resets to the initial value.</p>
+	<p class="hint">
+		Clicking remove() clears the key from sessionStorage and resets to the initial value.
+	</p>
 </div>

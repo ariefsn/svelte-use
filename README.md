@@ -24,14 +24,14 @@
 
 ## Features
 
-| | |
-|---|---|
+|                       |                                                       |
+| --------------------- | ----------------------------------------------------- |
 | ⚡ **Svelte 5 Runes** | Built for `$state`, `$derived`, `$effect` — no stores |
-| 🌲 **Tree-shakable** | Import only what you use |
-| 🔒 **Fully typed** | First-class TypeScript, no `any` |
-| 🌐 **SSR safe** | All browser APIs are guarded |
-| 📦 **Zero deps** | No runtime dependencies |
-| 🧹 **Auto cleanup** | Listeners removed on component destroy |
+| 🌲 **Tree-shakable**  | Import only what you use                              |
+| 🔒 **Fully typed**    | First-class TypeScript, no `any`                      |
+| 🌐 **SSR safe**       | All browser APIs are guarded                          |
+| 📦 **Zero deps**      | No runtime dependencies                               |
+| 🧹 **Auto cleanup**   | Listeners removed on component destroy                |
 
 ---
 
@@ -53,30 +53,30 @@ bun add @ariefsn/svelte-use
 
 ### Animation
 
-| Composable       | Description                                      |
-| ---------------- | ------------------------------------------------ |
-| `useAnimate`     | Reactive Web Animations API wrapper              |
-| `useParallax`    | Parallax effect based on pointer or device tilt  |
-| `useTransition`  | Animated numeric transitions with easing         |
+| Composable      | Description                                     |
+| --------------- | ----------------------------------------------- |
+| `useAnimate`    | Reactive Web Animations API wrapper             |
+| `useParallax`   | Parallax effect based on pointer or device tilt |
+| `useTransition` | Animated numeric transitions with easing        |
 
 ### Async
 
-| Composable      | Description                                      |
-| --------------- | ------------------------------------------------ |
-| `useFetch`      | Reactive fetch with loading/error state          |
-| `useWebSocket`  | Reactive WebSocket with auto-reconnect           |
+| Composable     | Description                             |
+| -------------- | --------------------------------------- |
+| `useFetch`     | Reactive fetch with loading/error state |
+| `useWebSocket` | Reactive WebSocket with auto-reconnect  |
 
 ### Time
 
-| Composable         | Description                                      |
-| ------------------ | ------------------------------------------------ |
-| `useInterval`      | Reactive interval counter                        |
-| `useIntervalFn`    | Run a callback on an interval                    |
-| `useNow`           | Reactive current Date                            |
-| `useTimeout`       | Reactive timeout flag                            |
-| `useTimeoutFn`     | Run a callback after a delay                     |
-| `useTimeoutPoll`   | Poll a callback with timeout-based intervals     |
-| `useTimestamp`     | Reactive current timestamp (ms)                  |
+| Composable       | Description                                  |
+| ---------------- | -------------------------------------------- |
+| `useInterval`    | Reactive interval counter                    |
+| `useIntervalFn`  | Run a callback on an interval                |
+| `useNow`         | Reactive current Date                        |
+| `useTimeout`     | Reactive timeout flag                        |
+| `useTimeoutFn`   | Run a callback after a delay                 |
+| `useTimeoutPoll` | Poll a callback with timeout-based intervals |
+| `useTimestamp`   | Reactive current timestamp (ms)              |
 
 ### State
 
@@ -92,9 +92,9 @@ bun add @ariefsn/svelte-use
 
 ### Reactivity
 
-| Composable    | Description                          |
-| ------------- | ------------------------------------ |
-| `useDebounce` | Debounce any reactive getter         |
+| Composable    | Description                  |
+| ------------- | ---------------------------- |
+| `useDebounce` | Debounce any reactive getter |
 
 ### Browser – Keyboard & Scroll
 
@@ -124,57 +124,57 @@ bun add @ariefsn/svelte-use
 
 ### Browser – Sensors
 
-| Composable              | Description                                            |
-| ----------------------- | ------------------------------------------------------ |
-| `useIdle`               | Detect user idle state                                 |
-| `useNetwork`            | Network Information API (downlink, RTT, effectiveType) |
-| `useGeolocation`        | Reactive geolocation via watchPosition                 |
-| `useBreakpoints`        | Reactive responsive breakpoints                        |
-| `useBrowserLocation`    | Reactive browser location (URL, hash, search)          |
-| `useNavigatorLanguage`  | Reactive navigator language                            |
-| `useOnline`             | Reactive online/offline status                         |
-| `usePageLeave`          | Detect when user leaves the page                       |
+| Composable             | Description                                            |
+| ---------------------- | ------------------------------------------------------ |
+| `useIdle`              | Detect user idle state                                 |
+| `useNetwork`           | Network Information API (downlink, RTT, effectiveType) |
+| `useGeolocation`       | Reactive geolocation via watchPosition                 |
+| `useBreakpoints`       | Reactive responsive breakpoints                        |
+| `useBrowserLocation`   | Reactive browser location (URL, hash, search)          |
+| `useNavigatorLanguage` | Reactive navigator language                            |
+| `useOnline`            | Reactive online/offline status                         |
+| `usePageLeave`         | Detect when user leaves the page                       |
 
 ### Browser – Storage
 
-| Composable          | Description                                         |
-| ------------------- | --------------------------------------------------- |
-| `useLocalStorage`   | Reactive localStorage with SSR safety               |
-| `useIndexedDB`      | Reactive IndexedDB with CRUD & querying             |
-| `useBase64`         | Reactive Base64 encode/decode                       |
-| `useObjectUrl`      | Reactive object URL from Blob/File                  |
-| `useSessionStorage` | Reactive sessionStorage with SSR safety             |
+| Composable          | Description                             |
+| ------------------- | --------------------------------------- |
+| `useLocalStorage`   | Reactive localStorage with SSR safety   |
+| `useIndexedDB`      | Reactive IndexedDB with CRUD & querying |
+| `useBase64`         | Reactive Base64 encode/decode           |
+| `useObjectUrl`      | Reactive object URL from Blob/File      |
+| `useSessionStorage` | Reactive sessionStorage with SSR safety |
 
 ### Browser – Interaction
 
-| Composable          | Description                                         |
-| ------------------- | --------------------------------------------------- |
-| `useClickOutside`   | Detect clicks outside an element                    |
-| `useDropZone`       | Drag-and-drop zone with file/data support           |
-| `useElementHover`   | Detect hover state of an element                    |
-| `useFocus`          | Reactive focus state of an element                  |
+| Composable        | Description                               |
+| ----------------- | ----------------------------------------- |
+| `useClickOutside` | Detect clicks outside an element          |
+| `useDropZone`     | Drag-and-drop zone with file/data support |
+| `useElementHover` | Detect hover state of an element          |
+| `useFocus`        | Reactive focus state of an element        |
 
 ### Performance
 
-| Composable        | Description                             |
-| ----------------- | --------------------------------------- |
-| `useFps`          | Reactive frames-per-second counter      |
-| `useThrottleFn`   | Throttle any function                   |
-| `useDebounceFn`   | Debounce any function                   |
+| Composable      | Description                        |
+| --------------- | ---------------------------------- |
+| `useFps`        | Reactive frames-per-second counter |
+| `useThrottleFn` | Throttle any function              |
+| `useDebounceFn` | Debounce any function              |
 
 ### Virtualization
 
-| Composable        | Description                             |
-| ----------------- | --------------------------------------- |
-| `useVirtualList`  | Efficient virtual list rendering        |
+| Composable       | Description                      |
+| ---------------- | -------------------------------- |
+| `useVirtualList` | Efficient virtual list rendering |
 
 ### Web APIs
 
-| Composable            | Description                             |
-| --------------------- | --------------------------------------- |
-| `useClipboard`        | Reactive clipboard read/write           |
-| `useBattery`          | Reactive Battery Status API             |
-| `useSpeechRecognition`| Reactive Web Speech Recognition API     |
+| Composable             | Description                         |
+| ---------------------- | ----------------------------------- |
+| `useClipboard`         | Reactive clipboard read/write       |
+| `useBattery`           | Reactive Battery Status API         |
+| `useSpeechRecognition` | Reactive Web Speech Recognition API |
 
 ---
 

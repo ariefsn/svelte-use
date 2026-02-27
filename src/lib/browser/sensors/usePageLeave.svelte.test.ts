@@ -16,9 +16,7 @@ describe('usePageLeave', () => {
 			const hasLeft = usePageLeave();
 			flushSync();
 
-			document.documentElement.dispatchEvent(
-				new MouseEvent('mouseleave', { relatedTarget: null })
-			);
+			document.documentElement.dispatchEvent(new MouseEvent('mouseleave', { relatedTarget: null }));
 			flushSync();
 
 			expect(hasLeft()).toBe(true);
@@ -31,15 +29,11 @@ describe('usePageLeave', () => {
 			const hasLeft = usePageLeave();
 			flushSync();
 
-			document.documentElement.dispatchEvent(
-				new MouseEvent('mouseleave', { relatedTarget: null })
-			);
+			document.documentElement.dispatchEvent(new MouseEvent('mouseleave', { relatedTarget: null }));
 			flushSync();
 			expect(hasLeft()).toBe(true);
 
-			document.documentElement.dispatchEvent(
-				new MouseEvent('mouseenter', { relatedTarget: null })
-			);
+			document.documentElement.dispatchEvent(new MouseEvent('mouseenter', { relatedTarget: null }));
 			flushSync();
 			expect(hasLeft()).toBe(false);
 		});
@@ -108,17 +102,13 @@ describe('usePageLeave', () => {
 			const b = usePageLeave();
 			flushSync();
 
-			document.documentElement.dispatchEvent(
-				new MouseEvent('mouseleave', { relatedTarget: null })
-			);
+			document.documentElement.dispatchEvent(new MouseEvent('mouseleave', { relatedTarget: null }));
 			flushSync();
 
 			expect(a()).toBe(true);
 			expect(b()).toBe(true);
 
-			document.documentElement.dispatchEvent(
-				new MouseEvent('mouseenter', { relatedTarget: null })
-			);
+			document.documentElement.dispatchEvent(new MouseEvent('mouseenter', { relatedTarget: null }));
 			flushSync();
 
 			expect(a()).toBe(false);

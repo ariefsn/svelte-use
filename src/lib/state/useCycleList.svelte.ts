@@ -34,8 +34,7 @@ export function useCycleList<T>(
 	prev: () => void;
 	setIndex: (i: number) => void;
 } {
-	const safeInitial =
-		list.length === 0 ? 0 : Math.max(0, Math.min(initialIndex, list.length - 1));
+	const safeInitial = list.length === 0 ? 0 : Math.max(0, Math.min(initialIndex, list.length - 1));
 
 	let currentIndex = $state(safeInitial);
 

@@ -23,7 +23,9 @@ describe('useMouse', () => {
 
 		flushSync();
 
-		window.dispatchEvent(new MouseEvent('mousemove', { clientX: 150, clientY: 250, bubbles: true }));
+		window.dispatchEvent(
+			new MouseEvent('mousemove', { clientX: 150, clientY: 250, bubbles: true })
+		);
 
 		expect(mouse.x()).toBe(150);
 		expect(mouse.y()).toBe(250);
@@ -105,7 +107,9 @@ describe('useMouse', () => {
 
 		cleanup();
 
-		window.dispatchEvent(new MouseEvent('mousemove', { clientX: 999, clientY: 999, bubbles: true }));
+		window.dispatchEvent(
+			new MouseEvent('mousemove', { clientX: 999, clientY: 999, bubbles: true })
+		);
 		expect(mouse.x()).toBe(50);
 	});
 
@@ -120,7 +124,9 @@ describe('useMouse', () => {
 
 		flushSync();
 
-		window.dispatchEvent(new MouseEvent('mousemove', { clientX: 100, clientY: 200, bubbles: true }));
+		window.dispatchEvent(
+			new MouseEvent('mousemove', { clientX: 100, clientY: 200, bubbles: true })
+		);
 
 		expect(a.x()).toBe(100);
 		expect(b.x()).toBe(100);

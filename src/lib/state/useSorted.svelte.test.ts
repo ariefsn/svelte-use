@@ -20,7 +20,10 @@ describe('useSorted', () => {
 
 	test('applies custom comparator (descending)', () => {
 		const cleanup = $effect.root(() => {
-			const sorted = useSorted(() => [3, 1, 2], (a, b) => b - a);
+			const sorted = useSorted(
+				() => [3, 1, 2],
+				(a, b) => b - a
+			);
 			expect(sorted()).toEqual([3, 2, 1]);
 		});
 		cleanup();
@@ -82,7 +85,10 @@ describe('useSorted', () => {
 	test('sorts objects using custom comparator by property', () => {
 		const cleanup = $effect.root(() => {
 			const items = [{ n: 3 }, { n: 1 }, { n: 2 }];
-			const sorted = useSorted(() => items, (a, b) => a.n - b.n);
+			const sorted = useSorted(
+				() => items,
+				(a, b) => a.n - b.n
+			);
 			expect(sorted().map((x) => x.n)).toEqual([1, 2, 3]);
 		});
 		cleanup();
