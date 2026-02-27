@@ -9,7 +9,7 @@ describe('useElementHover', () => {
 
 		const cleanup = $effect.root(() => {
 			const { hovering } = useElementHover(() => el);
-			expect(hovering).toBe(false);
+			expect(hovering()).toBe(false);
 		});
 
 		el.remove();
@@ -29,7 +29,7 @@ describe('useElementHover', () => {
 		flushSync();
 
 		el.dispatchEvent(new MouseEvent('mouseenter'));
-		expect(result.hovering).toBe(true);
+		expect(result.hovering()).toBe(true);
 
 		el.remove();
 		cleanup();
@@ -48,10 +48,10 @@ describe('useElementHover', () => {
 		flushSync();
 
 		el.dispatchEvent(new MouseEvent('mouseenter'));
-		expect(result.hovering).toBe(true);
+		expect(result.hovering()).toBe(true);
 
 		el.dispatchEvent(new MouseEvent('mouseleave'));
-		expect(result.hovering).toBe(false);
+		expect(result.hovering()).toBe(false);
 
 		el.remove();
 		cleanup();
@@ -61,7 +61,7 @@ describe('useElementHover', () => {
 		const cleanup = $effect.root(() => {
 			const { hovering } = useElementHover(() => null);
 			flushSync();
-			expect(hovering).toBe(false);
+			expect(hovering()).toBe(false);
 		});
 
 		cleanup();
@@ -71,7 +71,7 @@ describe('useElementHover', () => {
 		const cleanup = $effect.root(() => {
 			const { hovering } = useElementHover(() => undefined);
 			flushSync();
-			expect(hovering).toBe(false);
+			expect(hovering()).toBe(false);
 		});
 
 		cleanup();
@@ -90,16 +90,16 @@ describe('useElementHover', () => {
 		flushSync();
 
 		el.dispatchEvent(new MouseEvent('mouseenter'));
-		expect(result.hovering).toBe(true);
+		expect(result.hovering()).toBe(true);
 
 		cleanup();
 
 		// After cleanup hovering is reset
-		expect(result.hovering).toBe(false);
+		expect(result.hovering()).toBe(false);
 
 		// Event fired after cleanup should not change state
 		el.dispatchEvent(new MouseEvent('mouseenter'));
-		expect(result.hovering).toBe(false);
+		expect(result.hovering()).toBe(false);
 
 		el.remove();
 	});
@@ -121,16 +121,16 @@ describe('useElementHover', () => {
 		flushSync();
 
 		elA.dispatchEvent(new MouseEvent('mouseenter'));
-		expect(a.hovering).toBe(true);
-		expect(b.hovering).toBe(false);
+		expect(a.hovering()).toBe(true);
+		expect(b.hovering()).toBe(false);
 
 		elB.dispatchEvent(new MouseEvent('mouseenter'));
-		expect(a.hovering).toBe(true);
-		expect(b.hovering).toBe(true);
+		expect(a.hovering()).toBe(true);
+		expect(b.hovering()).toBe(true);
 
 		elA.dispatchEvent(new MouseEvent('mouseleave'));
-		expect(a.hovering).toBe(false);
-		expect(b.hovering).toBe(true);
+		expect(a.hovering()).toBe(false);
+		expect(b.hovering()).toBe(true);
 
 		elA.remove();
 		elB.remove();
@@ -153,17 +153,17 @@ describe('useElementHover', () => {
 		flushSync();
 
 		el1.dispatchEvent(new MouseEvent('mouseenter'));
-		expect(result.hovering).toBe(true);
+		expect(result.hovering()).toBe(true);
 
 		// Switch target — should reset and track new element
 		targetEl = el2;
 		flushSync();
 
 		// hovering reset after target switch
-		expect(result.hovering).toBe(false);
+		expect(result.hovering()).toBe(false);
 
 		el2.dispatchEvent(new MouseEvent('mouseenter'));
-		expect(result.hovering).toBe(true);
+		expect(result.hovering()).toBe(true);
 
 		el1.remove();
 		el2.remove();

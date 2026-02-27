@@ -24,20 +24,28 @@ export function usePageLeave(): () => boolean {
 	$effect(() => {
 		if (!isBrowser) return;
 
-		function handleLeave() {
-			hasLeft = true;
+		function handleLeave(event: MouseEvent) {
+			// Only treat as a viewport leave when the mouse moves outside the
+			// document element (relatedTarget is null or outside the document).
+			if (event.relatedTarget === null) {
+				hasLeft = true;
+			}
 		}
 
-		function handleEnter() {
-			hasLeft = false;
+		function handleEnter(event: MouseEvent) {
+			// Only treat as a viewport enter when the mouse comes from outside
+			// the document element.
+			if (event.relatedTarget === null) {
+				hasLeft = false;
+			}
 		}
 
-		document.addEventListener('mouseleave', handleLeave);
-		document.addEventListener('mouseenter', handleEnter);
+		document.documentElement.addEventListener('mouseleave', handleLeave);
+		document.documentElement.addEventListener('mouseenter', handleEnter);
 
 		return () => {
-			document.removeEventListener('mouseleave', handleLeave);
-			document.removeEventListener('mouseenter', handleEnter);
+			document.documentElement.removeEventListener('mouseleave', handleLeave);
+			document.documentElement.removeEventListener('mouseenter', handleEnter);
 		};
 	});
 

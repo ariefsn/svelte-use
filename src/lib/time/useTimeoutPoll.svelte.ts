@@ -53,12 +53,9 @@ export function useTimeoutPoll(fn: () => void, interval: number) {
 		schedule();
 	}
 
-	// The $effect tracks `active` as a reactive dependency so its teardown
-	// is reliably registered from the first run, ensuring any in-flight
-	// timer is cancelled when the owning scope is destroyed.
+	// Register a cleanup that cancels any in-flight timer when the owning
+	// reactive scope (component) is destroyed.
 	$effect(() => {
-		void active;
-
 		return () => {
 			clearTimer();
 		};

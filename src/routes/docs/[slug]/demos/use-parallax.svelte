@@ -10,7 +10,7 @@
     <div
       class="card"
       bind:this={card}
-      style:transform="translate({x}px, {y}px)"
+      style:transform="translate({x()}px, {y()}px)"
     >
       <span class="card-label">Move cursor over me</span>
     </div>
@@ -18,11 +18,11 @@
 
   <div class="row">
     <span class="label">x offset</span>
-    <span class="value accent">{x.toFixed(2)}px</span>
+    <span class="value accent">{x().toFixed(2)}px</span>
   </div>
   <div class="row">
     <span class="label">y offset</span>
-    <span class="value accent">{y.toFixed(2)}px</span>
+    <span class="value accent">{y().toFixed(2)}px</span>
   </div>
 
   <p class="hint">Offset is calculated from the centre of the card · speed = 0.06</p>
