@@ -167,7 +167,8 @@ function resolveBounds(
 		| HTMLElement
 		| (() => HTMLElement | DraggableBounds | null | undefined)
 		| null
-		| undefined
+		| undefined,
+	draggableEl?: HTMLElement | null
 ): DraggableBounds | null {
 	if (!bounds) return null;
 
@@ -175,12 +176,19 @@ function resolveBounds(
 	if (!resolved) return null;
 
 	if (resolved instanceof HTMLElement) {
-		const rect = resolved.getBoundingClientRect();
+		// The drag position (x, y) lives in the same local offset-space as the
+		// element's CSS transform, NOT in viewport/client space.  Using
+		// getBoundingClientRect() here would yield viewport-absolute numbers that
+		// would be wildly off.  Instead we compute bounds from the container's
+		// own dimensions so that x ∈ [0, containerWidth - elWidth] and
+		// y ∈ [0, containerHeight - elHeight].
+		const elWidth = draggableEl ? draggableEl.offsetWidth : 0;
+		const elHeight = draggableEl ? draggableEl.offsetHeight : 0;
 		return {
-			minX: rect.left,
-			maxX: rect.right,
-			minY: rect.top,
-			maxY: rect.bottom
+			minX: 0,
+			maxX: Math.max(0, resolved.offsetWidth - elWidth),
+			minY: 0,
+			maxY: Math.max(0, resolved.offsetHeight - elHeight)
 		};
 	}
 
@@ -278,7 +286,8 @@ export function useDraggable(
 	}
 
 	function resolveCurrentBounds(): DraggableBounds | null {
-		return resolveBounds(containerBounds);
+		const movingEl = resolveElement(draggingElement) ?? resolveElement(target);
+		return resolveBounds(containerBounds, movingEl);
 	}
 
 	function clampPosition(px: number, py: number): DraggablePosition {

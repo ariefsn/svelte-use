@@ -23,7 +23,8 @@ export const sidebar: SidebarGroup[] = [
 		items: [
 			{ label: 'useMagicKeys', slug: 'use-magic-keys' },
 			{ label: 'useKeyModifier', slug: 'use-key-modifier' },
-			{ label: 'useScroll', slug: 'use-scroll' }
+			{ label: 'useScroll', slug: 'use-scroll' },
+			{ label: 'useScrollLock', slug: 'use-scroll-lock' }
 		]
 	},
 	{

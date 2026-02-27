@@ -7,17 +7,36 @@
 		text: `Row #${i + 1} — item data ${Math.floor(Math.random() * 1000)}`
 	}));
 
-	const { list, containerProps, wrapperProps } = useVirtualList(() => data, {
+	const { list, containerProps, wrapperProps, containerRef } = useVirtualList(() => data, {
 		itemHeight: 36,
 		overscan: 5
+	});
+
+	// Track wrapper style reactively so Svelte re-renders when total height changes.
+	let wrapperStyle = $derived(wrapperProps.style);
+
+	// bind:this requires a mutable variable; we forward the element to the hook
+	// via the containerRef callback so it can measure height immediately.
+	let containerEl: HTMLElement | null = $state(null);
+	$effect(() => {
+		containerRef(containerEl);
 	});
 </script>
 
 <div class="demo-wrap" style="gap:0.5rem">
 	<p class="hint">{total.toLocaleString()} items — only ~15 DOM nodes rendered at a time.</p>
 
-	<div class="vlist-container" style={containerProps.style} onscroll={containerProps.onscroll}>
-		<div style={wrapperProps.style}>
+	<!--
+		bind:this feeds the element to containerRef so the hook measures its
+		height immediately on mount (before the first scroll event fires).
+	-->
+	<div
+		class="vlist-container"
+		style={containerProps.style}
+		onscroll={containerProps.onscroll}
+		bind:this={containerEl}
+	>
+		<div style={wrapperStyle}>
 			{#each list() as item (item.index)}
 				<div class="vlist-row" style={item.style}>
 					<span class="row-index">#{item.data.id + 1}</span>

@@ -9,3 +9,4 @@ export { useSessionStorage } from './browser/storage/useSessionStorage.svelte.js
 export type { UseSessionStorageOptions } from './browser/storage/useSessionStorage.svelte.js';
 export { useObjectUrl } from './browser/storage/useObjectUrl.svelte.js';
 export { useBase64 } from './browser/storage/useBase64.svelte.js';
+export { useScrollLock } from './browser/input/useScrollLock.svelte.js';

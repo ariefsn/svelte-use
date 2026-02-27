@@ -1396,5 +1396,74 @@ speech.stop();`,
 			'SSR-safe — `start()` and `stop()` are no-ops when the API is unavailable.',
 			'Recognition is stopped automatically when the component is destroyed.'
 		]
+	},
+
+	// --------------------------------------------------------------- Browser
+	'use-scroll-lock': {
+		slug: 'use-scroll-lock',
+		title: 'useScrollLock',
+		description:
+			'Locks and unlocks scroll on a target element (defaults to <code>document.body</code>) by toggling <code>overflow: hidden</code>. The previous overflow value is captured before locking and restored on unlock.',
+		usage: `import { useScrollLock } from '@ariefsn/svelte-use';
+
+const { isLocked, lock, unlock } = useScrollLock();
+
+lock();       // → document.body overflow set to 'hidden'
+isLocked();   // → true
+unlock();     // → overflow restored to original value`,
+		params: [
+			{
+				name: 'target',
+				type: '() => HTMLElement | null | undefined',
+				default: 'document.body',
+				description:
+					'Optional reactive getter returning the element to lock. Falls back to `document.body` when omitted or when the getter returns `null`/`undefined`.'
+			}
+		],
+		returns: [
+			{
+				name: 'isLocked',
+				type: '() => boolean',
+				description: '`true` while the element scroll is locked.'
+			},
+			{
+				name: 'lock',
+				type: '() => void',
+				description:
+					'Locks scroll on the target element by setting `overflow: hidden`. Saves the previous overflow value for restoration. No-op when already locked.'
+			},
+			{
+				name: 'unlock',
+				type: '() => void',
+				description:
+					'Unlocks scroll by restoring the overflow value that was saved when `lock()` was called. No-op when not locked.'
+			}
+		],
+		example: `<script lang="ts">
+  import { useScrollLock } from '@ariefsn/svelte-use';
+
+  let modalOpen = $state(false);
+  const { isLocked, lock, unlock } = useScrollLock();
+
+  $effect(() => {
+    if (modalOpen) lock(); else unlock();
+  });
+</script>
+
+<button onclick={() => (modalOpen = !modalOpen)}>
+  {modalOpen ? 'Close modal' : 'Open modal'}
+</button>
+
+{#if modalOpen}
+  <div class="modal">Scroll is locked while this modal is open.</div>
+{/if}
+
+<p>Body scroll locked: {isLocked()}</p>`,
+		notes: [
+			'SSR-safe — no DOM operations are performed outside the browser.',
+			'The previous <code>overflow</code> value is captured before locking and restored when <code>unlock()</code> is called, preventing style leaks.',
+			'Scroll is automatically unlocked when the component that owns the reactive scope is destroyed.',
+			'Calling <code>lock()</code> multiple times without an intervening <code>unlock()</code> is a no-op — the original overflow is preserved.'
+		]
 	}
 };
