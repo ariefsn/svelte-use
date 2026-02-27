@@ -15,8 +15,15 @@ export const sidebar: SidebarGroup[] = [
 			{ label: 'useSorted', slug: 'use-sorted' },
 			{ label: 'useCycleList', slug: 'use-cycle-list' },
 			{ label: 'useCountdown', slug: 'use-countdown' },
-			{ label: 'useTimeAgo', slug: 'use-time-ago' }
+			{ label: 'useTimeAgo', slug: 'use-time-ago' },
+			{ label: 'useToggle', slug: 'use-toggle' },
+			{ label: 'useCounter', slug: 'use-counter' },
+			{ label: 'usePrevious', slug: 'use-previous' }
 		]
+	},
+	{
+		title: 'Reactivity',
+		items: [{ label: 'useDebounce', slug: 'use-debounce' }]
 	},
 	{
 		title: 'Browser – Keyboard & Scroll',
@@ -50,6 +57,14 @@ export const sidebar: SidebarGroup[] = [
 			{ label: 'useIdle', slug: 'use-idle' },
 			{ label: 'useNetwork', slug: 'use-network' },
 			{ label: 'useGeolocation', slug: 'use-geolocation' }
+		]
+	},
+	{
+		title: 'Browser – Storage',
+		items: [
+			{ label: 'useBase64', slug: 'use-base64' },
+			{ label: 'useObjectUrl', slug: 'use-object-url' },
+			{ label: 'useSessionStorage', slug: 'use-session-storage' }
 		]
 	},
 	{
