@@ -2278,6 +2278,860 @@ hasLeft() // → true when the cursor is outside the viewport`,
 		]
 	},
 
+	// ------------------------------------------------------------ Animation
+	'use-animate': {
+		slug: 'use-animate',
+		title: 'useAnimate',
+		description:
+			'Reactive wrapper around the Web Animations API. Attaches an <code>Animation</code> to a target element using the provided keyframes and options. The animation is automatically cancelled and re-created whenever the target, keyframes, or options change.',
+		usage: `import { useAnimate } from '@ariefsn/svelte-use';
+
+let el = $state<HTMLDivElement | null>(null);
+
+const { play, pause, cancel, finish, isRunning } = useAnimate(
+  () => el,
+  () => [{ opacity: 0 }, { opacity: 1 }],
+  () => ({ duration: 300, fill: 'forwards' })
+);`,
+		params: [
+			{
+				name: 'target',
+				type: '() => HTMLElement | null | undefined',
+				description: 'Reactive getter returning the element to animate'
+			},
+			{
+				name: 'keyframes',
+				type: '() => Keyframe[] | PropertyIndexedKeyframes',
+				description: 'Reactive getter returning the keyframes for the animation'
+			},
+			{
+				name: 'options',
+				type: '() => KeyframeAnimationOptions | undefined',
+				default: 'undefined',
+				description: 'Optional reactive getter returning animation options such as <code>duration</code>, <code>easing</code>, <code>iterations</code>'
+			}
+		],
+		returns: [
+			{
+				name: 'play',
+				type: '() => void',
+				description: 'Starts or resumes the animation'
+			},
+			{
+				name: 'pause',
+				type: '() => void',
+				description: 'Pauses the animation at the current position'
+			},
+			{
+				name: 'cancel',
+				type: '() => void',
+				description: 'Cancels the animation and resets to the initial state'
+			},
+			{
+				name: 'finish',
+				type: '() => void',
+				description: 'Immediately jumps the animation to its end state'
+			},
+			{
+				name: 'isRunning',
+				type: '() => boolean',
+				description: '<code>true</code> while the animation <code>playState</code> is <code>"running"</code>'
+			}
+		],
+		example: `<script lang="ts">
+  import { useAnimate } from '@ariefsn/svelte-use';
+
+  let el = $state<HTMLDivElement | null>(null);
+
+  const { play, pause, cancel, finish, isRunning } = useAnimate(
+    () => el,
+    () => [{ transform: 'translateX(0px)' }, { transform: 'translateX(200px)' }],
+    () => ({ duration: 600, easing: 'ease-in-out', fill: 'forwards' })
+  );
+</script>
+
+<div bind:this={el} style="width:60px;height:60px;background:#a78bfa;border-radius:8px" />
+
+<div>
+  <button onclick={play} disabled={isRunning()}>Play</button>
+  <button onclick={pause}>Pause</button>
+  <button onclick={cancel}>Cancel</button>
+  <button onclick={finish}>Finish</button>
+</div>
+
+<p>Running: {isRunning()}</p>`,
+		notes: [
+			'The animation starts <strong>paused</strong> — call <code>play()</code> to begin.',
+			'Automatically cancelled and re-created when <code>target</code>, <code>keyframes</code>, or <code>options</code> change reactively.',
+			'Cleaned up automatically when the owning component is destroyed.',
+			'SSR-safe — no animation is created when <code>target</code> is <code>null</code> or <code>undefined</code>.'
+		]
+	},
+
+	'use-parallax': {
+		slug: 'use-parallax',
+		title: 'useParallax',
+		description:
+			'Tracks mouse movement and exposes the cursor position as an offset relative to the centre of a target element, scaled by a speed multiplier. Use the returned <code>x</code> and <code>y</code> values to drive CSS transforms for parallax depth effects.',
+		usage: `import { useParallax } from '@ariefsn/svelte-use';
+
+let el = $state<HTMLDivElement | null>(null);
+const { x, y } = useParallax(() => el, { speed: 0.05 });
+// Use x and y in style:transform`,
+		params: [
+			{
+				name: 'target',
+				type: '() => HTMLElement | null | undefined',
+				description: 'Reactive getter returning the reference element'
+			},
+			{
+				name: 'options',
+				type: '{ speed?: number }',
+				default: 'undefined',
+				description: 'Optional configuration object'
+			}
+		],
+		options: [
+			{
+				name: 'speed',
+				type: 'number',
+				default: '0.1',
+				description: 'Multiplier applied to the raw pixel offset. Negative values invert the direction.'
+			}
+		],
+		returns: [
+			{
+				name: 'x',
+				type: 'number',
+				description: 'Reactive getter — horizontal offset in pixels multiplied by <code>speed</code>'
+			},
+			{
+				name: 'y',
+				type: 'number',
+				description: 'Reactive getter — vertical offset in pixels multiplied by <code>speed</code>'
+			}
+		],
+		example: `<script lang="ts">
+  import { useParallax } from '@ariefsn/svelte-use';
+
+  let card = $state<HTMLDivElement | null>(null);
+  const { x, y } = useParallax(() => card, { speed: 0.08 });
+</script>
+
+<div
+  bind:this={card}
+  style:transform="translate({x}px, {y}px)"
+  style="width:200px;height:120px;background:#1e1e2e;border:1px solid #a78bfa;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#a78bfa"
+>
+  Move your mouse over me
+</div>`,
+		notes: [
+			'Attaches a single <code>mousemove</code> listener to <code>window</code>.',
+			'The offset is calculated relative to the centre of the element\'s bounding box.',
+			'Listener is removed automatically when the owning component is destroyed or the target changes.',
+			'SSR-safe — no listener is attached when <code>window</code> is unavailable.'
+		]
+	},
+
+	'use-transition': {
+		slug: 'use-transition',
+		title: 'useTransition',
+		description:
+			'Smoothly interpolates a reactive numeric source value using <code>requestAnimationFrame</code>. When the source changes the composable animates the displayed value from the previous value to the new target over a configurable duration.',
+		usage: `import { useTransition } from '@ariefsn/svelte-use';
+
+let target = $state(0);
+const displayed = useTransition(() => target, { duration: 500 });
+// displayed() returns the interpolated value, updating via rAF`,
+		params: [
+			{
+				name: 'source',
+				type: '() => number',
+				description: 'Reactive getter providing the current target number'
+			},
+			{
+				name: 'options',
+				type: '{ duration?: number; easing?: (t: number) => number }',
+				default: 'undefined',
+				description: 'Optional configuration object'
+			}
+		],
+		options: [
+			{
+				name: 'duration',
+				type: 'number',
+				default: '300',
+				description: 'Animation duration in milliseconds'
+			},
+			{
+				name: 'easing',
+				type: '(t: number) => number',
+				default: 'cubicInOut',
+				description: 'Easing function where <code>t</code> is in the range [0, 1]. Built-in options: <code>linear</code>, <code>cubicInOut</code>.'
+			}
+		],
+		returns: [
+			{
+				name: '()',
+				type: '() => number',
+				description: 'Getter returning the current interpolated value. Read in a reactive context for live updates.'
+			}
+		],
+		example: `<script lang="ts">
+  import { useTransition } from '@ariefsn/svelte-use';
+
+  let target = $state(0);
+  const displayed = useTransition(() => target, { duration: 600 });
+</script>
+
+<p style="font-size:3rem;font-weight:800;color:#a78bfa">
+  {displayed().toFixed(1)}
+</p>
+
+<div style="display:flex;gap:0.5rem">
+  <button onclick={() => (target = 0)}>0</button>
+  <button onclick={() => (target = 50)}>50</button>
+  <button onclick={() => (target = 100)}>100</button>
+</div>`,
+		notes: [
+			'Built-in easing helpers <code>linear</code> and <code>cubicInOut</code> are exported from the same module.',
+			'A pending animation frame is always cancelled before a new one begins — rapid source changes never stack animations.',
+			'SSR-safe — jumps directly to the target value when <code>requestAnimationFrame</code> is unavailable.',
+			'Works with any numeric value: percentages, pixel values, angles, etc.'
+		]
+	},
+
+	// ------------------------------------------------------------- Async
+	'use-fetch': {
+		slug: 'use-fetch',
+		title: 'useFetch',
+		description:
+			'Reactive fetch utility with automatic re-execution when the URL changes, in-flight request abortion via <code>AbortController</code>, and full SSR safety.',
+		usage: `import { useFetch } from '@ariefsn/svelte-use';
+
+let id = $state(1);
+const { data, error, isFetching, execute } = useFetch(
+  () => \`/api/users/\${id}\`
+);
+// Reactive: changing id automatically refetches`,
+		params: [
+			{
+				name: 'url',
+				type: '() => string | undefined',
+				description: 'Reactive getter returning the URL to fetch. Pass <code>undefined</code> to skip fetching.'
+			},
+			{
+				name: 'options',
+				type: 'UseFetchOptions',
+				default: '{}',
+				description: 'Optional configuration object'
+			}
+		],
+		options: [
+			{
+				name: 'immediate',
+				type: 'boolean',
+				default: 'true',
+				description: 'Whether to execute the fetch immediately and re-execute whenever the URL changes'
+			},
+			{
+				name: 'init',
+				type: 'RequestInit',
+				default: 'undefined',
+				description: 'Optional <code>RequestInit</code> options forwarded to every <code>fetch</code> call (headers, method, body, etc.)'
+			}
+		],
+		returns: [
+			{
+				name: 'data',
+				type: '() => T | null',
+				description: 'Parsed JSON response, or <code>null</code> before the first successful response'
+			},
+			{
+				name: 'error',
+				type: '() => Error | null',
+				description: 'Last error, or <code>null</code> when no error has occurred'
+			},
+			{
+				name: 'isFetching',
+				type: '() => boolean',
+				description: '<code>true</code> while a request is in-flight'
+			},
+			{
+				name: 'execute',
+				type: '() => Promise<void>',
+				description: 'Manually trigger a fetch. Aborts any in-flight request before starting a new one.'
+			}
+		],
+		example: `<script lang="ts">
+  import { useFetch } from '@ariefsn/svelte-use';
+
+  interface Post { id: number; title: string; body: string }
+
+  let postId = $state(1);
+  const { data, error, isFetching, execute } = useFetch<Post>(
+    () => \`https://jsonplaceholder.typicode.com/posts/\${postId}\`
+  );
+</script>
+
+<div>
+  {#if isFetching()}
+    <p>Loading…</p>
+  {:else if error()}
+    <p>Error: {error()?.message}</p>
+  {:else if data()}
+    <h3>{data()?.title}</h3>
+    <p>{data()?.body}</p>
+  {/if}
+</div>
+
+<div>
+  <button onclick={() => postId--} disabled={postId <= 1}>Prev</button>
+  <button onclick={() => postId++}>Next</button>
+  <button onclick={execute}>Refetch</button>
+</div>`,
+		notes: [
+			'Automatically aborts the in-flight request when the URL changes or the component is destroyed.',
+			'Only JSON responses are parsed — non-OK responses throw an <code>Error</code> with the status code.',
+			'Set <code>immediate: false</code> to control fetching manually via <code>execute()</code>.',
+			'SSR-safe — no fetch is performed when <code>fetch</code> is unavailable.'
+		]
+	},
+
+	'use-web-socket': {
+		slug: 'use-web-socket',
+		title: 'useWebSocket',
+		description:
+			'Reactive WebSocket utility with optional auto-reconnect, reactive URL changes, and full SSR safety. The socket opens when a URL is provided and closes automatically when the component is destroyed.',
+		usage: `import { useWebSocket } from '@ariefsn/svelte-use';
+
+const { data, status, send, close } = useWebSocket(
+  () => 'wss://example.com/ws',
+  { autoReconnect: true, reconnectInterval: 2000 }
+);`,
+		params: [
+			{
+				name: 'url',
+				type: '() => string | undefined',
+				description: 'Reactive getter returning the WebSocket URL. Pass <code>undefined</code> to stay disconnected.'
+			},
+			{
+				name: 'options',
+				type: 'UseWebSocketOptions',
+				default: '{}',
+				description: 'Optional configuration object'
+			}
+		],
+		options: [
+			{
+				name: 'protocols',
+				type: 'string | string[]',
+				default: 'undefined',
+				description: 'WebSocket sub-protocol(s) passed to the <code>WebSocket</code> constructor'
+			},
+			{
+				name: 'autoReconnect',
+				type: 'boolean',
+				default: 'false',
+				description: 'Automatically reconnect when the socket closes unexpectedly'
+			},
+			{
+				name: 'reconnectInterval',
+				type: 'number',
+				default: '1000',
+				description: 'Milliseconds to wait between reconnection attempts (requires <code>autoReconnect: true</code>)'
+			}
+		],
+		returns: [
+			{
+				name: 'data',
+				type: '() => T | null',
+				description: 'Last deserialized message, or <code>null</code> before the first message'
+			},
+			{
+				name: 'status',
+				type: '() => "CONNECTING" | "OPEN" | "CLOSED"',
+				description: 'Current connection status'
+			},
+			{
+				name: 'error',
+				type: '() => Event | null',
+				description: 'Last connection error event, or <code>null</code>'
+			},
+			{
+				name: 'send',
+				type: '(data: string | ArrayBufferLike | Blob | ArrayBufferView) => void',
+				description: 'Send data through the WebSocket. No-ops when the socket is not <code>OPEN</code>.'
+			},
+			{
+				name: 'close',
+				type: '() => void',
+				description: 'Close the connection and disable auto-reconnect for the current URL'
+			}
+		],
+		example: `<script lang="ts">
+  import { useWebSocket } from '@ariefsn/svelte-use';
+
+  interface ChatMessage { user: string; text: string }
+
+  let input = $state('');
+  const { data, status, send, close } = useWebSocket<ChatMessage>(
+    () => 'wss://echo.websocket.events',
+    { autoReconnect: true }
+  );
+</script>
+
+<p>Status: <strong>{status()}</strong></p>
+{#if data()}
+  <p>Last message: {JSON.stringify(data())}</p>
+{/if}
+
+<input bind:value={input} placeholder="Type a message…" />
+<button onclick={() => send(input)} disabled={status() !== 'OPEN'}>Send</button>
+<button onclick={close}>Disconnect</button>`,
+		notes: [
+			'Incoming messages are automatically parsed as JSON; if parsing fails the raw string value is used.',
+			'Call <code>close()</code> to permanently disconnect — this disables auto-reconnect.',
+			'Changing the URL getter reactive value triggers a fresh connection.',
+			'SSR-safe — no WebSocket is created when <code>WebSocket</code> is unavailable.'
+		]
+	},
+
+	// -------------------------------------------------------------- Time
+	'use-interval': {
+		slug: 'use-interval',
+		title: 'useInterval',
+		description:
+			'Reactive interval utility that invokes a callback on a recurring schedule. Starts automatically by default and can be paused and resumed at any time. The delay is a reactive getter — changing it restarts the interval.',
+		usage: `import { useInterval } from '@ariefsn/svelte-use';
+
+let delay = $state(1000);
+const { pause, resume, isActive } = useInterval(
+  () => console.log('tick'),
+  () => delay
+);
+// Ticks every 1000ms immediately. Change delay to restart.`,
+		params: [
+			{
+				name: 'callback',
+				type: '() => void',
+				description: 'Function to invoke on each tick'
+			},
+			{
+				name: 'delay',
+				type: '() => number',
+				description: 'Reactive getter returning the interval delay in milliseconds'
+			},
+			{
+				name: 'options',
+				type: 'UseIntervalOptions',
+				default: '{}',
+				description: 'Optional configuration object'
+			}
+		],
+		options: [
+			{
+				name: 'immediate',
+				type: 'boolean',
+				default: 'true',
+				description: 'Whether to start ticking automatically on initialisation'
+			}
+		],
+		returns: [
+			{
+				name: 'pause',
+				type: '() => void',
+				description: 'Stops the interval'
+			},
+			{
+				name: 'resume',
+				type: '() => void',
+				description: 'Resumes the interval'
+			},
+			{
+				name: 'isActive',
+				type: '() => boolean',
+				description: '<code>true</code> while the interval is running'
+			}
+		],
+		example: `<script lang="ts">
+  import { useInterval } from '@ariefsn/svelte-use';
+
+  let count = $state(0);
+  let delay = $state(1000);
+  const { pause, resume, isActive } = useInterval(() => count++, () => delay);
+</script>
+
+<p>Count: {count} — Active: {isActive()}</p>
+<div>
+  <button onclick={pause}>Pause</button>
+  <button onclick={resume}>Resume</button>
+  <button onclick={() => (delay = delay === 1000 ? 300 : 1000)}>
+    Toggle speed ({delay}ms)
+  </button>
+</div>`,
+		notes: [
+			'Changing the <code>delay</code> getter value clears the existing interval and starts a new one immediately.',
+			'SSR-safe — uses only <code>setInterval</code> / <code>clearInterval</code>.',
+			'The interval is cleared automatically when the owning reactive scope is destroyed.'
+		]
+	},
+
+	'use-interval-fn': {
+		slug: 'use-interval-fn',
+		title: 'useIntervalFn',
+		description:
+			'Manually-controlled interval utility. Unlike <code>useInterval</code>, this composable does <strong>not</strong> start automatically — you must call <code>resume()</code> explicitly. The delay is a plain number and does not change after initialisation.',
+		usage: `import { useIntervalFn } from '@ariefsn/svelte-use';
+
+const { resume, pause, isActive } = useIntervalFn(() => console.log('tick'), 1000);
+resume();   // start ticking every 1000ms
+pause();    // stop ticking`,
+		params: [
+			{
+				name: 'fn',
+				type: '() => void',
+				description: 'Function to invoke on each tick'
+			},
+			{
+				name: 'delay',
+				type: 'number',
+				description: 'Interval delay in milliseconds'
+			}
+		],
+		returns: [
+			{
+				name: 'resume',
+				type: '() => void',
+				description: 'Starts the interval'
+			},
+			{
+				name: 'pause',
+				type: '() => void',
+				description: 'Stops the interval'
+			},
+			{
+				name: 'isActive',
+				type: '() => boolean',
+				description: '<code>true</code> while the interval is running'
+			}
+		],
+		example: `<script lang="ts">
+  import { useIntervalFn } from '@ariefsn/svelte-use';
+
+  let count = $state(0);
+  const { resume, pause, isActive } = useIntervalFn(() => count++, 500);
+</script>
+
+<p>Count: {count}</p>
+<div>
+  {#if isActive()}
+    <button onclick={pause}>Pause</button>
+  {:else}
+    <button onclick={resume}>Start</button>
+  {/if}
+</div>`,
+		notes: [
+			'Does not start automatically — call <code>resume()</code> to begin.',
+			'The delay is fixed at initialisation and cannot be changed reactively (use <code>useInterval</code> for a reactive delay).',
+			'The interval is cleared automatically when the owning reactive scope is destroyed.'
+		]
+	},
+
+	'use-now': {
+		slug: 'use-now',
+		title: 'useNow',
+		description:
+			'Returns a reactive getter that yields the current Unix timestamp in milliseconds, updated at a configurable interval. Starts immediately.',
+		usage: `import { useNow } from '@ariefsn/svelte-use';
+
+const now = useNow();
+now() // e.g. 1700000000000 — updates every second
+
+const precise = useNow({ interval: 100 });
+precise() // updates every 100ms`,
+		options: [
+			{
+				name: 'interval',
+				type: 'number',
+				default: '1000',
+				description: 'Update interval in milliseconds'
+			}
+		],
+		returns: [
+			{
+				name: '()',
+				type: '() => number',
+				description: 'Current Unix timestamp in milliseconds, updated at the configured interval'
+			}
+		],
+		example: `<script lang="ts">
+  import { useNow } from '@ariefsn/svelte-use';
+
+  const now = useNow({ interval: 1000 });
+  const formatted = $derived(new Date(now()).toLocaleTimeString());
+</script>
+
+<p>Current time: {formatted}</p>`,
+		notes: [
+			'SSR-safe — uses only <code>Date.now()</code> and <code>setInterval</code>.',
+			'The interval is cleared automatically when the owning reactive scope is destroyed.',
+			'For a standalone version without options, see <code>useTimestamp</code>.'
+		]
+	},
+
+	'use-timeout': {
+		slug: 'use-timeout',
+		title: 'useTimeout',
+		description:
+			'Reactive timeout utility that schedules a callback after a reactive delay. Starts automatically by default. The timeout is automatically re-scheduled whenever the delay getter returns a new value while running.',
+		usage: `import { useTimeout } from '@ariefsn/svelte-use';
+
+let delay = $state(1000);
+const { isPending, stop, start } = useTimeout(
+  () => console.log('fired'),
+  () => delay
+);
+// Auto-starts. isPending() → true until callback fires.`,
+		params: [
+			{
+				name: 'callback',
+				type: '() => void',
+				description: 'Function to invoke when the timeout fires'
+			},
+			{
+				name: 'delay',
+				type: '() => number',
+				description: 'Reactive getter returning the delay in milliseconds'
+			},
+			{
+				name: 'options',
+				type: 'UseTimeoutOptions',
+				default: '{}',
+				description: 'Optional configuration object'
+			}
+		],
+		options: [
+			{
+				name: 'immediate',
+				type: 'boolean',
+				default: 'true',
+				description: 'Whether to schedule the timeout automatically on initialisation'
+			}
+		],
+		returns: [
+			{
+				name: 'start',
+				type: '() => void',
+				description: 'Arms (or re-arms) the timeout from the current point in time'
+			},
+			{
+				name: 'stop',
+				type: '() => void',
+				description: 'Cancels the pending timeout'
+			},
+			{
+				name: 'isPending',
+				type: '() => boolean',
+				description: '<code>true</code> while the timeout has been scheduled but has not yet fired'
+			}
+		],
+		example: `<script lang="ts">
+  import { useTimeout } from '@ariefsn/svelte-use';
+
+  let message = $state('Waiting…');
+  let delay = $state(2000);
+
+  const { isPending, start, stop } = useTimeout(
+    () => { message = 'Timeout fired!'; },
+    () => delay
+  );
+</script>
+
+<p>{message}</p>
+<p>Pending: {isPending()}</p>
+<div>
+  <button onclick={start}>Restart</button>
+  <button onclick={stop}>Cancel</button>
+</div>`,
+		notes: [
+			'Changing the <code>delay</code> getter while the timeout is pending reschedules it from that moment.',
+			'SSR-safe — uses only <code>setTimeout</code> / <code>clearTimeout</code>.',
+			'The timeout is cleared automatically when the owning reactive scope is destroyed.'
+		]
+	},
+
+	'use-timeout-fn': {
+		slug: 'use-timeout-fn',
+		title: 'useTimeoutFn',
+		description:
+			'Manually-controlled timeout utility. Unlike <code>useTimeout</code>, this composable does <strong>not</strong> start automatically — you must call <code>start()</code> explicitly. The timeout fires once, then becomes idle.',
+		usage: `import { useTimeoutFn } from '@ariefsn/svelte-use';
+
+const { start, stop, isPending } = useTimeoutFn(() => console.log('done'), 1000);
+start();        // arms the timeout
+isPending();    // → true
+// after 1000ms → fn fires, isPending() → false`,
+		params: [
+			{
+				name: 'fn',
+				type: '() => void',
+				description: 'Function to invoke when the timeout fires'
+			},
+			{
+				name: 'delay',
+				type: 'number',
+				description: 'Delay in milliseconds'
+			}
+		],
+		returns: [
+			{
+				name: 'start',
+				type: '() => void',
+				description: 'Arms (or re-arms) the timeout'
+			},
+			{
+				name: 'stop',
+				type: '() => void',
+				description: 'Cancels the pending timeout'
+			},
+			{
+				name: 'isPending',
+				type: '() => boolean',
+				description: '<code>true</code> while the timeout has been armed but has not yet fired'
+			}
+		],
+		example: `<script lang="ts">
+  import { useTimeoutFn } from '@ariefsn/svelte-use';
+
+  let status = $state('idle');
+  const { start, stop, isPending } = useTimeoutFn(() => {
+    status = 'done';
+  }, 2000);
+</script>
+
+<p>Status: {status} — Pending: {isPending()}</p>
+<div>
+  <button onclick={() => { status = 'waiting'; start(); }}>Start</button>
+  <button onclick={stop}>Cancel</button>
+</div>`,
+		notes: [
+			'Does not start automatically — call <code>start()</code> to arm.',
+			'Calling <code>start()</code> while already pending cancels the current timer and re-arms from the current time.',
+			'The delay is fixed at initialisation (use <code>useTimeout</code> for a reactive delay).',
+			'The timeout is cleared automatically when the owning reactive scope is destroyed.'
+		]
+	},
+
+	'use-timeout-poll': {
+		slug: 'use-timeout-poll',
+		title: 'useTimeoutPoll',
+		description:
+			'Polling utility that chains <code>setTimeout</code> calls to repeatedly invoke a function, avoiding drift issues inherent in <code>setInterval</code>. The interval represents the delay <em>between</em> the end of one execution and the start of the next.',
+		usage: `import { useTimeoutPoll } from '@ariefsn/svelte-use';
+
+const { start, stop, isActive } = useTimeoutPoll(() => fetchData(), 5000);
+start();    // begin polling every 5 seconds
+stop();     // stop polling`,
+		params: [
+			{
+				name: 'fn',
+				type: '() => void',
+				description: 'Function to invoke on each poll'
+			},
+			{
+				name: 'interval',
+				type: 'number',
+				description: 'Delay in milliseconds between polls (measured from the end of each execution)'
+			}
+		],
+		returns: [
+			{
+				name: 'start',
+				type: '() => void',
+				description: 'Begins polling'
+			},
+			{
+				name: 'stop',
+				type: '() => void',
+				description: 'Stops polling'
+			},
+			{
+				name: 'isActive',
+				type: '() => boolean',
+				description: '<code>true</code> while polling is active'
+			}
+		],
+		example: `<script lang="ts">
+  import { useTimeoutPoll } from '@ariefsn/svelte-use';
+
+  let pollCount = $state(0);
+  let lastPoll = $state('');
+
+  const { start, stop, isActive } = useTimeoutPoll(() => {
+    pollCount++;
+    lastPoll = new Date().toLocaleTimeString();
+  }, 2000);
+</script>
+
+<p>Poll count: {pollCount}</p>
+<p>Last poll: {lastPoll || '—'}</p>
+<div>
+  {#if isActive()}
+    <button onclick={stop}>Stop polling</button>
+  {:else}
+    <button onclick={start}>Start polling</button>
+  {/if}
+</div>`,
+		notes: [
+			'Uses chained <code>setTimeout</code> rather than <code>setInterval</code>, so long-running <code>fn</code> invocations cannot stack.',
+			'Does not start automatically — call <code>start()</code> to begin.',
+			'Cleaned up automatically when the owning reactive scope is destroyed.'
+		]
+	},
+
+	'use-timestamp': {
+		slug: 'use-timestamp',
+		title: 'useTimestamp',
+		description:
+			'Returns a reactive getter that yields the current Unix timestamp in milliseconds, updated at a configurable interval. This is a standalone implementation — it does not delegate to <code>useNow</code>.',
+		usage: `import { useTimestamp } from '@ariefsn/svelte-use';
+
+const timestamp = useTimestamp();
+timestamp() // e.g. 1700000000000 — updates every second
+
+const precise = useTimestamp({ interval: 100 });
+precise() // updates every 100ms`,
+		options: [
+			{
+				name: 'interval',
+				type: 'number',
+				default: '1000',
+				description: 'Update interval in milliseconds'
+			}
+		],
+		returns: [
+			{
+				name: '()',
+				type: '() => number',
+				description: 'Current Unix timestamp in milliseconds, updated at the configured interval'
+			}
+		],
+		example: `<script lang="ts">
+  import { useTimestamp } from '@ariefsn/svelte-use';
+
+  const timestamp = useTimestamp({ interval: 1000 });
+</script>
+
+<p>Unix ms: {timestamp()}</p>
+<p>ISO: {new Date(timestamp()).toISOString()}</p>`,
+		notes: [
+			'SSR-safe — uses only <code>Date.now()</code> and <code>setInterval</code>.',
+			'The interval is cleared automatically when the owning reactive scope is destroyed.',
+			'Similar to <code>useNow</code> — both expose the same API. <code>useNow</code> accepts options via its argument.'
+		]
+	},
+
 	// --------------------------------------------------------------- Browser
 	'use-scroll-lock': {
 		slug: 'use-scroll-lock',

@@ -10,6 +10,33 @@ export interface SidebarGroup {
 
 export const sidebar: SidebarGroup[] = [
 	{
+		title: 'Animation',
+		items: [
+			{ label: 'useAnimate', slug: 'use-animate' },
+			{ label: 'useParallax', slug: 'use-parallax' },
+			{ label: 'useTransition', slug: 'use-transition' }
+		]
+	},
+	{
+		title: 'Async',
+		items: [
+			{ label: 'useFetch', slug: 'use-fetch' },
+			{ label: 'useWebSocket', slug: 'use-web-socket' }
+		]
+	},
+	{
+		title: 'Time',
+		items: [
+			{ label: 'useInterval', slug: 'use-interval' },
+			{ label: 'useIntervalFn', slug: 'use-interval-fn' },
+			{ label: 'useNow', slug: 'use-now' },
+			{ label: 'useTimeout', slug: 'use-timeout' },
+			{ label: 'useTimeoutFn', slug: 'use-timeout-fn' },
+			{ label: 'useTimeoutPoll', slug: 'use-timeout-poll' },
+			{ label: 'useTimestamp', slug: 'use-timestamp' }
+		]
+	},
+	{
 		title: 'State',
 		items: [
 			{ label: 'useSorted', slug: 'use-sorted' },
