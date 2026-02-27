@@ -28,6 +28,13 @@
 	import DemoUseBattery from './demos/use-battery.svelte';
 	import DemoUseSpeechRecognition from './demos/use-speech-recognition.svelte';
 	import DemoUseScrollLock from './demos/use-scroll-lock.svelte';
+	import DemoUseToggle from './demos/use-toggle.svelte';
+	import DemoUseCounter from './demos/use-counter.svelte';
+	import DemoUsePrevious from './demos/use-previous.svelte';
+	import DemoUseDebounce from './demos/use-debounce.svelte';
+	import DemoUseBase64 from './demos/use-base64.svelte';
+	import DemoUseObjectUrl from './demos/use-object-url.svelte';
+	import DemoUseSessionStorage from './demos/use-session-storage.svelte';
 
 	// ── Static slug → component map ──────────────────────────────────────────
 	const demoMap: Record<string, any> = {
@@ -55,7 +62,14 @@
 		'use-clipboard': DemoUseClipboard,
 		'use-battery': DemoUseBattery,
 		'use-speech-recognition': DemoUseSpeechRecognition,
-		'use-scroll-lock': DemoUseScrollLock
+		'use-scroll-lock': DemoUseScrollLock,
+		'use-toggle': DemoUseToggle,
+		'use-counter': DemoUseCounter,
+		'use-previous': DemoUsePrevious,
+		'use-debounce': DemoUseDebounce,
+		'use-base64': DemoUseBase64,
+		'use-object-url': DemoUseObjectUrl,
+		'use-session-storage': DemoUseSessionStorage
 	};
 
 	// ── Page data + nav ───────────────────────────────────────────────────────

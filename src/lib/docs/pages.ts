@@ -1398,6 +1398,334 @@ speech.stop();`,
 		]
 	},
 
+	// ------------------------------------------------------------------ State (continued)
+	'use-toggle': {
+		slug: 'use-toggle',
+		title: 'useToggle',
+		description: 'A reactive boolean toggle. Flips between `true` and `false` with a `toggle()` call, or force a specific value with `set()`.',
+		usage: `import { useToggle } from '@ariefsn/svelte-use';
+
+const toggle = useToggle();        // starts false
+toggle.value  // → false
+toggle.toggle();
+toggle.value  // → true
+toggle.set(false);
+toggle.value  // → false
+
+// Custom initial value
+const on = useToggle(true);`,
+		params: [
+			{
+				name: 'initial',
+				type: 'boolean',
+				default: 'false',
+				description: 'Starting value'
+			}
+		],
+		returns: [
+			{ name: 'value', type: 'boolean', description: 'Reactive boolean state (property accessor, not a function)' },
+			{ name: 'toggle', type: '() => void', description: 'Flip the value between `true` and `false`' },
+			{ name: 'set', type: '(v: boolean) => void', description: 'Set an explicit boolean value' }
+		],
+		example: `<script lang="ts">
+  import { useToggle } from '@ariefsn/svelte-use';
+
+  const dark = useToggle(false);
+</script>
+
+<button onclick={() => dark.toggle()}>
+  {dark.value ? 'Dark mode' : 'Light mode'}
+</button>`,
+		notes: [
+			'`value` is a reactive property accessor (`get value()`), not a getter function. Use `toggle.value` directly in templates.',
+			'SSR-safe — no browser APIs used.'
+		]
+	},
+
+	'use-counter': {
+		slug: 'use-counter',
+		title: 'useCounter',
+		description: 'A reactive integer counter with increment, decrement, and reset operations. Supports custom step deltas.',
+		usage: `import { useCounter } from '@ariefsn/svelte-use';
+
+const counter = useCounter(0);
+counter.value  // → 0
+counter.inc();
+counter.value  // → 1
+counter.inc(5);
+counter.value  // → 6
+counter.dec(3);
+counter.value  // → 3
+counter.reset();
+counter.value  // → 0`,
+		params: [
+			{
+				name: 'initial',
+				type: 'number',
+				default: '0',
+				description: 'Starting value'
+			}
+		],
+		returns: [
+			{ name: 'value', type: 'number', description: 'Reactive numeric state (property accessor, not a function)' },
+			{ name: 'inc', type: '(delta?: number) => void', description: 'Increment by `delta` (default `1`)' },
+			{ name: 'dec', type: '(delta?: number) => void', description: 'Decrement by `delta` (default `1`)' },
+			{ name: 'reset', type: '() => void', description: 'Reset to the initial value' }
+		],
+		example: `<script lang="ts">
+  import { useCounter } from '@ariefsn/svelte-use';
+
+  const count = useCounter(10);
+</script>
+
+<p>Count: {count.value}</p>
+<button onclick={() => count.inc()}>+1</button>
+<button onclick={() => count.dec()}>-1</button>
+<button onclick={() => count.reset()}>Reset</button>`,
+		notes: [
+			'`value` is a reactive property accessor (`get value()`), not a getter function. Use `count.value` directly in templates.',
+			'SSR-safe — no browser APIs used.'
+		]
+	},
+
+	'use-previous': {
+		slug: 'use-previous',
+		title: 'usePrevious',
+		description: 'Tracks the previous value of a reactive getter. Returns `undefined` until the value changes for the first time.',
+		usage: `import { usePrevious } from '@ariefsn/svelte-use';
+
+let count = $state(0);
+const prev = usePrevious(() => count);
+prev()  // → undefined (no change yet)
+
+count = 1;
+prev()  // → 0
+
+count = 2;
+prev()  // → 1`,
+		params: [
+			{
+				name: 'getter',
+				type: '() => T',
+				description: 'Reactive getter function to observe'
+			}
+		],
+		returns: [
+			{
+				name: '()',
+				type: '() => T | undefined',
+				description: 'Getter returning the previous value, or `undefined` before the first change'
+			}
+		],
+		example: `<script lang="ts">
+  import { usePrevious } from '@ariefsn/svelte-use';
+
+  let name = $state('Alice');
+  const prev = usePrevious(() => name);
+</script>
+
+<input bind:value={name} />
+<p>Current: {name}</p>
+<p>Previous: {prev() ?? 'none'}</p>`,
+		notes: [
+			'Uses `$effect` cleanup to capture the value from the previous render cycle.',
+			'Returns `undefined` on the first render (before any change occurs).',
+			'SSR-safe — no browser APIs used.'
+		]
+	},
+
+	// ------------------------------------------------------------------ Reactivity
+	'use-debounce': {
+		slug: 'use-debounce',
+		title: 'useDebounce',
+		description: 'Debounces a reactive getter value, delaying updates until the source stops changing for the specified duration.',
+		usage: `import { useDebounce } from '@ariefsn/svelte-use';
+
+let query = $state('');
+const debounced = useDebounce(() => query, 300);
+
+// debounced() reflects the value of query only after 300ms of no changes`,
+		params: [
+			{
+				name: 'getter',
+				type: '() => T',
+				description: 'Reactive getter function to debounce'
+			},
+			{
+				name: 'delay',
+				type: 'number',
+				default: '300',
+				description: 'Debounce delay in milliseconds'
+			}
+		],
+		returns: [
+			{
+				name: '()',
+				type: '() => T',
+				description: 'Getter returning the debounced value; reflects the initial value immediately then delays subsequent updates'
+			}
+		],
+		example: `<script lang="ts">
+  import { useDebounce } from '@ariefsn/svelte-use';
+
+  let query = $state('');
+  const debouncedQuery = useDebounce(() => query, 300);
+
+  $effect(() => {
+    if (debouncedQuery()) {
+      fetch('/api/search?q=' + debouncedQuery());
+    }
+  });
+</script>
+
+<input bind:value={query} placeholder="Search…" />
+<p>Searching for: {debouncedQuery()}</p>`,
+		notes: [
+			'The initial value is reflected immediately; only subsequent changes are delayed.',
+			'SSR-safe — `$effect` only runs in the browser in SvelteKit.',
+			'The pending timer is cleared automatically when the component is destroyed.'
+		]
+	},
+
+	// --------------------------------------------------------------- Browser – Storage
+	'use-base64': {
+		slug: 'use-base64',
+		title: 'useBase64',
+		description: 'Reactively converts a `string`, `ArrayBuffer`, or `Blob` to its Base64 representation. Returns `undefined` while an async Blob conversion is in-flight or on the server.',
+		usage: `import { useBase64 } from '@ariefsn/svelte-use';
+
+let data = $state<string | undefined>('hello');
+const b64 = useBase64(() => data);
+b64()  // → 'aGVsbG8='
+
+data = undefined;
+b64()  // → undefined
+
+// Also accepts ArrayBuffer or Blob
+let buffer = $state<ArrayBuffer | undefined>(someBuffer);
+const b64buf = useBase64(() => buffer);`,
+		params: [
+			{
+				name: 'input',
+				type: '() => string | ArrayBuffer | Blob | undefined',
+				description: 'Reactive getter returning the value to encode'
+			}
+		],
+		returns: [
+			{
+				name: '()',
+				type: '() => string | undefined',
+				description: 'Getter returning the Base64-encoded string, or `undefined` when the input is `undefined`, during async Blob reads, or on the server'
+			}
+		],
+		example: `<script lang="ts">
+  import { useBase64 } from '@ariefsn/svelte-use';
+
+  let text = $state('svelte');
+  const encoded = useBase64(() => text);
+</script>
+
+<input bind:value={text} />
+<p>Base64: {encoded() ?? '…'}</p>`,
+		notes: [
+			'String values are encoded via `TextEncoder` + `btoa` (UTF-8 safe).',
+			'`Blob` values are read asynchronously via `FileReader`; the getter returns `undefined` until the read completes.',
+			'SSR-safe — returns `undefined` in non-browser environments.'
+		]
+	},
+
+	'use-object-url': {
+		slug: 'use-object-url',
+		title: 'useObjectUrl',
+		description: 'Generates a reactive `blob:` URL for a `Blob`, `File`, or `MediaSource` object. Automatically revokes the previous URL when the source changes, preventing memory leaks.',
+		usage: `import { useObjectUrl } from '@ariefsn/svelte-use';
+
+let file = $state<File | undefined>(undefined);
+const url = useObjectUrl(() => file);
+// url() → undefined
+
+file = new File(['hello'], 'hello.txt');
+// url() → 'blob:...'`,
+		params: [
+			{
+				name: 'object',
+				type: '() => Blob | File | MediaSource | undefined',
+				description: 'Reactive getter returning the object to create a URL for'
+			}
+		],
+		returns: [
+			{
+				name: '()',
+				type: '() => string | undefined',
+				description: 'Getter returning the current object URL, or `undefined` when the source is `undefined` or in SSR'
+			}
+		],
+		example: `<script lang="ts">
+  import { useObjectUrl } from '@ariefsn/svelte-use';
+
+  let file = $state<File | undefined>(undefined);
+  const url = useObjectUrl(() => file);
+</script>
+
+<input type="file" onchange={(e) => { file = e.currentTarget.files?.[0] }} />
+{#if url()}
+  <a href={url()} target="_blank">Open file</a>
+{/if}`,
+		notes: [
+			'The previous object URL is automatically revoked via `URL.revokeObjectURL` when the source changes or the component is destroyed.',
+			'SSR-safe — returns `undefined` in non-browser environments.',
+			'The generated URL is only valid in the browser tab where it was created.'
+		]
+	},
+
+	'use-session-storage': {
+		slug: 'use-session-storage',
+		title: 'useSessionStorage',
+		description: 'Reactive `sessionStorage` utility. Reads the stored value on init, persists changes automatically, and syncs across tabs via the `storage` event.',
+		usage: `import { useSessionStorage } from '@ariefsn/svelte-use';
+
+const token = useSessionStorage('auth-token', '');
+token.value          // persisted string
+token.set('abc123'); // writes to sessionStorage
+token.remove();      // removes key, value → initial
+
+// Custom serializer / deserializer
+const obj = useSessionStorage('my-obj', {}, {
+  serializer: JSON.stringify,
+  deserializer: JSON.parse
+});`,
+		params: [
+			{ name: 'key', type: 'string', description: '`sessionStorage` key' },
+			{ name: 'initial', type: 'T', description: 'Fallback value when the key is absent or during SSR' },
+			{
+				name: 'options',
+				type: 'UseSessionStorageOptions<T>',
+				default: '{}',
+				description: 'Optional `serializer` and `deserializer` functions'
+			}
+		],
+		returns: [
+			{ name: 'value', type: 'T', description: 'Reactive stored value (property accessor, not a function)' },
+			{ name: 'set', type: '(v: T) => void', description: 'Update the value and persist to sessionStorage' },
+			{ name: 'remove', type: '() => void', description: 'Remove the key from sessionStorage and reset to `initial`' }
+		],
+		example: `<script lang="ts">
+  import { useSessionStorage } from '@ariefsn/svelte-use';
+
+  const name = useSessionStorage('username', '');
+</script>
+
+<input bind:value={name.value} placeholder="Enter your name" />
+<p>Stored: {name.value || 'nothing yet'}</p>
+<button onclick={() => name.remove()}>Clear</button>`,
+		notes: [
+			'`value` is a reactive property accessor (`get value()`), not a getter function. Use `store.value` directly in templates.',
+			'SSR-safe — storage reads and writes are skipped on the server; `initial` is used instead.',
+			'Listens to the `storage` event to sync changes made in other tabs on the same origin.',
+			'Uses `JSON.stringify` / `JSON.parse` by default; supply custom `serializer`/`deserializer` for non-JSON values.'
+		]
+	},
+
 	// --------------------------------------------------------------- Browser
 	'use-scroll-lock': {
 		slug: 'use-scroll-lock',
