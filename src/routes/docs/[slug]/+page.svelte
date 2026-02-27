@@ -2,10 +2,65 @@
 	import type { PageData } from './$types.js';
 	import { sidebar } from '$lib/docs/sidebar.js';
 
+	// ── Demo components ──────────────────────────────────────────────────────
+	import DemoUseSorted from './demos/use-sorted.svelte';
+	import DemoUseCycleList from './demos/use-cycle-list.svelte';
+	import DemoUseCountdown from './demos/use-countdown.svelte';
+	import DemoUseTimeAgo from './demos/use-time-ago.svelte';
+	import DemoUseMagicKeys from './demos/use-magic-keys.svelte';
+	import DemoUseKeyModifier from './demos/use-key-modifier.svelte';
+	import DemoUseScroll from './demos/use-scroll.svelte';
+	import DemoUseMouse from './demos/use-mouse.svelte';
+	import DemoUseMousePressed from './demos/use-mouse-pressed.svelte';
+	import DemoUseDraggable from './demos/use-draggable.svelte';
+	import DemoUseElementSize from './demos/use-element-size.svelte';
+	import DemoUseIntersectionObserver from './demos/use-intersection-observer.svelte';
+	import DemoUseResizeObserver from './demos/use-resize-observer.svelte';
+	import DemoUseMutationObserver from './demos/use-mutation-observer.svelte';
+	import DemoUseIdle from './demos/use-idle.svelte';
+	import DemoUseNetwork from './demos/use-network.svelte';
+	import DemoUseGeolocation from './demos/use-geolocation.svelte';
+	import DemoUseFps from './demos/use-fps.svelte';
+	import DemoUseThrottleFn from './demos/use-throttle-fn.svelte';
+	import DemoUseDebounceFn from './demos/use-debounce-fn.svelte';
+	import DemoUseVirtualList from './demos/use-virtual-list.svelte';
+	import DemoUseClipboard from './demos/use-clipboard.svelte';
+	import DemoUseBattery from './demos/use-battery.svelte';
+	import DemoUseSpeechRecognition from './demos/use-speech-recognition.svelte';
+
+	// ── Static slug → component map ──────────────────────────────────────────
+	const demoMap: Record<string, any> = {
+		'use-sorted': DemoUseSorted,
+		'use-cycle-list': DemoUseCycleList,
+		'use-countdown': DemoUseCountdown,
+		'use-time-ago': DemoUseTimeAgo,
+		'use-magic-keys': DemoUseMagicKeys,
+		'use-key-modifier': DemoUseKeyModifier,
+		'use-scroll': DemoUseScroll,
+		'use-mouse': DemoUseMouse,
+		'use-mouse-pressed': DemoUseMousePressed,
+		'use-draggable': DemoUseDraggable,
+		'use-element-size': DemoUseElementSize,
+		'use-intersection-observer': DemoUseIntersectionObserver,
+		'use-resize-observer': DemoUseResizeObserver,
+		'use-mutation-observer': DemoUseMutationObserver,
+		'use-idle': DemoUseIdle,
+		'use-network': DemoUseNetwork,
+		'use-geolocation': DemoUseGeolocation,
+		'use-fps': DemoUseFps,
+		'use-throttle-fn': DemoUseThrottleFn,
+		'use-debounce-fn': DemoUseDebounceFn,
+		'use-virtual-list': DemoUseVirtualList,
+		'use-clipboard': DemoUseClipboard,
+		'use-battery': DemoUseBattery,
+		'use-speech-recognition': DemoUseSpeechRecognition
+	};
+
+	// ── Page data + nav ───────────────────────────────────────────────────────
 	let { data }: { data: PageData } = $props();
 	const page = $derived(data.page);
+	const Demo = $derived(demoMap[page.slug] ?? null);
 
-	// Find prev/next for navigation
 	const flat = sidebar.flatMap((g) => g.items);
 	const currentIndex = $derived(flat.findIndex((i) => i.slug === page.slug));
 	const prev = $derived(currentIndex > 0 ? flat[currentIndex - 1] : null);
@@ -23,6 +78,16 @@
 		<h1 class="doc-title">{page.title}</h1>
 		<p class="doc-desc">{page.description}</p>
 	</header>
+
+	<!-- ─── Live Demo ─── -->
+	{#if Demo}
+		<section class="doc-section">
+			<h2>Live Demo</h2>
+			<div class="demo-panel">
+				<Demo />
+			</div>
+		</section>
+	{/if}
 
 	<!-- ─── Usage ─── -->
 	<section class="doc-section">
@@ -214,6 +279,107 @@
 		padding-bottom: 0.4rem;
 		border-bottom: 1px solid #1e1e1e;
 		letter-spacing: -0.01em;
+	}
+
+	/* ─── Live Demo Panel ─── */
+	.demo-panel {
+		background: #141414;
+		border: 1px solid #2a2a2a;
+		border-radius: 10px;
+		padding: 1.25rem;
+		/* shared demo sub-styles (passed down to demo components) */
+	}
+
+	/* Styles shared by all demo components via global cascade */
+	:global(.demo-wrap) {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+	}
+
+	:global(.demo-wrap .hint) {
+		font-size: 0.82rem;
+		color: #555;
+		margin: 0;
+		font-style: italic;
+	}
+
+	:global(.demo-wrap .row) {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		font-size: 0.875rem;
+	}
+
+	:global(.demo-wrap .label) {
+		font-family: monospace;
+		font-size: 0.78rem;
+		color: #555;
+		min-width: 72px;
+		flex-shrink: 0;
+	}
+
+	:global(.demo-wrap .value) {
+		font-family: monospace;
+		color: #999;
+	}
+
+	:global(.demo-wrap .value.accent) {
+		color: #a78bfa;
+	}
+
+	:global(.demo-wrap .muted) {
+		color: #444;
+		font-size: 0.8rem;
+	}
+
+	:global(.demo-wrap .divider) {
+		height: 1px;
+		background: #222;
+		margin: 0.25rem 0;
+	}
+
+	:global(.demo-wrap .actions) {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+
+	:global(.demo-wrap button) {
+		background: #2a2a2a;
+		color: #e8e8e8;
+		border: 1px solid #3a3a3a;
+		border-radius: 6px;
+		padding: 0.3rem 0.7rem;
+		font-size: 0.83rem;
+		cursor: pointer;
+		transition: background 0.15s;
+	}
+
+	:global(.demo-wrap button:hover) {
+		background: #3a3a3a;
+	}
+
+	:global(.demo-wrap button.active) {
+		background: #1a1630;
+		border-color: #a78bfa;
+		color: #a78bfa;
+	}
+
+	:global(.demo-wrap input[type='text']) {
+		width: 100%;
+		background: #1e1e1e;
+		border: 1px solid #2e2e2e;
+		border-radius: 6px;
+		padding: 0.35rem 0.65rem;
+		color: #e8e8e8;
+		font-size: 0.85rem;
+		outline: none;
+		box-sizing: border-box;
+	}
+
+	:global(.demo-wrap input[type='text']:focus) {
+		border-color: #a78bfa;
 	}
 
 	/* ─── Code ─── */
