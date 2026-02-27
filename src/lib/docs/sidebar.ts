@@ -50,6 +50,26 @@ export const sidebar: SidebarGroup[] = [
 			{ label: 'useNetwork', slug: 'use-network' },
 			{ label: 'useGeolocation', slug: 'use-geolocation' }
 		]
+	},
+	{
+		title: 'Performance',
+		items: [
+			{ label: 'useFps', slug: 'use-fps' },
+			{ label: 'useThrottleFn', slug: 'use-throttle-fn' },
+			{ label: 'useDebounceFn', slug: 'use-debounce-fn' }
+		]
+	},
+	{
+		title: 'Virtualization',
+		items: [{ label: 'useVirtualList', slug: 'use-virtual-list' }]
+	},
+	{
+		title: 'Web APIs',
+		items: [
+			{ label: 'useClipboard', slug: 'use-clipboard' },
+			{ label: 'useBattery', slug: 'use-battery' },
+			{ label: 'useSpeechRecognition', slug: 'use-speech-recognition' }
+		]
 	}
 ];
 

@@ -76,8 +76,7 @@ const desc = useSorted(() => items, (a, b) => b - a);
 	'use-cycle-list': {
 		slug: 'use-cycle-list',
 		title: 'useCycleList',
-		description:
-			'Cycles through a list of items reactively. Wraps around at both ends.',
+		description: 'Cycles through a list of items reactively. Wraps around at both ends.',
 		usage: `import { useCycleList } from '@ariefsn/svelte-use';
 
 const cycle = useCycleList(['apple', 'banana', 'cherry']);
@@ -444,8 +443,7 @@ scroll.scrollTo({ top: 0 }); // imperative scroll`,
 	'use-mouse': {
 		slug: 'use-mouse',
 		title: 'useMouse',
-		description:
-			'Tracks the current pointer position (mouse or touch) relative to the viewport.',
+		description: 'Tracks the current pointer position (mouse or touch) relative to the viewport.',
 		usage: `import { useMouse } from '@ariefsn/svelte-use';
 
 const mouse = useMouse();
@@ -575,7 +573,7 @@ drag.style()     // → "transform: translate(100px, 0px);"`,
 			},
 			{
 				name: 'pointerTypes',
-				type: "DraggablePointerType[]",
+				type: 'DraggablePointerType[]',
 				default: 'all types',
 				description: "Limit to 'mouse', 'touch', 'pen'"
 			},
@@ -799,9 +797,7 @@ stop(); // disconnect manually`,
 				description: 'Called on every resize event'
 			}
 		],
-		returns: [
-			{ name: 'stop', type: '() => void', description: 'Disconnect the observer' }
-		],
+		returns: [{ name: 'stop', type: '() => void', description: 'Disconnect the observer' }],
 		example: `<script lang="ts">
   import { useResizeObserver } from '@ariefsn/svelte-use';
 
@@ -862,9 +858,7 @@ stop(); // disconnect manually`,
 					'Standard `MutationObserverInit`: `childList`, `attributes`, `subtree`, `characterData`, etc.'
 			}
 		],
-		returns: [
-			{ name: 'stop', type: '() => void', description: 'Disconnect the observer' }
-		],
+		returns: [{ name: 'stop', type: '() => void', description: 'Disconnect the observer' }],
 		example: `<script lang="ts">
   import { useMutationObserver } from '@ariefsn/svelte-use';
 
@@ -894,32 +888,34 @@ stop(); // disconnect manually`,
 		slug: 'use-idle',
 		title: 'useIdle',
 		description:
-			'Detects when the user has been idle (no mouse, keyboard, touch, or scroll activity) for longer than the specified timeout.',
+			'Detects when the user has been idle (no mouse, keyboard, or touch activity) for longer than the specified timeout.',
 		usage: `import { useIdle } from '@ariefsn/svelte-use';
 
-const { isIdle, reset } = useIdle(5000); // idle after 5s
-
+const isIdle = useIdle(5000); // idle after 5s
 isIdle() // → true when no activity for 5s
-reset()  // restart the idle timer`,
+
+// Default timeout: 60 seconds
+const idle = useIdle();
+idle() // → boolean`,
 		params: [
 			{
 				name: 'timeout',
 				type: 'number',
-				description: 'Milliseconds of inactivity before `isIdle` becomes `true`'
+				default: '60000',
+				description: 'Milliseconds of inactivity before the return value becomes `true`'
 			}
 		],
 		returns: [
 			{
-				name: 'isIdle',
+				name: '()',
 				type: '() => boolean',
 				description: '`true` when the user has been inactive for longer than `timeout`'
-			},
-			{ name: 'reset', type: '() => void', description: 'Restart the idle timer' }
+			}
 		],
 		example: `<script lang="ts">
   import { useIdle } from '@ariefsn/svelte-use';
 
-  const { isIdle } = useIdle(3000); // 3s
+  const isIdle = useIdle(3000); // idle after 3s
 </script>
 
 {#if isIdle()}
@@ -928,7 +924,7 @@ reset()  // restart the idle timer`,
   <p>User is active</p>
 {/if}`,
 		notes: [
-			'Tracks: `mousemove`, `mousedown`, `keydown`, `touchstart`, `wheel`, `pointermove`, `scroll`, `resize`, `visibilitychange`.',
+			'Tracks: `mousemove`, `mousedown`, `keydown`, `touchstart`.',
 			'SSR-safe — listeners are added only in the browser.',
 			'Cleanup is handled automatically when the component is destroyed.'
 		]
@@ -938,35 +934,17 @@ reset()  // restart the idle timer`,
 		slug: 'use-network',
 		title: 'useNetwork',
 		description:
-			'Reactively exposes Network Information API data: effective connection type, estimated downlink speed, round-trip time, and data-saver mode.',
+			'Reactively tracks online/offline state using the browser `online` and `offline` events.',
 		usage: `import { useNetwork } from '@ariefsn/svelte-use';
 
 const net = useNetwork();
-
-net.effectiveType() // → '4g' | '3g' | '2g' | 'slow-2g' | undefined
-net.downlink()      // → Mbps estimate | undefined
-net.rtt()           // → ms | undefined
-net.saveData()      // → true if data-saver is on | undefined`,
+net.online() // → true when navigator.onLine is true`,
 		returns: [
 			{
-				name: 'effectiveType',
-				type: "() => string | undefined",
-				description: "Effective connection type: `'4g'`, `'3g'`, `'2g'`, `'slow-2g'`"
-			},
-			{
-				name: 'downlink',
-				type: '() => number | undefined',
-				description: 'Estimated downlink speed in Mbps'
-			},
-			{
-				name: 'rtt',
-				type: '() => number | undefined',
-				description: 'Estimated round-trip time in ms'
-			},
-			{
-				name: 'saveData',
-				type: '() => boolean | undefined',
-				description: '`true` if the user has data-saver mode enabled'
+				name: 'online',
+				type: '() => boolean',
+				description:
+					'`true` when the browser reports an active network connection. Defaults to `true` on the server.'
 			}
 		],
 		example: `<script lang="ts">
@@ -975,15 +953,15 @@ net.saveData()      // → true if data-saver is on | undefined`,
   const net = useNetwork();
 </script>
 
-<p>Connection: {net.effectiveType() ?? 'unknown'}</p>
-<p>Downlink: {net.downlink() ?? '?'} Mbps</p>
-{#if net.saveData()}
-  <p>Data saver active — serving reduced assets</p>
+{#if net.online()}
+  <p>Online</p>
+{:else}
+  <p>Offline — check your connection</p>
 {/if}`,
 		notes: [
-			'The Network Information API is not available in Firefox or Safari; all values will be `undefined`.',
-			'SSR-safe — all values return `undefined` on the server.',
-			'Updates reactively when the connection changes.'
+			'Listens to `window` `online` and `offline` events.',
+			'SSR-safe — defaults to `true` on the server (matches `navigator.onLine` behavior).',
+			'Cleanup is handled automatically when the component is destroyed.'
 		]
 	},
 
@@ -999,11 +977,9 @@ const geo = useGeolocation({
   timeout: 10_000
 });
 
-geo.isSupported()         // → true if Geolocation API available
-geo.coords()              // → GeolocationCoordinates | null
-geo.coords()?.latitude    // → number
-geo.coords()?.longitude   // → number
-geo.error()               // → GeolocationPositionError | null`,
+geo.coords()           // → GeolocationCoordinates | null
+geo.coords()?.latitude  // → number
+geo.error()            // → GeolocationPositionError | null`,
 		options: [
 			{
 				name: 'enableHighAccuracy',
@@ -1033,12 +1009,8 @@ geo.error()               // → GeolocationPositionError | null`,
 			{
 				name: 'error',
 				type: '() => GeolocationPositionError | null',
-				description: 'Last error, or `null`'
-			},
-			{
-				name: 'isSupported',
-				type: '() => boolean',
-				description: '`true` if the Geolocation API is available'
+				description:
+					'Last geolocation error, or `null`. Cleared automatically on the next successful fix.'
 			}
 		],
 		example: `<script lang="ts">
@@ -1047,9 +1019,7 @@ geo.error()               // → GeolocationPositionError | null`,
   const geo = useGeolocation();
 </script>
 
-{#if !geo.isSupported()}
-  <p>Geolocation not supported</p>
-{:else if geo.error()}
+{#if geo.error()}
   <p>Error: {geo.error()?.message}</p>
 {:else if geo.coords()}
   <p>Lat: {geo.coords()?.latitude}</p>
@@ -1059,8 +1029,372 @@ geo.error()               // → GeolocationPositionError | null`,
 {/if}`,
 		notes: [
 			'Requires explicit user permission. The browser will show a permission prompt.',
-			'SSR-safe — `isSupported()` returns `false` on the server; all other values are `null`.',
+			'SSR-safe — guards against missing `navigator.geolocation`; all values are `null` on the server.',
 			'The position watcher is automatically cleared when the component is destroyed.'
+		]
+	},
+
+	// ──────────────────────────────────────────── Performance
+	'use-fps': {
+		slug: 'use-fps',
+		title: 'useFps',
+		description:
+			'Tracks the current frames-per-second rate of the browser rendering loop using `requestAnimationFrame`.',
+		usage: `import { useFps } from '@ariefsn/svelte-use';
+
+const fps = useFps();
+fps() // → current FPS as a rounded integer`,
+		returns: [
+			{
+				name: '()',
+				type: '() => number',
+				description:
+					'Current FPS as a rounded integer. Returns `0` when `requestAnimationFrame` is unavailable (SSR).'
+			}
+		],
+		example: `<script lang="ts">
+  import { useFps } from '@ariefsn/svelte-use';
+
+  const fps = useFps();
+</script>
+
+<p>{fps()} fps</p>`,
+		notes: [
+			'Uses a `requestAnimationFrame` loop internally; the loop is cancelled automatically on component destroy.',
+			'SSR-safe — returns `0` when `requestAnimationFrame` is not available.',
+			'Rounds to the nearest integer via `Math.round(1000 / delta)`.'
+		]
+	},
+
+	'use-throttle-fn': {
+		slug: 'use-throttle-fn',
+		title: 'useThrottleFn',
+		description:
+			'Returns a throttled version of a function that fires at most once per `delay` milliseconds. Uses leading-edge invocation with a trailing call for the remainder of the window.',
+		usage: `import { useThrottleFn } from '@ariefsn/svelte-use';
+
+const throttled = useThrottleFn((value: string) => {
+  console.log('search:', value);
+}, 300);
+
+throttled('hello'); // fires immediately
+throttled('world'); // queued — fires after 300ms`,
+		params: [
+			{
+				name: 'fn',
+				type: 'T extends (...args) => ReturnType<T>',
+				description: 'The function to throttle'
+			},
+			{
+				name: 'delay',
+				type: 'number',
+				description: 'Minimum milliseconds between invocations'
+			}
+		],
+		returns: [
+			{
+				name: '()',
+				type: 'T',
+				description: 'A throttled wrapper with the same signature as `fn`'
+			}
+		],
+		example: `<script lang="ts">
+  import { useThrottleFn } from '@ariefsn/svelte-use';
+
+  let pos = $state({ x: 0, y: 0 });
+
+  const onMove = useThrottleFn((e: MouseEvent) => {
+    pos = { x: e.clientX, y: e.clientY };
+  }, 50);
+</script>
+
+<svelte:window onmousemove={onMove} />
+<p>X: {pos.x} Y: {pos.y}</p>`,
+		notes: [
+			'Leading-edge: the first call fires immediately, subsequent calls within `delay` are delayed.',
+			'The trailing call always uses the most recent arguments.',
+			'The pending timer is cleared automatically when the component is destroyed.'
+		]
+	},
+
+	'use-debounce-fn': {
+		slug: 'use-debounce-fn',
+		title: 'useDebounceFn',
+		description:
+			'Returns a debounced version of a function that only executes after `delay` milliseconds of inactivity. Each new call resets the timer.',
+		usage: `import { useDebounceFn } from '@ariefsn/svelte-use';
+
+const search = useDebounceFn((query: string) => {
+  fetch('/api/search?q=' + query);
+}, 400);
+
+// Only fires 400ms after the last call
+search('s');
+search('sv');
+search('svelte'); // ← this one fires`,
+		params: [
+			{
+				name: 'fn',
+				type: 'T extends (...args) => ReturnType<T>',
+				description: 'The function to debounce'
+			},
+			{
+				name: 'delay',
+				type: 'number',
+				description: 'Milliseconds to wait after the last call'
+			}
+		],
+		returns: [
+			{
+				name: '()',
+				type: 'T',
+				description: 'A debounced wrapper with the same signature as `fn`'
+			}
+		],
+		example: `<script lang="ts">
+  import { useDebounceFn } from '@ariefsn/svelte-use';
+
+  let results = $state<string[]>([]);
+
+  const search = useDebounceFn(async (q: string) => {
+    results = await fetch('/api?q=' + q).then(r => r.json());
+  }, 400);
+</script>
+
+<input oninput={(e) => search(e.currentTarget.value)} placeholder="Search…" />`,
+		notes: [
+			'Pure trailing debounce — no leading-edge execution.',
+			'The return value is always `undefined` since execution is deferred.',
+			'The pending timer is cleared automatically when the component is destroyed.'
+		]
+	},
+
+	// ──────────────────────────────────────────── Virtualization
+	'use-virtual-list': {
+		slug: 'use-virtual-list',
+		title: 'useVirtualList',
+		description:
+			'Renders only the items currently visible in a scrollable container. Handles lists of any size with a fixed row height, dramatically reducing DOM nodes.',
+		usage: `import { useVirtualList } from '@ariefsn/svelte-use';
+
+const items = Array.from({ length: 10_000 }, (_, i) => ({ id: i, name: 'Item ' + i }));
+
+const { list, containerProps, wrapperProps } = useVirtualList(
+  () => items,
+  { itemHeight: 40, overscan: 5 }
+);
+
+// list()             → VirtualItem<T>[] — only visible items
+// list()[0].data     → the source item
+// list()[0].style    → "position: absolute; top: Npx; height: 40px;"
+// list()[0].index    → original index in source array`,
+		params: [
+			{
+				name: 'list',
+				type: '() => T[]',
+				description: 'Reactive getter returning the full source array'
+			}
+		],
+		options: [
+			{
+				name: 'itemHeight',
+				type: 'number',
+				description: 'Fixed height in px for every row (required)'
+			},
+			{
+				name: 'overscan',
+				type: 'number',
+				default: '3',
+				description: 'Number of extra items to render above and below the visible window'
+			}
+		],
+		returns: [
+			{
+				name: 'list',
+				type: '() => VirtualItem<T>[]',
+				description: 'Getter returning only the currently visible items with positioning styles'
+			},
+			{
+				name: 'containerProps.style',
+				type: 'string',
+				description: 'Apply to the scroll container: `"overflow-y: auto; position: relative;"`'
+			},
+			{
+				name: 'containerProps.onscroll',
+				type: '(event: Event) => void',
+				description: "Scroll handler — bind to the container's `onscroll`"
+			},
+			{
+				name: 'wrapperProps.style',
+				type: 'string (reactive getter)',
+				description:
+					'Apply to the inner wrapper: sets `height` to `totalItems × itemHeight` to maintain scrollbar size'
+			}
+		],
+		example: `<script lang="ts">
+  import { useVirtualList } from '@ariefsn/svelte-use';
+
+  const data = Array.from({ length: 5000 }, (_, i) => 'Row ' + i);
+
+  const { list, containerProps, wrapperProps } = useVirtualList(
+    () => data,
+    { itemHeight: 32 }
+  );
+</script>
+
+<div style="{containerProps.style} height: 400px;" onscroll={containerProps.onscroll}>
+  <div style={wrapperProps.style}>
+    {#each list() as item (item.index)}
+      <div style={item.style}>
+        {item.data}
+      </div>
+    {/each}
+  </div>
+</div>`,
+		notes: [
+			'`itemHeight` must be fixed and consistent — variable heights are not supported.',
+			'SSR-safe — renders a first-page estimate when the container height is unknown.',
+			'No DOM listeners are added internally; scroll state is managed via the `onscroll` prop.'
+		]
+	},
+
+	// ──────────────────────────────────────────── Web APIs
+	'use-clipboard': {
+		slug: 'use-clipboard',
+		title: 'useClipboard',
+		description:
+			'Provides a reactive interface for reading and writing to the system clipboard, with a temporary `copied` flag and a `document.execCommand` fallback.',
+		usage: `import { useClipboard } from '@ariefsn/svelte-use';
+
+const clipboard = useClipboard();
+
+await clipboard.copy('Hello, world!');
+clipboard.text()   // → 'Hello, world!'
+clipboard.copied() // → true (for 1500ms, then resets to false)`,
+		returns: [
+			{
+				name: 'text',
+				type: '() => string',
+				description: 'The last successfully copied text value'
+			},
+			{
+				name: 'copied',
+				type: '() => boolean',
+				description: '`true` for 1500 ms after a successful `copy()` call'
+			},
+			{
+				name: 'copy',
+				type: '(value: string) => Promise<void>',
+				description: 'Write a string to the clipboard'
+			}
+		],
+		example: `<script lang="ts">
+  import { useClipboard } from '@ariefsn/svelte-use';
+
+  const clipboard = useClipboard();
+</script>
+
+<button onclick={() => clipboard.copy('npm install @ariefsn/svelte-use')}>
+  {clipboard.copied() ? 'Copied!' : 'Copy install command'}
+</button>`,
+		notes: [
+			'Uses `navigator.clipboard.writeText` with a `document.execCommand("copy")` textarea fallback for older browsers.',
+			'The `copied` flag resets to `false` automatically after 1500 ms.',
+			'SSR-safe — `copy()` is a no-op on the server.',
+			'Cleanup clears the reset timer when the component is destroyed.'
+		]
+	},
+
+	'use-battery': {
+		slug: 'use-battery',
+		title: 'useBattery',
+		description:
+			'Reactively tracks battery charging state and charge level via the Battery Status API.',
+		usage: `import { useBattery } from '@ariefsn/svelte-use';
+
+const battery = useBattery();
+battery.charging() // → true when plugged in
+battery.level()    // → 0.0–1.0 charge level`,
+		returns: [
+			{
+				name: 'charging',
+				type: '() => boolean',
+				description: '`true` when the battery is currently charging. Defaults to `false`.'
+			},
+			{
+				name: 'level',
+				type: '() => number',
+				description: 'Battery charge level from `0.0` (empty) to `1.0` (full). Defaults to `1`.'
+			}
+		],
+		example: `<script lang="ts">
+  import { useBattery } from '@ariefsn/svelte-use';
+
+  const battery = useBattery();
+</script>
+
+<p>
+  {Math.round(battery.level() * 100)}% —
+  {battery.charging() ? 'Charging' : 'On battery'}
+</p>`,
+		notes: [
+			'The Battery Status API is available in Chrome/Edge. Returns default values (`charging: false`, `level: 1`) when unsupported.',
+			'SSR-safe — guards against missing `navigator.getBattery`.',
+			'Event listeners are removed automatically when the component is destroyed.'
+		]
+	},
+
+	'use-speech-recognition': {
+		slug: 'use-speech-recognition',
+		title: 'useSpeechRecognition',
+		description:
+			'Reactive speech-to-text using the Web Speech API. Returns a live transcript that updates as the user speaks.',
+		usage: `import { useSpeechRecognition } from '@ariefsn/svelte-use';
+
+const speech = useSpeechRecognition();
+
+speech.start();
+speech.isListening() // → true
+speech.result()      // → live transcript string
+speech.stop();`,
+		returns: [
+			{
+				name: 'result',
+				type: '() => string',
+				description: 'The latest transcript. Empty string when unsupported or not started.'
+			},
+			{
+				name: 'isListening',
+				type: '() => boolean',
+				description: '`true` while recognition is active'
+			},
+			{
+				name: 'start',
+				type: '() => void',
+				description: 'Start listening. No-op when the API is unsupported.'
+			},
+			{
+				name: 'stop',
+				type: '() => void',
+				description: 'Stop listening. No-op when the API is unsupported.'
+			}
+		],
+		example: `<script lang="ts">
+  import { useSpeechRecognition } from '@ariefsn/svelte-use';
+
+  const speech = useSpeechRecognition();
+</script>
+
+<button onclick={() => speech.isListening() ? speech.stop() : speech.start()}>
+  {speech.isListening() ? 'Stop' : 'Start'}
+</button>
+
+<p>{speech.result() || 'Say something…'}</p>`,
+		notes: [
+			'Uses `window.SpeechRecognition` with `window.webkitSpeechRecognition` as a vendor-prefix fallback.',
+			'`continuous` and `interimResults` are both set to `true` — the transcript streams partial results.',
+			'SSR-safe — `start()` and `stop()` are no-ops when the API is unavailable.',
+			'Recognition is stopped automatically when the component is destroyed.'
 		]
 	}
 };
