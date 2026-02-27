@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { sidebar } from '$lib/docs/sidebar.js';
 	import {
 		useCounter,
 		useDebounce,
@@ -60,92 +61,201 @@
 	async function runQuery() {
 		queryResults = await db.query((n) => !n.done);
 	}
+
+	const features = [
+		{ icon: '⚡', label: 'Svelte 5 Runes', desc: 'Built for $state, $derived, $effect — no stores' },
+		{ icon: '🌲', label: 'Tree-shakable', desc: 'Import only what you use' },
+		{ icon: '🔒', label: 'Fully typed', desc: 'First-class TypeScript, no any' },
+		{ icon: '🌐', label: 'SSR safe', desc: 'All browser APIs are guarded' },
+		{ icon: '📦', label: 'Zero deps', desc: 'No runtime dependencies' },
+		{ icon: '🧹', label: 'Auto cleanup', desc: 'Listeners removed on component destroy' }
+	];
 </script>
 
-<main>
-	<header>
-		<h1>Svelte Use</h1>
-		<p>
-			Svelte 5 runes-first utility library. No stores, no external deps, SSR-safe, tree-shakable.
+<div class="page">
+	<!-- ─── Hero ─── -->
+	<header class="hero">
+		<div class="hero-badge">@ariefsn/svelte-use</div>
+		<h1>svelte-use</h1>
+		<p class="hero-desc">
+			A collection of Svelte 5 runes-first utility composables.<br />
+			No stores. No external dependencies. SSR-safe. Fully typed.
 		</p>
+
+		<div class="hero-actions">
+			<a href="/docs/use-sorted" class="btn btn-primary">Browse Docs</a>
+			<a
+				href="https://github.com/ariefsn/svelte-use"
+				class="btn btn-ghost"
+				target="_blank"
+				rel="noopener">GitHub</a
+			>
+		</div>
 	</header>
 
-	<div class="grid">
-		<!-- useToggle -->
-		<section class="card">
-			<h2>useToggle</h2>
-			<p class="description">Reactive boolean toggle.</p>
+	<!-- ─── Install ─── -->
+	<section class="section">
+		<h2 class="section-title">Installation</h2>
+		<pre class="code-block"><code>{`npm install @ariefsn/svelte-use
+# or
+pnpm add @ariefsn/svelte-use
+# or
+bun add @ariefsn/svelte-use`}</code></pre>
+		<p class="note">Requires <strong>Svelte 5</strong> as a peer dependency.</p>
+	</section>
 
-			<div class="demo">
-				<span class="badge" class:on={toggle.value}>{toggle.value ? 'ON' : 'OFF'}</span>
-				<div class="actions">
-					<button onclick={() => toggle.toggle()}>Toggle</button>
-					<button onclick={() => toggle.set(true)}>Set true</button>
-					<button onclick={() => toggle.set(false)}>Set false</button>
+	<!-- ─── Quick Start ─── -->
+	<section class="section">
+		<h2 class="section-title">Quick Start</h2>
+		<p class="section-desc">
+			All composables follow the runes-first pattern. State is exposed as <strong
+				>getter functions</strong
+			>
+			backed by <code>$state</code> — call them in templates or <code>$derived</code> to read reactively.
+		</p>
+		<pre class="code-block"><code>{`import { useMouse, useScroll, useCountdown } from '@ariefsn/svelte-use';
+
+// Tracks pointer position
+const mouse = useMouse();
+mouse.x()   // → number (reactive)
+mouse.y()   // → number (reactive)
+
+// Tracks scroll state of window or any element
+const scroll = useScroll();
+scroll.y()                   // → number
+scroll.arrivedState.bottom() // → boolean
+
+// Countdown timer
+const timer = useCountdown(60);
+timer.start();
+timer.count()    // → 60, 59, 58 …`}</code></pre>
+	</section>
+
+	<!-- ─── Features ─── -->
+	<section class="section">
+		<h2 class="section-title">Features</h2>
+		<div class="features-grid">
+			{#each features as f}
+				<div class="feature-card">
+					<span class="feature-icon">{f.icon}</span>
+					<strong>{f.label}</strong>
+					<span class="feature-desc">{f.desc}</span>
 				</div>
-			</div>
+			{/each}
+		</div>
+	</section>
 
-			<pre><code
-					>{`import { useToggle } from '@ariefsn/svelte-use';
+	<!-- ─── Category Overview ─── -->
+	<section class="section">
+		<h2 class="section-title">Utilities</h2>
+		<div class="cat-grid">
+			{#each sidebar as group}
+				<div class="cat-card">
+					<h3 class="cat-title">{group.title}</h3>
+					<ul class="cat-list">
+						{#each group.items as item}
+							<li>
+								<a href="/docs/{item.slug}" class="cat-link">{item.label}</a>
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/each}
+		</div>
+	</section>
+
+	<!-- ─── Runes Pattern ─── -->
+	<section class="section">
+		<h2 class="section-title">Runes-first Pattern</h2>
+		<p class="section-desc">
+			Every composable exposes state as <strong>getter functions</strong> rather than raw reactive
+			variables or Svelte stores. This means you always have a stable reference — safe to pass as
+			props, store in objects, and use in <code>$derived</code>.
+		</p>
+		<pre class="code-block"><code>{`// ✅ Getter function — stable reference, works everywhere
+const mouse = useMouse();
+const dist = $derived(Math.sqrt(mouse.x() ** 2 + mouse.y() ** 2));
+
+// The getter itself is not reactive — calling it inside $derived
+// or a Svelte template establishes the reactive dependency automatically.`}</code></pre>
+	</section>
+
+	<!-- ─── Interactive Demos ─── -->
+	<section class="section demos-section">
+		<h2 class="section-title">Interactive Demos</h2>
+		<p class="section-desc">Existing utilities — try them live.</p>
+
+		<div class="grid">
+			<!-- useToggle -->
+			<section class="card">
+				<h2>useToggle</h2>
+				<p class="description">Reactive boolean toggle.</p>
+
+				<div class="demo">
+					<span class="badge" class:on={toggle.value}>{toggle.value ? 'ON' : 'OFF'}</span>
+					<div class="actions">
+						<button onclick={() => toggle.toggle()}>Toggle</button>
+						<button onclick={() => toggle.set(true)}>Set true</button>
+						<button onclick={() => toggle.set(false)}>Set false</button>
+					</div>
+				</div>
+
+				<pre><code>{`import { useToggle } from '@ariefsn/svelte-use';
 
 const { value, toggle, set } = useToggle();
 toggle();     // value → true
-set(false);   // value → false`}</code
-				></pre>
-		</section>
+set(false);   // value → false`}</code></pre>
+			</section>
 
-		<!-- useCounter -->
-		<section class="card">
-			<h2>useCounter</h2>
-			<p class="description">Reactive counter with increment, decrement and reset.</p>
+			<!-- useCounter -->
+			<section class="card">
+				<h2>useCounter</h2>
+				<p class="description">Reactive counter with increment, decrement and reset.</p>
 
-			<div class="demo">
-				<span class="count">{counter.value}</span>
-				<div class="actions">
-					<button onclick={() => counter.inc()}>+1</button>
-					<button onclick={() => counter.inc(5)}>+5</button>
-					<button onclick={() => counter.dec()}>−1</button>
-					<button onclick={() => counter.dec(5)}>−5</button>
-					<button onclick={() => counter.reset()}>Reset</button>
+				<div class="demo">
+					<span class="count">{counter.value}</span>
+					<div class="actions">
+						<button onclick={() => counter.inc()}>+1</button>
+						<button onclick={() => counter.inc(5)}>+5</button>
+						<button onclick={() => counter.dec()}>−1</button>
+						<button onclick={() => counter.dec(5)}>−5</button>
+						<button onclick={() => counter.reset()}>Reset</button>
+					</div>
 				</div>
-			</div>
 
-			<pre><code
-					>{`import { useCounter } from '@ariefsn/svelte-use';
+				<pre><code>{`import { useCounter } from '@ariefsn/svelte-use';
 
 const { value, inc, dec, reset } = useCounter(0);
 inc();     // value → 1
 inc(5);    // value → 6
 dec(3);    // value → 3
-reset();   // value → 0`}</code
-				></pre>
-		</section>
+reset();   // value → 0`}</code></pre>
+			</section>
 
-		<!-- usePrevious -->
-		<section class="card">
-			<h2>usePrevious</h2>
-			<p class="description">
-				Tracks the previous value of any reactive getter. Returns <code>undefined</code> until the first
-				change.
-			</p>
+			<!-- usePrevious -->
+			<section class="card">
+				<h2>usePrevious</h2>
+				<p class="description">
+					Tracks the previous value of any reactive getter. Returns <code>undefined</code> until the first
+					change.
+				</p>
 
-			<div class="demo">
-				<div class="kv-row">
-					<span class="label">current</span>
-					<span class="value">{prevSource}</span>
+				<div class="demo">
+					<div class="kv-row">
+						<span class="label">current</span>
+						<span class="value">{prevSource}</span>
+					</div>
+					<div class="kv-row">
+						<span class="label">previous</span>
+						<span class="value muted">{previous() ?? '—'}</span>
+					</div>
+					<div class="actions">
+						<button onclick={() => prevSource++}>Increment source</button>
+						<button onclick={() => (prevSource = 0)}>Reset to 0</button>
+					</div>
 				</div>
-				<div class="kv-row">
-					<span class="label">previous</span>
-					<span class="value muted">{previous() ?? '—'}</span>
-				</div>
-				<div class="actions">
-					<button onclick={() => prevSource++}>Increment source</button>
-					<button onclick={() => (prevSource = 0)}>Reset to 0</button>
-				</div>
-			</div>
 
-			<pre><code
-					>{`import { usePrevious } from '@ariefsn/svelte-use';
+				<pre><code>{`import { usePrevious } from '@ariefsn/svelte-use';
 
 let count = $state(0);
 const prev = usePrevious(() => count);
@@ -153,130 +263,124 @@ const prev = usePrevious(() => count);
 count = 1;
 // prev() → 0
 count = 2;
-// prev() → 1`}</code
-				></pre>
-		</section>
+// prev() → 1`}</code></pre>
+			</section>
 
-		<!-- useDebounce -->
-		<section class="card">
-			<h2>useDebounce</h2>
-			<p class="description">
-				Delays a reactive value until the source stops changing for the given duration (500 ms
-				here).
-			</p>
+			<!-- useDebounce -->
+			<section class="card">
+				<h2>useDebounce</h2>
+				<p class="description">
+					Delays a reactive value until the source stops changing for the given duration (500 ms
+					here).
+				</p>
 
-			<div class="demo">
-				<input type="text" placeholder="Type something…" bind:value={query} />
-				<div class="kv-row">
-					<span class="label">raw</span>
-					<span class="value">{query || '—'}</span>
+				<div class="demo">
+					<input type="text" placeholder="Type something…" bind:value={query} />
+					<div class="kv-row">
+						<span class="label">raw</span>
+						<span class="value">{query || '—'}</span>
+					</div>
+					<div class="kv-row">
+						<span class="label">debounced</span>
+						<span class="value muted">{debouncedQuery() || '—'}</span>
+					</div>
 				</div>
-				<div class="kv-row">
-					<span class="label">debounced</span>
-					<span class="value muted">{debouncedQuery() || '—'}</span>
-				</div>
-			</div>
 
-			<pre><code
-					>{`import { useDebounce } from '@ariefsn/svelte-use';
+				<pre><code>{`import { useDebounce } from '@ariefsn/svelte-use';
 
 let query = $state('');
 const debounced = useDebounce(() => query, 500);
-// debounced() updates only after 500 ms of inactivity`}</code
-				></pre>
-		</section>
+// debounced() updates only after 500 ms of inactivity`}</code></pre>
+			</section>
 
-		<!-- useLocalStorage -->
-		<section class="card">
-			<h2>useLocalStorage</h2>
-			<p class="description">
-				Reactive <code>localStorage</code> with SSR safety. Value persists across page refreshes.
-			</p>
+			<!-- useLocalStorage -->
+			<section class="card">
+				<h2>useLocalStorage</h2>
+				<p class="description">
+					Reactive <code>localStorage</code> with SSR safety. Value persists across page refreshes.
+				</p>
 
-			<div class="demo">
-				<div class="kv-row">
-					<span class="label">stored theme</span>
-					<span class="value">{theme.value}</span>
+				<div class="demo">
+					<div class="kv-row">
+						<span class="label">stored theme</span>
+						<span class="value">{theme.value}</span>
+					</div>
+					<div class="actions">
+						<button onclick={() => theme.set('light')}>Light</button>
+						<button onclick={() => theme.set('dark')}>Dark</button>
+					</div>
+					<p class="hint">Refresh the page — the value survives.</p>
 				</div>
-				<div class="actions">
-					<button onclick={() => theme.set('light')}>Light</button>
-					<button onclick={() => theme.set('dark')}>Dark</button>
-				</div>
-				<p class="hint">Refresh the page — the value survives.</p>
-			</div>
 
-			<pre><code
-					>{`import { useLocalStorage } from '@ariefsn/svelte-use';
+				<pre><code>{`import { useLocalStorage } from '@ariefsn/svelte-use';
 
 const theme = useLocalStorage('theme', 'light');
 theme.set('dark');  // persists to localStorage
-theme.value;        // 'dark'`}</code
-				></pre>
-		</section>
+theme.value;        // 'dark'`}</code></pre>
+			</section>
 
-		<!-- useIndexedDB -->
-		<section class="card">
-			<h2>useIndexedDB</h2>
-			<p class="description">
-				Reactive IndexedDB with full CRUD, querying, and filtering. Data persists across sessions.
-			</p>
+			<!-- useIndexedDB -->
+			<section class="card">
+				<h2>useIndexedDB</h2>
+				<p class="description">
+					Reactive IndexedDB with full CRUD, querying, and filtering. Data persists across sessions.
+				</p>
 
-			<div class="demo">
-				<div class="idb-row">
-					<input
-						type="text"
-						placeholder="New note…"
-						bind:value={noteInput}
-						onkeydown={(e) => e.key === 'Enter' && addNote()}
-					/>
-					<button onclick={addNote}>Add</button>
+				<div class="demo">
+					<div class="idb-row">
+						<input
+							type="text"
+							placeholder="New note…"
+							bind:value={noteInput}
+							onkeydown={(e) => e.key === 'Enter' && addNote()}
+						/>
+						<button onclick={addNote}>Add</button>
+					</div>
+
+					<input type="text" placeholder="Filter notes…" bind:value={filterText} />
+
+					{#if db.loading}
+						<span class="muted">Loading…</span>
+					{:else if db.error}
+						<span style="color:#f87171">Error: {db.error.message}</span>
+					{:else if visibleNotes.length === 0}
+						<span class="muted">No notes yet.</span>
+					{:else}
+						<ul class="note-list">
+							{#each visibleNotes as note (note.id)}
+								<li class="note-item">
+									<button
+										class="toggle-btn"
+										class:done={note.done}
+										onclick={() => toggleNote(note)}
+										title="Toggle done"
+									>
+										{note.done ? '✓' : '○'}
+									</button>
+									<span class="note-text" class:done={note.done}>{note.text}</span>
+									<button class="remove-btn" onclick={() => removeNote(note.id!)}>×</button>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+
+					<div class="idb-footer">
+						<span class="muted">{db.items.length} total · {visibleNotes.length} shown</span>
+						<div class="actions">
+							<button onclick={runQuery}>Query pending</button>
+							<button onclick={() => db.clear()}>Clear all</button>
+						</div>
+					</div>
+
+					{#if queryResults.length > 0}
+						<div class="kv-row">
+							<span class="label">pending</span>
+							<span class="value muted">{queryResults.map((n) => n.text).join(', ')}</span>
+						</div>
+					{/if}
 				</div>
 
-				<input type="text" placeholder="Filter notes…" bind:value={filterText} />
-
-				{#if db.loading}
-					<span class="muted">Loading…</span>
-				{:else if db.error}
-					<span style="color:#f87171">Error: {db.error.message}</span>
-				{:else if visibleNotes.length === 0}
-					<span class="muted">No notes yet.</span>
-				{:else}
-					<ul class="note-list">
-						{#each visibleNotes as note (note.id)}
-							<li class="note-item">
-								<button
-									class="toggle-btn"
-									class:done={note.done}
-									onclick={() => toggleNote(note)}
-									title="Toggle done"
-								>
-									{note.done ? '✓' : '○'}
-								</button>
-								<span class="note-text" class:done={note.done}>{note.text}</span>
-								<button class="remove-btn" onclick={() => removeNote(note.id!)}>×</button>
-							</li>
-						{/each}
-					</ul>
-				{/if}
-
-				<div class="idb-footer">
-					<span class="muted">{db.items.length} total · {visibleNotes.length} shown</span>
-					<div class="actions">
-						<button onclick={runQuery}>Query pending</button>
-						<button onclick={() => db.clear()}>Clear all</button>
-					</div>
-				</div>
-
-				{#if queryResults.length > 0}
-					<div class="kv-row">
-						<span class="label">pending</span>
-						<span class="value muted">{queryResults.map((n) => n.text).join(', ')}</span>
-					</div>
-				{/if}
-			</div>
-
-			<pre><code
-					>{`import { useIndexedDB } from '@ariefsn/svelte-use';
+				<pre><code>{`import { useIndexedDB } from '@ariefsn/svelte-use';
 
 interface Note { id?: number; text: string; done: boolean }
 const db = useIndexedDB<Note>('my-app', 'notes');
@@ -285,44 +389,219 @@ await db.add({ text: 'Buy milk', done: false });
 db.items;                              // reactive T[]
 await db.update({ id: 1, done: true });
 await db.remove(1);
-const pending = await db.query(n => !n.done);`}</code
-				></pre>
-		</section>
-	</div>
-</main>
+const pending = await db.query(n => !n.done);`}</code></pre>
+			</section>
+		</div>
+	</section>
+</div>
 
 <style>
-	:global(body) {
-		font-family: system-ui, sans-serif;
-		background: #0f0f0f;
+	.page {
+		max-width: 900px;
+	}
+
+	/* ─── Hero ─── */
+	.hero {
+		padding-bottom: 3rem;
+		border-bottom: 1px solid #1e1e1e;
+		margin-bottom: 3rem;
+	}
+
+	.hero-badge {
+		display: inline-block;
+		background: #1a1630;
+		color: #a78bfa;
+		border: 1px solid #3b2d6e;
+		border-radius: 999px;
+		padding: 0.2rem 0.75rem;
+		font-size: 0.78rem;
+		font-family: monospace;
+		margin-bottom: 1rem;
+	}
+
+	h1 {
+		font-size: 3rem;
+		font-weight: 800;
+		margin: 0 0 0.75rem;
+		letter-spacing: -0.04em;
+		background: linear-gradient(135deg, #e8e8e8 40%, #a78bfa);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.hero-desc {
+		color: #888;
+		font-size: 1.05rem;
+		line-height: 1.6;
+		margin: 0 0 1.75rem;
+	}
+
+	.hero-actions {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.5rem 1.25rem;
+		border-radius: 8px;
+		font-size: 0.9rem;
+		font-weight: 500;
+		text-decoration: none;
+		transition: all 0.15s;
+		cursor: pointer;
+		border: none;
+	}
+
+	.btn-primary {
+		background: #a78bfa;
+		color: #0f0f0f;
+	}
+
+	.btn-primary:hover {
+		background: #c4b5fd;
+	}
+
+	.btn-ghost {
+		background: #1e1e1e;
 		color: #e8e8e8;
+		border: 1px solid #2e2e2e;
+	}
+
+	.btn-ghost:hover {
+		background: #2a2a2a;
+	}
+
+	/* ─── Sections ─── */
+	.section {
+		margin-bottom: 3.5rem;
+	}
+
+	.section-title {
+		font-size: 1.35rem;
+		font-weight: 700;
+		margin: 0 0 1rem;
+		letter-spacing: -0.02em;
+	}
+
+	.section-desc {
+		color: #999;
+		line-height: 1.65;
+		margin: 0 0 1rem;
+		font-size: 0.95rem;
+	}
+
+	.note {
+		color: #666;
+		font-size: 0.85rem;
+		margin: 0.5rem 0 0;
+	}
+
+	.note strong {
+		color: #a78bfa;
+	}
+
+	/* ─── Code ─── */
+	.code-block {
+		background: #111;
+		border: 1px solid #222;
+		border-radius: 8px;
+		padding: 1.1rem 1.25rem;
+		overflow-x: auto;
+		margin: 0;
+	}
+
+	.code-block code {
+		font-family: 'Fira Code', 'Cascadia Code', monospace;
+		font-size: 0.82rem;
+		color: #a78bfa;
+		white-space: pre;
+	}
+
+	/* ─── Feature Grid ─── */
+	.features-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		gap: 1rem;
+	}
+
+	.feature-card {
+		background: #141414;
+		border: 1px solid #222;
+		border-radius: 10px;
+		padding: 1rem 1.1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.feature-icon {
+		font-size: 1.3rem;
+		margin-bottom: 0.15rem;
+	}
+
+	.feature-card strong {
+		font-size: 0.9rem;
+		color: #e8e8e8;
+	}
+
+	.feature-desc {
+		font-size: 0.8rem;
+		color: #666;
+	}
+
+	/* ─── Category Grid ─── */
+	.cat-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+		gap: 1rem;
+	}
+
+	.cat-card {
+		background: #141414;
+		border: 1px solid #222;
+		border-radius: 10px;
+		padding: 1rem 1.1rem;
+	}
+
+	.cat-title {
+		font-size: 0.78rem;
+		font-weight: 600;
+		color: #555;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		margin: 0 0 0.6rem;
+	}
+
+	.cat-list {
+		list-style: none;
 		margin: 0;
 		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
 	}
 
-	main {
-		max-width: 960px;
-		margin: 0 auto;
-		padding: 3rem 1.5rem;
-	}
-
-	header {
-		margin-bottom: 3rem;
-		border-bottom: 1px solid #2a2a2a;
-		padding-bottom: 2rem;
-	}
-
-	header h1 {
-		font-size: 2.5rem;
-		font-weight: 700;
-		margin: 0 0 0.5rem;
-		letter-spacing: -0.03em;
-	}
-
-	header p {
+	.cat-link {
+		display: block;
 		color: #888;
-		margin: 0;
-		font-size: 1rem;
+		text-decoration: none;
+		font-family: monospace;
+		font-size: 0.85rem;
+		padding: 0.2rem 0;
+		transition: color 0.15s;
+	}
+
+	.cat-link:hover {
+		color: #a78bfa;
+	}
+
+	/* ─── Demo Grid ─── */
+	.demos-section .section-desc {
+		margin-bottom: 1.5rem;
 	}
 
 	.grid {
