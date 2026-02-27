@@ -24,7 +24,7 @@
 </script>
 
 <div class="demo-wrap" style="gap:0.5rem">
-	<p class="hint">{total.toLocaleString()} items — only ~15 DOM nodes rendered at a time.</p>
+	<p class="hint">{total.toLocaleString()} items — only ~16 DOM nodes rendered at a time.</p>
 
 	<!--
 		bind:this feeds the element to containerRef so the hook measures its

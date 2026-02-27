@@ -135,7 +135,7 @@ export function useVirtualList<T>(
 
 			const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
 			const visibleCount = Math.ceil(containerHeight / itemHeight);
-			const endIndex = Math.min(total - 1, startIndex + visibleCount + overscan * 2);
+			const endIndex = Math.min(total - 1, startIndex + visibleCount - 1 + overscan * 2);
 
 			const result: VirtualItem<T>[] = [];
 			for (let i = startIndex; i <= endIndex; i++) {
