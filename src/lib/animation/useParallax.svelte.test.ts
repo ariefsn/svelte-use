@@ -55,8 +55,8 @@ describe('useParallax', () => {
 		const cleanup = $effect.root(() => {
 			const { x, y } = useParallax(() => null);
 			flushSync();
-			expect(x).toBe(0);
-			expect(y).toBe(0);
+			expect(x()).toBe(0);
+			expect(y()).toBe(0);
 		});
 		cleanup();
 	});
@@ -65,8 +65,8 @@ describe('useParallax', () => {
 		const cleanup = $effect.root(() => {
 			const { x, y } = useParallax(() => undefined);
 			flushSync();
-			expect(x).toBe(0);
-			expect(y).toBe(0);
+			expect(x()).toBe(0);
+			expect(y()).toBe(0);
 		});
 		cleanup();
 	});
@@ -81,8 +81,8 @@ describe('useParallax', () => {
 
 			// Mouse at (300, 350) → raw offset (100, 100) × speed 0.1 = (10, 10).
 			fireMouseMove(300, 350);
-			expect(result.x).toBeCloseTo(10, 5);
-			expect(result.y).toBeCloseTo(10, 5);
+			expect(result.x()).toBeCloseTo(10, 5);
+			expect(result.y()).toBeCloseTo(10, 5);
 		});
 		cleanup();
 	});
@@ -96,8 +96,8 @@ describe('useParallax', () => {
 
 			// Centre is at (100, 100). Mouse at (200, 200) → raw offset (100, 100) × 0.5.
 			fireMouseMove(200, 200);
-			expect(result.x).toBeCloseTo(50, 5);
-			expect(result.y).toBeCloseTo(50, 5);
+			expect(result.x()).toBeCloseTo(50, 5);
+			expect(result.y()).toBeCloseTo(50, 5);
 		});
 		cleanup();
 	});
@@ -111,8 +111,8 @@ describe('useParallax', () => {
 
 			// Centre at (100, 100). Mouse at (200, 200) → raw offset (100, 100) × -0.1.
 			fireMouseMove(200, 200);
-			expect(result.x).toBeCloseTo(-10, 5);
-			expect(result.y).toBeCloseTo(-10, 5);
+			expect(result.x()).toBeCloseTo(-10, 5);
+			expect(result.y()).toBeCloseTo(-10, 5);
 		});
 		cleanup();
 	});
@@ -126,8 +126,8 @@ describe('useParallax', () => {
 
 			// Centre is (200, 200) — mouse exactly at centre → offset (0, 0).
 			fireMouseMove(200, 200);
-			expect(result.x).toBeCloseTo(0, 5);
-			expect(result.y).toBeCloseTo(0, 5);
+			expect(result.x()).toBeCloseTo(0, 5);
+			expect(result.y()).toBeCloseTo(0, 5);
 		});
 		cleanup();
 	});
@@ -140,8 +140,8 @@ describe('useParallax', () => {
 			const result = useParallax(() => el);
 			flushSync();
 			fireMouseMove(400, 400);
-			expect(result.x).not.toBe(0);
-			expect(result.y).not.toBe(0);
+			expect(result.x()).not.toBe(0);
+			expect(result.y()).not.toBe(0);
 		});
 
 		cleanup();
@@ -157,7 +157,7 @@ describe('useParallax', () => {
 			const result = useParallax(() => el);
 			flushSync();
 			fireMouseMove(300, 300);
-			expect(result.x).not.toBe(0);
+			expect(result.x()).not.toBe(0);
 
 			// Nullify target — effect should re-run and clean up the listener.
 			el = null;
@@ -165,8 +165,8 @@ describe('useParallax', () => {
 
 			// After target becomes null, offsets reset and no listener fires.
 			fireMouseMove(500, 500);
-			expect(result.x).toBe(0);
-			expect(result.y).toBe(0);
+			expect(result.x()).toBe(0);
+			expect(result.y()).toBe(0);
 		});
 
 		expect(removeListenerSpy).toHaveBeenCalledWith('mousemove', expect.any(Function));
@@ -182,8 +182,8 @@ describe('useParallax', () => {
 			const cleanup = $effect.root(() => {
 				const { x, y } = useParallax(() => null);
 				flushSync();
-				expect(x).toBe(0);
-				expect(y).toBe(0);
+				expect(x()).toBe(0);
+				expect(y()).toBe(0);
 			});
 			cleanup();
 		}).not.toThrow();
@@ -198,12 +198,12 @@ describe('useParallax', () => {
 
 			// Centre at (50, 50).
 			fireMouseMove(100, 100);
-			expect(result.x).toBeCloseTo(50, 5);
-			expect(result.y).toBeCloseTo(50, 5);
+			expect(result.x()).toBeCloseTo(50, 5);
+			expect(result.y()).toBeCloseTo(50, 5);
 
 			fireMouseMove(0, 0);
-			expect(result.x).toBeCloseTo(-50, 5);
-			expect(result.y).toBeCloseTo(-50, 5);
+			expect(result.x()).toBeCloseTo(-50, 5);
+			expect(result.y()).toBeCloseTo(-50, 5);
 		});
 		cleanup();
 	});

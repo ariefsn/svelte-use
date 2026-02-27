@@ -45,8 +45,6 @@ export function useFocus(target: () => HTMLElement | null | undefined): {
 	});
 
 	return {
-		get focused() {
-			return focused;
-		}
+		focused: () => focused
 	};
 }

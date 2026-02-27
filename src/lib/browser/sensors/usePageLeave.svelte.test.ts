@@ -11,12 +11,14 @@ describe('usePageLeave', () => {
 		cleanup();
 	});
 
-	test('returns true when mouseleave fires on document', () => {
+	test('returns true when mouseleave fires on documentElement', () => {
 		const cleanup = $effect.root(() => {
 			const hasLeft = usePageLeave();
 			flushSync();
 
-			document.dispatchEvent(new MouseEvent('mouseleave'));
+			document.documentElement.dispatchEvent(
+				new MouseEvent('mouseleave', { relatedTarget: null })
+			);
 			flushSync();
 
 			expect(hasLeft()).toBe(true);
@@ -29,11 +31,15 @@ describe('usePageLeave', () => {
 			const hasLeft = usePageLeave();
 			flushSync();
 
-			document.dispatchEvent(new MouseEvent('mouseleave'));
+			document.documentElement.dispatchEvent(
+				new MouseEvent('mouseleave', { relatedTarget: null })
+			);
 			flushSync();
 			expect(hasLeft()).toBe(true);
 
-			document.dispatchEvent(new MouseEvent('mouseenter'));
+			document.documentElement.dispatchEvent(
+				new MouseEvent('mouseenter', { relatedTarget: null })
+			);
 			flushSync();
 			expect(hasLeft()).toBe(false);
 		});
@@ -46,11 +52,15 @@ describe('usePageLeave', () => {
 			flushSync();
 
 			for (let i = 0; i < 3; i++) {
-				document.dispatchEvent(new MouseEvent('mouseleave'));
+				document.documentElement.dispatchEvent(
+					new MouseEvent('mouseleave', { relatedTarget: null })
+				);
 				flushSync();
 				expect(hasLeft()).toBe(true);
 
-				document.dispatchEvent(new MouseEvent('mouseenter'));
+				document.documentElement.dispatchEvent(
+					new MouseEvent('mouseenter', { relatedTarget: null })
+				);
 				flushSync();
 				expect(hasLeft()).toBe(false);
 			}
@@ -59,8 +69,8 @@ describe('usePageLeave', () => {
 	});
 
 	test('cleanup removes event listeners', () => {
-		const addSpy = vi.spyOn(document, 'addEventListener');
-		const removeSpy = vi.spyOn(document, 'removeEventListener');
+		const addSpy = vi.spyOn(document.documentElement, 'addEventListener');
+		const removeSpy = vi.spyOn(document.documentElement, 'removeEventListener');
 
 		const cleanup = $effect.root(() => {
 			usePageLeave();
@@ -98,13 +108,17 @@ describe('usePageLeave', () => {
 			const b = usePageLeave();
 			flushSync();
 
-			document.dispatchEvent(new MouseEvent('mouseleave'));
+			document.documentElement.dispatchEvent(
+				new MouseEvent('mouseleave', { relatedTarget: null })
+			);
 			flushSync();
 
 			expect(a()).toBe(true);
 			expect(b()).toBe(true);
 
-			document.dispatchEvent(new MouseEvent('mouseenter'));
+			document.documentElement.dispatchEvent(
+				new MouseEvent('mouseenter', { relatedTarget: null })
+			);
 			flushSync();
 
 			expect(a()).toBe(false);

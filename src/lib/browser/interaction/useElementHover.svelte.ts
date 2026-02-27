@@ -45,8 +45,6 @@ export function useElementHover(target: () => HTMLElement | null | undefined): {
 	});
 
 	return {
-		get hovering() {
-			return hovering;
-		}
+		hovering: () => hovering
 	};
 }

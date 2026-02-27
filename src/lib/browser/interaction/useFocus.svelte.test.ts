@@ -9,7 +9,7 @@ describe('useFocus', () => {
 
 		const cleanup = $effect.root(() => {
 			const { focused } = useFocus(() => el);
-			expect(focused).toBe(false);
+			expect(focused()).toBe(false);
 		});
 
 		el.remove();
@@ -29,7 +29,7 @@ describe('useFocus', () => {
 		flushSync();
 
 		el.dispatchEvent(new FocusEvent('focus'));
-		expect(result.focused).toBe(true);
+		expect(result.focused()).toBe(true);
 
 		el.remove();
 		cleanup();
@@ -48,10 +48,10 @@ describe('useFocus', () => {
 		flushSync();
 
 		el.dispatchEvent(new FocusEvent('focus'));
-		expect(result.focused).toBe(true);
+		expect(result.focused()).toBe(true);
 
 		el.dispatchEvent(new FocusEvent('blur'));
-		expect(result.focused).toBe(false);
+		expect(result.focused()).toBe(false);
 
 		el.remove();
 		cleanup();
@@ -61,7 +61,7 @@ describe('useFocus', () => {
 		const cleanup = $effect.root(() => {
 			const { focused } = useFocus(() => null);
 			flushSync();
-			expect(focused).toBe(false);
+			expect(focused()).toBe(false);
 		});
 
 		cleanup();
@@ -71,7 +71,7 @@ describe('useFocus', () => {
 		const cleanup = $effect.root(() => {
 			const { focused } = useFocus(() => undefined);
 			flushSync();
-			expect(focused).toBe(false);
+			expect(focused()).toBe(false);
 		});
 
 		cleanup();
@@ -90,15 +90,15 @@ describe('useFocus', () => {
 		flushSync();
 
 		el.dispatchEvent(new FocusEvent('focus'));
-		expect(result.focused).toBe(true);
+		expect(result.focused()).toBe(true);
 
 		cleanup();
 
-		expect(result.focused).toBe(false);
+		expect(result.focused()).toBe(false);
 
 		// Events after cleanup should not change state
 		el.dispatchEvent(new FocusEvent('focus'));
-		expect(result.focused).toBe(false);
+		expect(result.focused()).toBe(false);
 
 		el.remove();
 	});
@@ -120,13 +120,13 @@ describe('useFocus', () => {
 		flushSync();
 
 		elA.dispatchEvent(new FocusEvent('focus'));
-		expect(a.focused).toBe(true);
-		expect(b.focused).toBe(false);
+		expect(a.focused()).toBe(true);
+		expect(b.focused()).toBe(false);
 
 		elA.dispatchEvent(new FocusEvent('blur'));
 		elB.dispatchEvent(new FocusEvent('focus'));
-		expect(a.focused).toBe(false);
-		expect(b.focused).toBe(true);
+		expect(a.focused()).toBe(false);
+		expect(b.focused()).toBe(true);
 
 		elA.remove();
 		elB.remove();
@@ -149,16 +149,16 @@ describe('useFocus', () => {
 		flushSync();
 
 		el1.dispatchEvent(new FocusEvent('focus'));
-		expect(result.focused).toBe(true);
+		expect(result.focused()).toBe(true);
 
 		targetEl = el2;
 		flushSync();
 
 		// focused resets after target switch
-		expect(result.focused).toBe(false);
+		expect(result.focused()).toBe(false);
 
 		el2.dispatchEvent(new FocusEvent('focus'));
-		expect(result.focused).toBe(true);
+		expect(result.focused()).toBe(true);
 
 		el1.remove();
 		el2.remove();

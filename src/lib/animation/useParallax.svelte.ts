@@ -75,11 +75,7 @@ export function useParallax(
 	});
 
 	return {
-		get x() {
-			return x;
-		},
-		get y() {
-			return y;
-		}
+		x: () => x,
+		y: () => y
 	};
 }

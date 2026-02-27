@@ -84,8 +84,6 @@ export function useDropZone(
 	});
 
 	return {
-		get isOver() {
-			return isOver;
-		}
+		isOver: () => isOver
 	};
 }

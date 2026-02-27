@@ -17,7 +17,7 @@ describe('useDropZone', () => {
 
 		const cleanup = $effect.root(() => {
 			const { isOver } = useDropZone(() => el);
-			expect(isOver).toBe(false);
+			expect(isOver()).toBe(false);
 		});
 
 		el.remove();
@@ -37,7 +37,7 @@ describe('useDropZone', () => {
 		flushSync();
 
 		el.dispatchEvent(makeDragEvent('dragenter'));
-		expect(result.isOver).toBe(true);
+		expect(result.isOver()).toBe(true);
 
 		el.remove();
 		cleanup();
@@ -56,10 +56,10 @@ describe('useDropZone', () => {
 		flushSync();
 
 		el.dispatchEvent(makeDragEvent('dragenter'));
-		expect(result.isOver).toBe(true);
+		expect(result.isOver()).toBe(true);
 
 		el.dispatchEvent(makeDragEvent('dragleave'));
-		expect(result.isOver).toBe(false);
+		expect(result.isOver()).toBe(false);
 
 		el.remove();
 		cleanup();
@@ -80,15 +80,15 @@ describe('useDropZone', () => {
 		// Enter parent then child → count = 2
 		el.dispatchEvent(makeDragEvent('dragenter'));
 		el.dispatchEvent(makeDragEvent('dragenter'));
-		expect(result.isOver).toBe(true);
+		expect(result.isOver()).toBe(true);
 
 		// Leave child → count = 1, still over
 		el.dispatchEvent(makeDragEvent('dragleave'));
-		expect(result.isOver).toBe(true);
+		expect(result.isOver()).toBe(true);
 
 		// Leave parent → count = 0, not over
 		el.dispatchEvent(makeDragEvent('dragleave'));
-		expect(result.isOver).toBe(false);
+		expect(result.isOver()).toBe(false);
 
 		el.remove();
 		cleanup();
@@ -107,10 +107,10 @@ describe('useDropZone', () => {
 		flushSync();
 
 		el.dispatchEvent(makeDragEvent('dragenter'));
-		expect(result.isOver).toBe(true);
+		expect(result.isOver()).toBe(true);
 
 		el.dispatchEvent(makeDragEvent('drop'));
-		expect(result.isOver).toBe(false);
+		expect(result.isOver()).toBe(false);
 
 		el.remove();
 		cleanup();
@@ -179,7 +179,7 @@ describe('useDropZone', () => {
 		const cleanup = $effect.root(() => {
 			const { isOver } = useDropZone(() => null);
 			flushSync();
-			expect(isOver).toBe(false);
+			expect(isOver()).toBe(false);
 		});
 
 		cleanup();
@@ -199,16 +199,16 @@ describe('useDropZone', () => {
 		flushSync();
 
 		el.dispatchEvent(makeDragEvent('dragenter'));
-		expect(result.isOver).toBe(true);
+		expect(result.isOver()).toBe(true);
 
 		cleanup();
 
-		expect(result.isOver).toBe(false);
+		expect(result.isOver()).toBe(false);
 
 		// Events after cleanup should not fire handler or change state
 		el.dispatchEvent(makeDragEvent('drop'));
 		expect(onDrop).not.toHaveBeenCalled();
-		expect(result.isOver).toBe(false);
+		expect(result.isOver()).toBe(false);
 
 		el.remove();
 	});
@@ -232,8 +232,8 @@ describe('useDropZone', () => {
 		flushSync();
 
 		elA.dispatchEvent(makeDragEvent('dragenter'));
-		expect(a.isOver).toBe(true);
-		expect(b.isOver).toBe(false);
+		expect(a.isOver()).toBe(true);
+		expect(b.isOver()).toBe(false);
 
 		const file = new File(['x'], 'x.txt');
 		elA.dispatchEvent(makeDragEvent('drop', [file]));

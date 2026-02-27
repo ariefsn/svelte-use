@@ -47,12 +47,9 @@ export function useTimeoutFn(fn: () => void, delay: number) {
 		}, delay);
 	}
 
-	// The $effect tracks `pending` as a reactive dependency so its teardown
-	// is reliably registered from the first run, ensuring any in-flight
-	// timer is cancelled when the owning scope is destroyed.
+	// Register a cleanup that cancels any in-flight timer when the owning
+	// reactive scope (component) is destroyed.
 	$effect(() => {
-		void pending;
-
 		return () => {
 			clearTimer();
 		};
