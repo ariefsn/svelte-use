@@ -68,27 +68,68 @@
 		{ icon: '🔒', label: 'Fully typed', desc: 'First-class TypeScript, no any' },
 		{ icon: '🌐', label: 'SSR safe', desc: 'All browser APIs are guarded' },
 		{ icon: '📦', label: 'Zero deps', desc: 'No runtime dependencies' },
-		{ icon: '🧹', label: 'Auto cleanup', desc: 'Listeners removed on component destroy' }
+		{ icon: '🧹', label: 'Auto cleanup', desc: 'Listeners removed on component destroy' },
+		{ icon: '🎞️', label: 'Animation', desc: 'useAnimate, useParallax, useTransition' },
+		{ icon: '🔌', label: 'Async & WebSocket', desc: 'useFetch, useWebSocket' },
+		{ icon: '⏱️', label: 'Time utilities', desc: 'useInterval, useTimeout, useNow, useTimestamp…' },
+		{ icon: '🖱️', label: 'Pointer & Drag', desc: 'useMouse, useDraggable, useDropZone…' },
+		{ icon: '📡', label: 'Sensors', desc: 'useGeolocation, useNetwork, useIdle, useBreakpoints…' },
+		{ icon: '💾', label: 'Storage', desc: 'useLocalStorage, useIndexedDB, useSessionStorage…' }
 	];
+
+	// Total composable count from sidebar
+	const totalComposables = sidebar.reduce((acc, g) => acc + g.items.length, 0);
 </script>
 
 <div class="page">
 	<!-- ─── Hero ─── -->
 	<header class="hero">
-		<div class="hero-badge">@ariefsn/svelte-use</div>
+		<div class="hero-top">
+			<img src="/logo.svg" alt="svelte-use logo" class="hero-logo" width="80" height="80" />
+			<div class="hero-badges">
+				<span class="hero-badge">@ariefsn/svelte-use</span>
+				<a
+					href="https://www.npmjs.com/package/@ariefsn/svelte-use"
+					class="hero-badge hero-badge-link"
+					target="_blank"
+					rel="noopener"
+					aria-label="View on npm"
+				>
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 0v24h24V0H0zm19.2 19.2H4.8V4.8h14.4v14.4z"/><path d="M7.2 7.2h9.6v9.6h-2.4V9.6H12v7.2H7.2z"/></svg>
+					npm
+				</a>
+				<a
+					href="https://github.com/ariefsn/svelte-use"
+					class="hero-badge hero-badge-link"
+					target="_blank"
+					rel="noopener"
+					aria-label="View on GitHub"
+				>
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+					GitHub
+				</a>
+			</div>
+		</div>
 		<h1>svelte-use</h1>
 		<p class="hero-desc">
-			A collection of Svelte 5 runes-first utility composables.<br />
+			A collection of <strong>{totalComposables}+</strong> Svelte 5 runes-first utility composables.<br />
 			No stores. No external dependencies. SSR-safe. Fully typed.
 		</p>
 
 		<div class="hero-actions">
-			<a href="/docs/use-sorted" class="btn btn-primary">Browse Docs</a>
+			<a href="/docs/use-toggle" class="btn btn-primary">Browse Docs</a>
+			<a href="#demos" class="btn btn-secondary">Live Demos</a>
 			<a
 				href="https://github.com/ariefsn/svelte-use"
 				class="btn btn-ghost"
 				target="_blank"
 				rel="noopener">GitHub</a
+			>
+			<a
+				href="https://www.npmjs.com/package/@ariefsn/svelte-use"
+				class="btn btn-ghost"
+				target="_blank"
+				rel="noopener">npm</a
 			>
 		</div>
 	</header>
@@ -147,7 +188,7 @@ timer.count()    // → 60, 59, 58 …`}</code></pre>
 
 	<!-- ─── Category Overview ─── -->
 	<section class="section">
-		<h2 class="section-title">Utilities</h2>
+		<h2 class="section-title">Utilities <span class="count-badge">{totalComposables}</span></h2>
 		<div class="cat-grid">
 			{#each sidebar as group}
 				<div class="cat-card">
@@ -181,9 +222,12 @@ const dist = $derived(Math.sqrt(mouse.x() ** 2 + mouse.y() ** 2));
 	</section>
 
 	<!-- ─── Interactive Demos ─── -->
-	<section class="section demos-section">
+	<section class="section demos-section" id="demos">
 		<h2 class="section-title">Interactive Demos</h2>
-		<p class="section-desc">Existing utilities — try them live.</p>
+		<p class="section-desc">
+			Try these composables live. Browse the full demo collection in the
+			<a href="/docs/use-toggle" class="inline-link">docs</a>.
+		</p>
 
 		<div class="grid">
 			<!-- useToggle -->
@@ -393,6 +437,25 @@ const pending = await db.query(n => !n.done);`}</code></pre>
 			</section>
 		</div>
 	</section>
+
+	<!-- ─── Footer ─── -->
+	<footer class="footer">
+		<div class="footer-logo">
+			<img src="/logo.svg" alt="svelte-use logo" width="24" height="24" />
+			<span>svelte-use</span>
+		</div>
+		<div class="footer-links">
+			<a href="https://github.com/ariefsn/svelte-use" target="_blank" rel="noopener" class="footer-link">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+				GitHub
+			</a>
+			<a href="https://www.npmjs.com/package/@ariefsn/svelte-use" target="_blank" rel="noopener" class="footer-link">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 0v24h24V0H0zm19.2 19.2H4.8V4.8h14.4v14.4z"/><path d="M7.2 7.2h9.6v9.6h-2.4V9.6H12v7.2H7.2z"/></svg>
+				npm
+			</a>
+		</div>
+		<p class="footer-copy">MIT License · Built with Svelte 5</p>
+	</footer>
 </div>
 
 <style>
@@ -407,8 +470,31 @@ const pending = await db.query(n => !n.done);`}</code></pre>
 		margin-bottom: 3rem;
 	}
 
+	.hero-top {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		margin-bottom: 1.25rem;
+		flex-wrap: wrap;
+	}
+
+	.hero-logo {
+		width: 72px;
+		height: 72px;
+		flex-shrink: 0;
+	}
+
+	.hero-badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		align-items: center;
+	}
+
 	.hero-badge {
-		display: inline-block;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
 		background: #1a1630;
 		color: #a78bfa;
 		border: 1px solid #3b2d6e;
@@ -416,11 +502,20 @@ const pending = await db.query(n => !n.done);`}</code></pre>
 		padding: 0.2rem 0.75rem;
 		font-size: 0.78rem;
 		font-family: monospace;
-		margin-bottom: 1rem;
+	}
+
+	.hero-badge-link {
+		text-decoration: none;
+		transition: background 0.15s, border-color 0.15s;
+	}
+
+	.hero-badge-link:hover {
+		background: #231d45;
+		border-color: #5b3fa0;
 	}
 
 	h1 {
-		font-size: 3rem;
+		font-size: clamp(2rem, 6vw, 3rem);
 		font-weight: 800;
 		margin: 0 0 0.75rem;
 		letter-spacing: -0.04em;
@@ -465,6 +560,16 @@ const pending = await db.query(n => !n.done);`}</code></pre>
 		background: #c4b5fd;
 	}
 
+	.btn-secondary {
+		background: #1e1e2e;
+		color: #a78bfa;
+		border: 1px solid #3b2d6e;
+	}
+
+	.btn-secondary:hover {
+		background: #231d45;
+	}
+
 	.btn-ghost {
 		background: #1e1e1e;
 		color: #e8e8e8;
@@ -485,6 +590,23 @@ const pending = await db.query(n => !n.done);`}</code></pre>
 		font-weight: 700;
 		margin: 0 0 1rem;
 		letter-spacing: -0.02em;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.count-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: #1a1630;
+		color: #a78bfa;
+		border: 1px solid #3b2d6e;
+		border-radius: 999px;
+		padding: 0.1rem 0.6rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		font-family: monospace;
 	}
 
 	.section-desc {
@@ -492,6 +614,15 @@ const pending = await db.query(n => !n.done);`}</code></pre>
 		line-height: 1.65;
 		margin: 0 0 1rem;
 		font-size: 0.95rem;
+	}
+
+	.inline-link {
+		color: #a78bfa;
+		text-decoration: none;
+	}
+
+	.inline-link:hover {
+		text-decoration: underline;
 	}
 
 	.note {
@@ -524,7 +655,7 @@ const pending = await db.query(n => !n.done);`}</code></pre>
 	/* ─── Feature Grid ─── */
 	.features-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 		gap: 1rem;
 	}
 
@@ -556,7 +687,7 @@ const pending = await db.query(n => !n.done);`}</code></pre>
 	/* ─── Category Grid ─── */
 	.cat-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 		gap: 1rem;
 	}
 
@@ -607,7 +738,7 @@ const pending = await db.query(n => !n.done);`}</code></pre>
 	.grid {
 		display: grid;
 		gap: 1.5rem;
-		grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
 	}
 
 	.card {
@@ -832,5 +963,95 @@ const pending = await db.query(n => !n.done);`}</code></pre>
 		border-radius: 4px;
 		font-size: 0.85em;
 		color: #a78bfa;
+	}
+
+	/* ─── Footer ─── */
+	.footer {
+		border-top: 1px solid #1e1e1e;
+		padding: 2rem 0;
+		margin-top: 2rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+		text-align: center;
+	}
+
+	.footer-logo {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-family: monospace;
+		font-weight: 700;
+		color: #a78bfa;
+		font-size: 0.95rem;
+	}
+
+	.footer-links {
+		display: flex;
+		gap: 1.5rem;
+	}
+
+	.footer-link {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		color: #666;
+		text-decoration: none;
+		font-size: 0.85rem;
+		transition: color 0.15s;
+	}
+
+	.footer-link:hover {
+		color: #a78bfa;
+	}
+
+	.footer-copy {
+		color: #444;
+		font-size: 0.8rem;
+		margin: 0;
+	}
+
+	/* ─── Mobile Responsive ─── */
+	@media (max-width: 640px) {
+		.hero-logo {
+			width: 56px;
+			height: 56px;
+		}
+
+		.hero-desc {
+			font-size: 0.95rem;
+		}
+
+		.features-grid {
+			grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+		}
+
+		.cat-grid {
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.grid {
+			grid-template-columns: 1fr;
+		}
+
+		.code-block code,
+		code {
+			font-size: 0.75rem;
+		}
+
+		.count {
+			font-size: 2rem;
+		}
+	}
+
+	@media (max-width: 400px) {
+		.cat-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.features-grid {
+			grid-template-columns: 1fr 1fr;
+		}
 	}
 </style>
