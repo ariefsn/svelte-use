@@ -47,6 +47,17 @@
 	import DemoUseBase64 from './demos/use-base64.svelte';
 	import DemoUseObjectUrl from './demos/use-object-url.svelte';
 	import DemoUseSessionStorage from './demos/use-session-storage.svelte';
+	import DemoUseBreakpoints from './demos/use-breakpoints.svelte';
+	import DemoUseNavigatorLanguage from './demos/use-navigator-language.svelte';
+	import DemoUseBrowserLocation from './demos/use-browser-location.svelte';
+	import DemoUseOnline from './demos/use-online.svelte';
+	import DemoUsePageLeave from './demos/use-page-leave.svelte';
+	import DemoUseLocalStorage from './demos/use-local-storage.svelte';
+	import DemoUseIndexedDB from './demos/use-indexed-db.svelte';
+	import DemoUseClickOutside from './demos/use-click-outside.svelte';
+	import DemoUseDropZone from './demos/use-drop-zone.svelte';
+	import DemoUseElementHover from './demos/use-element-hover.svelte';
+	import DemoUseFocus from './demos/use-focus.svelte';
 
 	// ── Static slug → component map ──────────────────────────────────────────
 	const demoMap: Record<string, any> = {
@@ -93,7 +104,18 @@
 		'use-debounce': DemoUseDebounce,
 		'use-base64': DemoUseBase64,
 		'use-object-url': DemoUseObjectUrl,
-		'use-session-storage': DemoUseSessionStorage
+		'use-session-storage': DemoUseSessionStorage,
+		'use-breakpoints': DemoUseBreakpoints,
+		'use-navigator-language': DemoUseNavigatorLanguage,
+		'use-browser-location': DemoUseBrowserLocation,
+		'use-online': DemoUseOnline,
+		'use-page-leave': DemoUsePageLeave,
+		'use-local-storage': DemoUseLocalStorage,
+		'use-indexed-db': DemoUseIndexedDB,
+		'use-click-outside': DemoUseClickOutside,
+		'use-drop-zone': DemoUseDropZone,
+		'use-element-hover': DemoUseElementHover,
+		'use-focus': DemoUseFocus
 	};
 
 	// ── Page data + nav ───────────────────────────────────────────────────────
