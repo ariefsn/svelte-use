@@ -25,20 +25,19 @@ describe('useSpeechRecognition', () => {
 	beforeEach(() => {
 		mockInstance = makeMockRecognition();
 
-		const MockClass = vi.fn(() => mockInstance);
-		Object.defineProperty(window, 'SpeechRecognition', {
-			value: MockClass,
-			writable: true,
-			configurable: true
-		});
+		// vi.fn() with an arrow function cannot be used as a constructor (no `new`).
+		// A constructor that explicitly returns an object causes `new` to return
+		// that object, so all property mutations (onresult, onend, etc.) happen
+		// on the shared mockInstance and remain observable in tests.
+		const instance = mockInstance;
+		function MockClass() {
+			return instance;
+		}
+		vi.stubGlobal('SpeechRecognition', MockClass);
 	});
 
 	afterEach(() => {
-		Object.defineProperty(window, 'SpeechRecognition', {
-			value: undefined,
-			writable: true,
-			configurable: true
-		});
+		vi.unstubAllGlobals();
 	});
 
 	test('result starts as empty string', () => {
@@ -142,16 +141,9 @@ describe('useSpeechRecognition', () => {
 	});
 
 	test('gracefully degrades when SpeechRecognition is unavailable', () => {
-		Object.defineProperty(window, 'SpeechRecognition', {
-			value: undefined,
-			writable: true,
-			configurable: true
-		});
-		Object.defineProperty(window, 'webkitSpeechRecognition', {
-			value: undefined,
-			writable: true,
-			configurable: true
-		});
+		// Override the stub set in beforeEach with undefined values.
+		vi.stubGlobal('SpeechRecognition', undefined);
+		vi.stubGlobal('webkitSpeechRecognition', undefined);
 
 		const cleanup = $effect.root(() => {
 			const { result, isListening, start, stop } = useSpeechRecognition();
