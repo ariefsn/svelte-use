@@ -1,7 +1,7 @@
-import type { PageServerLoad } from './$types.js';
 import { error } from '@sveltejs/kit';
-import { pages } from '$lib/docs/pages.js';
-import { allSlugs } from '$lib/docs/sidebar.js';
+import { pages } from '../../../docs/pages.js';
+import { allSlugs } from '../../../docs/sidebar.js';
+import type { PageServerLoad } from './$types.js';
 
 export const prerender = true;
 

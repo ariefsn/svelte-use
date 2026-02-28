@@ -811,4 +811,4 @@ npm publish --access public
 
 ## License
 
-MIT
+[MIT](./LICENSE.md)

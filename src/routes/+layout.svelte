@@ -1,11 +1,22 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { sidebar } from '$lib/docs/sidebar.js';
+	import { sidebar } from '../docs/sidebar.js';
 
 	let { children } = $props();
 
 	let openGroups = $state<Record<string, boolean>>({});
 	let mobileMenuOpen = $state(false);
+	let searchQuery = $state('');
+
+	let filteredItems = $derived(
+		searchQuery.trim()
+			? sidebar.flatMap((group) =>
+					group.items
+						.filter((item) => item.label.toLowerCase().includes(searchQuery.toLowerCase()))
+						.map((item) => ({ ...item, group: group.title }))
+				)
+			: []
+	);
 
 	// Auto-open group containing the active slug
 	$effect(() => {
@@ -80,50 +91,114 @@
 			<a href="/" class="nav-home" class:active={$page.url.pathname === '/'}>Home</a>
 		</div>
 
-		{#each sidebar as group}
-			<div class="nav-group">
-				<button
-					class="group-title"
-					class:open={openGroups[group.title]}
-					onclick={() => toggleGroup(group.title)}
+		<div class="search-section">
+			<div class="search-wrapper">
+				<svg
+					class="search-icon"
+					width="13"
+					height="13"
+					viewBox="0 0 13 13"
+					fill="none"
+					aria-hidden="true"
 				>
-					<span>{group.title}</span>
-					<svg
-						class="chevron"
-						class:rotated={openGroups[group.title]}
-						width="12"
-						height="12"
-						viewBox="0 0 12 12"
-						fill="none"
-						aria-hidden="true"
+					<circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.5" />
+					<path
+						d="M9 9L11.5 11.5"
+						stroke="currentColor"
+						stroke-width="1.5"
+						stroke-linecap="round"
+					/>
+				</svg>
+				<input
+					type="text"
+					class="search-input"
+					placeholder="Search..."
+					bind:value={searchQuery}
+					aria-label="Search composables"
+				/>
+				{#if searchQuery}
+					<button
+						class="search-clear"
+						onclick={() => (searchQuery = '')}
+						aria-label="Clear search"
 					>
-						<path
-							d="M2 4L6 8L10 4"
-							stroke="currentColor"
-							stroke-width="1.5"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-				</button>
-
-				{#if openGroups[group.title]}
-					<ul class="group-items">
-						{#each group.items as item}
-							<li>
-								<a
-									href="/docs/{item.slug}"
-									class="nav-item"
-									class:active={$page.params.slug === item.slug}
-								>
-									{item.label}
-								</a>
-							</li>
-						{/each}
-					</ul>
+						<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+							<path
+								d="M1 1L9 9M9 1L1 9"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-linecap="round"
+							/>
+						</svg>
+					</button>
 				{/if}
 			</div>
-		{/each}
+		</div>
+
+		{#if searchQuery.trim()}
+			<div class="search-results">
+				{#if filteredItems.length === 0}
+					<p class="no-results">No results</p>
+				{:else}
+					{#each filteredItems as item}
+						<a
+							href="/docs/{item.slug}"
+							class="nav-item search-result-item"
+							class:active={$page.params.slug === item.slug}
+							onclick={() => (searchQuery = '')}
+						>
+							<span>{item.label}</span>
+							<span class="result-group">{item.group}</span>
+						</a>
+					{/each}
+				{/if}
+			</div>
+		{:else}
+			{#each sidebar as group}
+				<div class="nav-group">
+					<button
+						class="group-title"
+						class:open={openGroups[group.title]}
+						onclick={() => toggleGroup(group.title)}
+					>
+						<span>{group.title}</span>
+						<svg
+							class="chevron"
+							class:rotated={openGroups[group.title]}
+							width="12"
+							height="12"
+							viewBox="0 0 12 12"
+							fill="none"
+							aria-hidden="true"
+						>
+							<path
+								d="M2 4L6 8L10 4"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+					</button>
+
+					{#if openGroups[group.title]}
+						<ul class="group-items">
+							{#each group.items as item}
+								<li>
+									<a
+										href="/docs/{item.slug}"
+										class="nav-item"
+										class:active={$page.params.slug === item.slug}
+									>
+										{item.label}
+									</a>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</div>
+			{/each}
+		{/if}
 	</nav>
 
 	<!-- Overlay for mobile -->
@@ -264,6 +339,96 @@
 	.nav-home.active {
 		color: #a78bfa;
 		background: #1a1630;
+	}
+
+	/* ─── Search ─── */
+	.search-section {
+		padding: 0 0.75rem 0.5rem;
+	}
+
+	.search-wrapper {
+		position: relative;
+		display: flex;
+		align-items: center;
+	}
+
+	.search-icon {
+		position: absolute;
+		left: 0.55rem;
+		color: #555;
+		pointer-events: none;
+		flex-shrink: 0;
+	}
+
+	.search-input {
+		width: 100%;
+		background: #111;
+		border: 1px solid #2a2a2a;
+		border-radius: 6px;
+		padding: 0.35rem 1.8rem 0.35rem 1.85rem;
+		color: #e8e8e8;
+		font-size: 0.82rem;
+		outline: none;
+		transition:
+			border-color 0.15s,
+			background 0.15s;
+	}
+
+	.search-input::placeholder {
+		color: #444;
+	}
+
+	.search-input:focus {
+		border-color: #3d3060;
+		background: #131313;
+	}
+
+	.search-clear {
+		position: absolute;
+		right: 0.45rem;
+		background: none;
+		border: none;
+		color: #555;
+		cursor: pointer;
+		padding: 0.2rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 4px;
+		transition: color 0.15s;
+	}
+
+	.search-clear:hover {
+		color: #e8e8e8;
+	}
+
+	.search-results {
+		padding: 0 0.75rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1px;
+	}
+
+	.search-result-item {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+	}
+
+	.result-group {
+		font-size: 0.7rem;
+		color: #444;
+		font-family: system-ui, sans-serif;
+		white-space: nowrap;
+		flex-shrink: 0;
+	}
+
+	.no-results {
+		font-size: 0.82rem;
+		color: #555;
+		padding: 0.35rem 0.6rem;
+		margin: 0;
 	}
 
 	/* ─── Groups ─── */

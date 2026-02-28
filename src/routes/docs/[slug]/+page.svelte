@@ -1,63 +1,63 @@
 <script lang="ts">
+	import { page as appPage } from '$app/stores';
+	import { sidebar } from '../../../docs/sidebar.js';
 	import type { PageData } from './$types.js';
-	import { sidebar } from '$lib/docs/sidebar.js';
-
 	// ── Demo components ──────────────────────────────────────────────────────
 	import DemoUseAnimate from './demos/use-animate.svelte';
-	import DemoUseParallax from './demos/use-parallax.svelte';
-	import DemoUseTransition from './demos/use-transition.svelte';
-	import DemoUseFetch from './demos/use-fetch.svelte';
-	import DemoUseWebSocket from './demos/use-web-socket.svelte';
-	import DemoUseInterval from './demos/use-interval.svelte';
-	import DemoUseIntervalFn from './demos/use-interval-fn.svelte';
-	import DemoUseNow from './demos/use-now.svelte';
-	import DemoUseTimeout from './demos/use-timeout.svelte';
-	import DemoUseTimeoutFn from './demos/use-timeout-fn.svelte';
-	import DemoUseTimeoutPoll from './demos/use-timeout-poll.svelte';
-	import DemoUseTimestamp from './demos/use-timestamp.svelte';
-	import DemoUseSorted from './demos/use-sorted.svelte';
-	import DemoUseCycleList from './demos/use-cycle-list.svelte';
-	import DemoUseCountdown from './demos/use-countdown.svelte';
-	import DemoUseTimeAgo from './demos/use-time-ago.svelte';
-	import DemoUseMagicKeys from './demos/use-magic-keys.svelte';
-	import DemoUseKeyModifier from './demos/use-key-modifier.svelte';
-	import DemoUseScroll from './demos/use-scroll.svelte';
-	import DemoUseMouse from './demos/use-mouse.svelte';
-	import DemoUseMousePressed from './demos/use-mouse-pressed.svelte';
-	import DemoUseDraggable from './demos/use-draggable.svelte';
-	import DemoUseElementSize from './demos/use-element-size.svelte';
-	import DemoUseIntersectionObserver from './demos/use-intersection-observer.svelte';
-	import DemoUseResizeObserver from './demos/use-resize-observer.svelte';
-	import DemoUseMutationObserver from './demos/use-mutation-observer.svelte';
-	import DemoUseIdle from './demos/use-idle.svelte';
-	import DemoUseNetwork from './demos/use-network.svelte';
-	import DemoUseGeolocation from './demos/use-geolocation.svelte';
-	import DemoUseFps from './demos/use-fps.svelte';
-	import DemoUseThrottleFn from './demos/use-throttle-fn.svelte';
-	import DemoUseDebounceFn from './demos/use-debounce-fn.svelte';
-	import DemoUseVirtualList from './demos/use-virtual-list.svelte';
-	import DemoUseClipboard from './demos/use-clipboard.svelte';
-	import DemoUseBattery from './demos/use-battery.svelte';
-	import DemoUseSpeechRecognition from './demos/use-speech-recognition.svelte';
-	import DemoUseScrollLock from './demos/use-scroll-lock.svelte';
-	import DemoUseToggle from './demos/use-toggle.svelte';
-	import DemoUseCounter from './demos/use-counter.svelte';
-	import DemoUsePrevious from './demos/use-previous.svelte';
-	import DemoUseDebounce from './demos/use-debounce.svelte';
 	import DemoUseBase64 from './demos/use-base64.svelte';
-	import DemoUseObjectUrl from './demos/use-object-url.svelte';
-	import DemoUseSessionStorage from './demos/use-session-storage.svelte';
+	import DemoUseBattery from './demos/use-battery.svelte';
 	import DemoUseBreakpoints from './demos/use-breakpoints.svelte';
-	import DemoUseNavigatorLanguage from './demos/use-navigator-language.svelte';
 	import DemoUseBrowserLocation from './demos/use-browser-location.svelte';
-	import DemoUseOnline from './demos/use-online.svelte';
-	import DemoUsePageLeave from './demos/use-page-leave.svelte';
-	import DemoUseLocalStorage from './demos/use-local-storage.svelte';
-	import DemoUseIndexedDB from './demos/use-indexed-db.svelte';
 	import DemoUseClickOutside from './demos/use-click-outside.svelte';
+	import DemoUseClipboard from './demos/use-clipboard.svelte';
+	import DemoUseCountdown from './demos/use-countdown.svelte';
+	import DemoUseCounter from './demos/use-counter.svelte';
+	import DemoUseCycleList from './demos/use-cycle-list.svelte';
+	import DemoUseDebounceFn from './demos/use-debounce-fn.svelte';
+	import DemoUseDebounce from './demos/use-debounce.svelte';
+	import DemoUseDraggable from './demos/use-draggable.svelte';
 	import DemoUseDropZone from './demos/use-drop-zone.svelte';
 	import DemoUseElementHover from './demos/use-element-hover.svelte';
+	import DemoUseElementSize from './demos/use-element-size.svelte';
+	import DemoUseFetch from './demos/use-fetch.svelte';
 	import DemoUseFocus from './demos/use-focus.svelte';
+	import DemoUseFps from './demos/use-fps.svelte';
+	import DemoUseGeolocation from './demos/use-geolocation.svelte';
+	import DemoUseIdle from './demos/use-idle.svelte';
+	import DemoUseIndexedDB from './demos/use-indexed-db.svelte';
+	import DemoUseIntersectionObserver from './demos/use-intersection-observer.svelte';
+	import DemoUseIntervalFn from './demos/use-interval-fn.svelte';
+	import DemoUseInterval from './demos/use-interval.svelte';
+	import DemoUseKeyModifier from './demos/use-key-modifier.svelte';
+	import DemoUseLocalStorage from './demos/use-local-storage.svelte';
+	import DemoUseMagicKeys from './demos/use-magic-keys.svelte';
+	import DemoUseMousePressed from './demos/use-mouse-pressed.svelte';
+	import DemoUseMouse from './demos/use-mouse.svelte';
+	import DemoUseMutationObserver from './demos/use-mutation-observer.svelte';
+	import DemoUseNavigatorLanguage from './demos/use-navigator-language.svelte';
+	import DemoUseNetwork from './demos/use-network.svelte';
+	import DemoUseNow from './demos/use-now.svelte';
+	import DemoUseObjectUrl from './demos/use-object-url.svelte';
+	import DemoUseOnline from './demos/use-online.svelte';
+	import DemoUsePageLeave from './demos/use-page-leave.svelte';
+	import DemoUseParallax from './demos/use-parallax.svelte';
+	import DemoUsePrevious from './demos/use-previous.svelte';
+	import DemoUseResizeObserver from './demos/use-resize-observer.svelte';
+	import DemoUseScrollLock from './demos/use-scroll-lock.svelte';
+	import DemoUseScroll from './demos/use-scroll.svelte';
+	import DemoUseSessionStorage from './demos/use-session-storage.svelte';
+	import DemoUseSorted from './demos/use-sorted.svelte';
+	import DemoUseSpeechRecognition from './demos/use-speech-recognition.svelte';
+	import DemoUseThrottleFn from './demos/use-throttle-fn.svelte';
+	import DemoUseTimeAgo from './demos/use-time-ago.svelte';
+	import DemoUseTimeoutFn from './demos/use-timeout-fn.svelte';
+	import DemoUseTimeoutPoll from './demos/use-timeout-poll.svelte';
+	import DemoUseTimeout from './demos/use-timeout.svelte';
+	import DemoUseTimestamp from './demos/use-timestamp.svelte';
+	import DemoUseToggle from './demos/use-toggle.svelte';
+	import DemoUseTransition from './demos/use-transition.svelte';
+	import DemoUseVirtualList from './demos/use-virtual-list.svelte';
+	import DemoUseWebSocket from './demos/use-web-socket.svelte';
 
 	// ── Static slug → component map ──────────────────────────────────────────
 	const demoMap: Record<string, any> = {
@@ -130,8 +130,18 @@
 </script>
 
 <svelte:head>
-	<title>{page.title} — svelte-use</title>
+	<title>{page.title} — Svelte Use</title>
 	<meta name="description" content={page.description} />
+	<meta property="og:title" content="{page.title} — Svelte Use" />
+	<meta property="og:description" content={page.description} />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content={$appPage.url.href} />
+	<meta property="og:image" content="{$appPage.url.origin}/logo.svg" />
+	<meta property="og:site_name" content="Svelte Use" />
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="{page.title} — Svelte Use" />
+	<meta name="twitter:description" content={page.description} />
+	<meta name="twitter:image" content="{$appPage.url.origin}/logo.svg" />
 </svelte:head>
 
 <article class="doc">
