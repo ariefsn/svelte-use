@@ -6,9 +6,20 @@ export { useSorted } from './state/useSorted.svelte.js';
 export { useCycleList } from './state/useCycleList.svelte.js';
 export { useCountdown } from './state/useCountdown.svelte.js';
 export { useTimeAgo } from './state/useTimeAgo.svelte.js';
+export { useAutoResetState } from './state/useAutoResetState.svelte.js';
+export { useDefaultState } from './state/useDefaultState.svelte.js';
+export { useLastChanged } from './state/useLastChanged.svelte.js';
+export { useTrackHistory } from './state/useTrackHistory.svelte.js';
+export type { HistorySnapshot, UseTrackHistoryReturn } from './state/useTrackHistory.svelte.js';
+export { useHistoryState } from './state/useHistoryState.svelte.js';
+export type { UseHistoryStateReturn } from './state/useHistoryState.svelte.js';
 
 // Reactivity
 export { useDebounce } from './reactivity/useDebounce.svelte.js';
+export { useWatch } from './reactivity/useWatch.svelte.js';
+export { useWhenever } from './reactivity/useWhenever.svelte.js';
+export { useAsyncState } from './reactivity/useAsyncState.svelte.js';
+export type { UseAsyncStateOptions, UseAsyncStateReturn } from './reactivity/useAsyncState.svelte.js';
 
 // Browser – Storage
 export { useLocalStorage } from './browser/useLocalStorage.svelte.js';
@@ -71,6 +82,16 @@ export type { UseBrowserLocationReturn } from './browser/sensors/useBrowserLocat
 export { useNavigatorLanguage } from './browser/sensors/useNavigatorLanguage.svelte.js';
 export { useOnline } from './browser/sensors/useOnline.svelte.js';
 export { usePageLeave } from './browser/sensors/usePageLeave.svelte.js';
+export { useDocumentVisibility } from './browser/sensors/useDocumentVisibility.svelte.js';
+export type { UseDocumentVisibilityReturn } from './browser/sensors/useDocumentVisibility.svelte.js';
+export { useWindowFocus } from './browser/sensors/useWindowFocus.svelte.js';
+export type { UseWindowFocusReturn } from './browser/sensors/useWindowFocus.svelte.js';
+export { useDeviceMotion } from './browser/sensors/useDeviceMotion.svelte.js';
+export type { UseDeviceMotionReturn } from './browser/sensors/useDeviceMotion.svelte.js';
+export { useDeviceOrientation } from './browser/sensors/useDeviceOrientation.svelte.js';
+export type { UseDeviceOrientationReturn } from './browser/sensors/useDeviceOrientation.svelte.js';
+export { useDevicePixelRatio } from './browser/sensors/useDevicePixelRatio.svelte.js';
+export type { UseDevicePixelRatioReturn } from './browser/sensors/useDevicePixelRatio.svelte.js';
 
 // Browser – Interaction
 export { useClickOutside } from './browser/interaction/useClickOutside.svelte.js';
@@ -81,6 +102,13 @@ export type {
 export { useDropZone } from './browser/interaction/useDropZone.svelte.js';
 export { useElementHover } from './browser/interaction/useElementHover.svelte.js';
 export { useFocus } from './browser/interaction/useFocus.svelte.js';
+export { useActiveElement } from './browser/interaction/useActiveElement.svelte.js';
+export type { UseActiveElementReturn } from './browser/interaction/useActiveElement.svelte.js';
+export { useLongPress } from './browser/interaction/useLongPress.svelte.js';
+export type { UseLongPressOptions } from './browser/interaction/useLongPress.svelte.js';
+export { useStartTyping } from './browser/interaction/useStartTyping.svelte.js';
+export { useSwipe } from './browser/interaction/useSwipe.svelte.js';
+export type { SwipeDirection, UseSwipeOptions, UseSwipeReturn } from './browser/interaction/useSwipe.svelte.js';
 
 // Browser – Web APIs
 export { useBattery } from './browser/useBattery.svelte.js';
@@ -89,6 +117,31 @@ export { useClipboard } from './browser/useClipboard.svelte.js';
 export type { UseClipboardReturn } from './browser/useClipboard.svelte.js';
 export { useSpeechRecognition } from './browser/useSpeechRecognition.svelte.js';
 export type { UseSpeechRecognitionReturn } from './browser/useSpeechRecognition.svelte.js';
+export { useEyeDropper } from './browser/useEyeDropper.svelte.js';
+export type { UseEyeDropperReturn } from './browser/useEyeDropper.svelte.js';
+export { useFileDialog } from './browser/useFileDialog.svelte.js';
+export type { UseFileDialogOptions, UseFileDialogReturn } from './browser/useFileDialog.svelte.js';
+export { useShare } from './browser/useShare.svelte.js';
+export type { UseShareData, UseShareReturn } from './browser/useShare.svelte.js';
+export { useVibrate } from './browser/useVibrate.svelte.js';
+export type { UseVibrateReturn } from './browser/useVibrate.svelte.js';
+export { useWebNotification } from './browser/useWebNotification.svelte.js';
+export type { UseWebNotificationOptions, UseWebNotificationReturn } from './browser/useWebNotification.svelte.js';
+export { usePermission } from './browser/usePermission.svelte.js';
+export type { UsePermissionReturn } from './browser/usePermission.svelte.js';
+export { useWakeLock } from './browser/useWakeLock.svelte.js';
+export type { UseWakeLockReturn } from './browser/useWakeLock.svelte.js';
+export { useEventListener } from './browser/useEventListener.svelte.js';
+export { useTextDirection } from './browser/useTextDirection.svelte.js';
+export type { TextDirection, UseTextDirectionReturn } from './browser/useTextDirection.svelte.js';
+export { useTextSelection } from './browser/useTextSelection.svelte.js';
+export type { UseTextSelectionReturn } from './browser/useTextSelection.svelte.js';
+export { useScrollbarWidth } from './browser/useScrollbarWidth.svelte.js';
+export type { UseScrollbarWidthReturn } from './browser/useScrollbarWidth.svelte.js';
+
+// Browser – Navigation
+export { useNavigationGuard } from './browser/useNavigationGuard.svelte.js';
+export type { UseNavigationGuardOptions, UseNavigationGuardReturn } from './browser/useNavigationGuard.svelte.js';
 
 // Performance
 export { useFps } from './performance/useFps.svelte.js';

@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-03-18
+
+### Added
+
+- **29 new utility composables** expanding coverage across state, reactivity, browser APIs, sensors, and gestures
+
+#### State
+- `useAutoResetState` — state that auto-resets to default after a delay
+- `useDefaultState` — state with fallback value for null/undefined
+- `useLastChanged` — timestamp of when a reactive value last changed
+- `useTrackHistory` — undo/redo history tracking for reactive values
+- `useHistoryState` — state with built-in undo/redo history
+
+#### Reactivity
+- `useWatch` — Vue-like watcher with current and previous values
+- `useWhenever` — watch that fires only when value becomes truthy
+- `useAsyncState` — reactive async/promise state with loading and error tracking
+
+#### Web APIs
+- `useEyeDropper` — EyeDropper API for picking colors from screen
+- `useFileDialog` — programmatic file input dialog
+- `useShare` — Web Share API for native sharing
+- `useVibrate` — Vibration API wrapper
+- `useWebNotification` — Web Notifications API
+- `usePermission` — Permissions API for querying browser permissions
+- `useWakeLock` — Screen Wake Lock API
+- `useEventListener` — generic event listener with auto-cleanup
+- `useTextDirection` — track/set text directionality (LTR/RTL)
+- `useTextSelection` — track current text selection
+
+#### Browser - Sensors
+- `useDocumentVisibility` — reactive document visibility state
+- `useWindowFocus` — track whether window is focused
+- `useDeviceMotion` — DeviceMotion API for acceleration and rotation
+- `useDeviceOrientation` — DeviceOrientation API (alpha/beta/gamma)
+- `useDevicePixelRatio` — reactive device pixel ratio
+- `useScrollbarWidth` — measure element scrollbar dimensions
+
+#### Browser - Interaction
+- `useActiveElement` — track currently focused element globally
+- `useLongPress` — long press gesture detection
+- `useStartTyping` — detect typing on non-editable elements
+- `useSwipe` — touch swipe gesture detection
+
+#### Browser - Navigation
+- `useNavigationGuard` — SvelteKit navigation guard with confirm/cancel flow
+
+---
+
 ## [1.0.0] - 2026-02-28
 
 ### Added

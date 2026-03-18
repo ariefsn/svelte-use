@@ -3193,6 +3193,703 @@ precise() // updates every 100ms`,
 	},
 
 	// --------------------------------------------------------------- Browser
+	// --------------------------------------------------------------- New v1.1.0 State
+	'use-auto-reset-state': {
+		slug: 'use-auto-reset-state',
+		title: 'useAutoResetState',
+		description: 'Creates reactive state that automatically resets to a default value after a specified delay.',
+		usage: `import { useAutoResetState } from '@ariefsn/svelte-use';
+
+const message = useAutoResetState('default', 3000);
+message.value = 'changed'; // resets to 'default' after 3000ms`,
+		params: [
+			{ name: 'defaultValue', type: 'T', description: 'The value to reset to after the delay' },
+			{ name: 'delay', type: 'number', default: '1000', description: 'Time in milliseconds before auto-reset' }
+		],
+		returns: [
+			{ name: 'value', type: 'T', description: 'Reactive value that auto-resets (read/write)' }
+		],
+		example: `<script lang="ts">
+  import { useAutoResetState } from '@ariefsn/svelte-use';
+  const msg = useAutoResetState('Ready', 2000);
+</script>
+<button onclick={() => msg.value = 'Clicked!'}>Click</button>
+<p>{msg.value}</p>`,
+		notes: ['SSR-safe — uses only `setTimeout`.', 'Timer resets on each new value change.']
+	},
+
+	'use-default-state': {
+		slug: 'use-default-state',
+		title: 'useDefaultState',
+		description: 'Creates reactive state with a fallback value when set to null or undefined.',
+		usage: `import { useDefaultState } from '@ariefsn/svelte-use';
+
+const state = useDefaultState('fallback');
+state.value = null; // value → 'fallback'`,
+		params: [
+			{ name: 'defaultValue', type: 'T', description: 'The fallback value' },
+			{ name: 'initialValue', type: 'T', default: 'defaultValue', description: 'Optional initial value' }
+		],
+		returns: [
+			{ name: 'value', type: 'T', description: 'Reactive value that falls back to default on null/undefined' }
+		],
+		example: `<script lang="ts">
+  import { useDefaultState } from '@ariefsn/svelte-use';
+  const name = useDefaultState('Anonymous');
+</script>
+<input oninput={(e) => name.value = e.currentTarget.value || null} />
+<p>Hello, {name.value}!</p>`,
+		notes: ['Falsy values like `""`, `0`, `false` are preserved — only `null` and `undefined` trigger fallback.']
+	},
+
+	'use-last-changed': {
+		slug: 'use-last-changed',
+		title: 'useLastChanged',
+		description: 'Tracks the timestamp (in milliseconds) of when a reactive value last changed.',
+		usage: `import { useLastChanged } from '@ariefsn/svelte-use';
+
+let count = $state(0);
+const lastChanged = useLastChanged(() => count);`,
+		params: [
+			{ name: 'getter', type: '() => T', description: 'Reactive getter to observe' }
+		],
+		returns: [
+			{ name: '()', type: '() => number | undefined', description: 'Timestamp of last change, or undefined' }
+		],
+		example: `<script lang="ts">
+  import { useLastChanged } from '@ariefsn/svelte-use';
+  let count = $state(0);
+  const lastChanged = useLastChanged(() => count);
+</script>
+<button onclick={() => count++}>Increment ({count})</button>
+<p>Last changed: {lastChanged() ? new Date(lastChanged()!).toLocaleTimeString() : 'never'}</p>`,
+		notes: ['Returns `undefined` until the first change occurs.', 'Uses `$effect` cleanup to capture the timestamp.']
+	},
+
+	'use-track-history': {
+		slug: 'use-track-history',
+		title: 'useTrackHistory',
+		description: 'Tracks changes to a reactive value and provides undo/redo functionality.',
+		usage: `import { useTrackHistory } from '@ariefsn/svelte-use';
+
+let count = $state(0);
+const tracker = useTrackHistory(() => count, (v) => count = v);
+tracker.undo(); // restores previous value`,
+		params: [
+			{ name: 'getter', type: '() => T', description: 'Reactive getter to track' },
+			{ name: 'setter', type: '(v: T) => void', description: 'Function to update the tracked value' }
+		],
+		returns: [
+			{ name: 'canUndo', type: '() => boolean', description: 'Whether undo is available' },
+			{ name: 'canRedo', type: '() => boolean', description: 'Whether redo is available' },
+			{ name: 'undo', type: '() => void', description: 'Undo to previous value' },
+			{ name: 'redo', type: '() => void', description: 'Redo to next value' },
+			{ name: 'history', type: '() => HistorySnapshot<T>[]', description: 'Array of past snapshots' },
+			{ name: 'redoHistory', type: '() => HistorySnapshot<T>[]', description: 'Array of undone snapshots' }
+		],
+		example: `<script lang="ts">
+  import { useTrackHistory } from '@ariefsn/svelte-use';
+  let count = $state(0);
+  const t = useTrackHistory(() => count, (v) => count = v);
+</script>
+<button onclick={() => count++}>Inc ({count})</button>
+<button onclick={t.undo} disabled={!t.canUndo()}>Undo</button>
+<button onclick={t.redo} disabled={!t.canRedo()}>Redo</button>`,
+		notes: ['Redo history is cleared on new external changes.', 'Each snapshot includes a timestamp.']
+	},
+
+	'use-history-state': {
+		slug: 'use-history-state',
+		title: 'useHistoryState',
+		description: 'Creates reactive state with built-in undo/redo history tracking.',
+		usage: `import { useHistoryState } from '@ariefsn/svelte-use';
+
+const counter = useHistoryState(0);
+counter.value = 1;
+counter.undo(); // counter.value → 0`,
+		params: [
+			{ name: 'initial', type: 'T', description: 'The initial state value' }
+		],
+		returns: [
+			{ name: 'value', type: 'T', description: 'Reactive state value (read/write)' },
+			{ name: 'canUndo', type: '() => boolean', description: 'Whether undo is available' },
+			{ name: 'canRedo', type: '() => boolean', description: 'Whether redo is available' },
+			{ name: 'undo', type: '() => void', description: 'Undo to previous value' },
+			{ name: 'redo', type: '() => void', description: 'Redo to next value' }
+		],
+		example: `<script lang="ts">
+  import { useHistoryState } from '@ariefsn/svelte-use';
+  const state = useHistoryState('hello');
+</script>
+<input bind:value={state.value} />
+<button onclick={state.undo} disabled={!state.canUndo()}>Undo</button>
+<button onclick={state.redo} disabled={!state.canRedo()}>Redo</button>`,
+		notes: ['Combines `$state` with `useTrackHistory` for convenience.']
+	},
+
+	// --------------------------------------------------------------- New v1.1.0 Reactivity
+	'use-watch': {
+		slug: 'use-watch',
+		title: 'useWatch',
+		description: 'Watches one or more reactive getters and calls a callback with the current and previous values.',
+		usage: `import { useWatch } from '@ariefsn/svelte-use';
+
+let count = $state(0);
+useWatch(() => count, (curr, prev) => {
+  console.log(\`\${prev} → \${curr}\`);
+});`,
+		params: [
+			{ name: 'deps', type: '(() => T) | (() => any)[]', description: 'Getter or array of getters to watch' },
+			{ name: 'fn', type: '(current, previous) => void', description: 'Callback with current and previous values' },
+			{ name: 'options', type: '{ runOnMounted?: boolean }', default: '{ runOnMounted: true }', description: 'Configuration' }
+		],
+		returns: [],
+		example: `<script lang="ts">
+  import { useWatch } from '@ariefsn/svelte-use';
+  let count = $state(0);
+  let log = $state('');
+  useWatch(() => count, (curr, prev) => {
+    log = \`\${prev} → \${curr}\`;
+  });
+</script>
+<button onclick={() => count++}>Inc ({count})</button>
+<p>{log}</p>`,
+		notes: ['Supports single and multiple dependency watching.', 'Set `runOnMounted: false` to skip initial call.']
+	},
+
+	'use-whenever': {
+		slug: 'use-whenever',
+		title: 'useWhenever',
+		description: 'Watches a reactive getter and calls the callback only when the value becomes truthy.',
+		usage: `import { useWhenever } from '@ariefsn/svelte-use';
+
+let ready = $state(false);
+useWhenever(() => ready, () => console.log('ready!'));`,
+		params: [
+			{ name: 'deps', type: '(() => boolean) | (() => boolean)[]', description: 'Boolean getter(s) to watch' },
+			{ name: 'fn', type: '() => void', description: 'Callback when truthy' },
+			{ name: 'options', type: '{ runOnMounted?: boolean }', default: '{ runOnMounted: true }', description: 'Configuration' }
+		],
+		returns: [],
+		example: `<script lang="ts">
+  import { useWhenever } from '@ariefsn/svelte-use';
+  let ready = $state(false);
+  let msg = $state('');
+  useWhenever(() => ready, () => msg = 'Now ready!');
+</script>
+<button onclick={() => ready = !ready}>Toggle ({ready})</button>
+<p>{msg}</p>`,
+		notes: ['With multiple deps, all must be truthy.', 'Does not fire when value becomes falsy.']
+	},
+
+	'use-async-state': {
+		slug: 'use-async-state',
+		title: 'useAsyncState',
+		description: 'Reactive wrapper around async operations, tracking loading and error states.',
+		usage: `import { useAsyncState } from '@ariefsn/svelte-use';
+
+const { current, isLoading, error } = useAsyncState(
+  () => fetch('/api').then(r => r.json()),
+  null
+);`,
+		params: [
+			{ name: 'promise', type: '(() => Promise<T>) | Promise<T>', description: 'Async function or promise' },
+			{ name: 'initial', type: 'T', description: 'Initial value before resolution' },
+			{ name: 'options', type: 'UseAsyncStateOptions<T>', default: '{}', description: 'Configuration' }
+		],
+		returns: [
+			{ name: 'isReady', type: '() => boolean', description: 'Whether resolved at least once' },
+			{ name: 'isLoading', type: '() => boolean', description: 'Whether currently pending' },
+			{ name: 'current', type: '() => T', description: 'The resolved data' },
+			{ name: 'error', type: '() => unknown | null', description: 'Error if rejected' },
+			{ name: 'execute', type: '(...args) => Promise<T>', description: 'Manually execute' }
+		],
+		example: `<script lang="ts">
+  import { useAsyncState } from '@ariefsn/svelte-use';
+  const { current, isLoading, error } = useAsyncState(
+    () => fetch('https://jsonplaceholder.typicode.com/todos/1').then(r => r.json()),
+    null
+  );
+</script>
+{#if isLoading()}<p>Loading…</p>{:else}<pre>{JSON.stringify(current(), null, 2)}</pre>{/if}`,
+		notes: ['Executes immediately by default. Set `immediate: false` to control manually.', 'Supports `onSuccess` and `onError` callbacks.']
+	},
+
+	// --------------------------------------------------------------- New v1.1.0 Web APIs
+	'use-eye-dropper': {
+		slug: 'use-eye-dropper',
+		title: 'useEyeDropper',
+		description: 'Reactive wrapper around the EyeDropper API for picking colors from the screen.',
+		usage: `import { useEyeDropper } from '@ariefsn/svelte-use';
+const { isSupported, current, open } = useEyeDropper();
+const color = await open();`,
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether EyeDropper API is available' },
+			{ name: 'current', type: '() => string | undefined', description: 'Last picked hex color' },
+			{ name: 'open', type: '() => Promise<string | undefined>', description: 'Opens the eye dropper' }
+		],
+		example: `<script lang="ts">
+  import { useEyeDropper } from '@ariefsn/svelte-use';
+  const { isSupported, current, open } = useEyeDropper();
+</script>
+{#if isSupported()}
+  <button onclick={() => open()}>Pick Color</button>
+  <p style="color:{current()}">{current() ?? 'No color picked'}</p>
+{:else}<p>EyeDropper not supported</p>{/if}`,
+		notes: ['Only available in Chromium-based browsers.', 'Returns `undefined` if user cancels.']
+	},
+
+	'use-file-dialog': {
+		slug: 'use-file-dialog',
+		title: 'useFileDialog',
+		description: 'Programmatic file input dialog using a hidden input element.',
+		usage: `import { useFileDialog } from '@ariefsn/svelte-use';
+const { files, open, reset } = useFileDialog({ accept: 'image/*' });`,
+		params: [
+			{ name: 'options', type: 'UseFileDialogOptions', default: '{}', description: 'Configuration' }
+		],
+		returns: [
+			{ name: 'files', type: '() => File[]', description: 'Selected files' },
+			{ name: 'open', type: '() => void', description: 'Opens file dialog' },
+			{ name: 'reset', type: '() => void', description: 'Clears selected files' }
+		],
+		example: `<script lang="ts">
+  import { useFileDialog } from '@ariefsn/svelte-use';
+  const { files, open, reset } = useFileDialog({ accept: 'image/*', multiple: true });
+</script>
+<button onclick={open}>Select Files</button>
+<button onclick={reset}>Clear</button>
+<p>{files().length} file(s) selected</p>`,
+		notes: ['Uses a hidden `<input type="file">` element.', 'Cleaned up automatically on destroy.']
+	},
+
+	'use-share': {
+		slug: 'use-share',
+		title: 'useShare',
+		description: 'Reactive wrapper around the Web Share API for native sharing.',
+		usage: `import { useShare } from '@ariefsn/svelte-use';
+const { isSupported, share } = useShare();`,
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether Web Share is available' },
+			{ name: 'share', type: '(data?) => Promise<boolean>', description: 'Triggers native share dialog' }
+		],
+		example: `<script lang="ts">
+  import { useShare } from '@ariefsn/svelte-use';
+  const { isSupported, share } = useShare();
+</script>
+{#if isSupported()}
+  <button onclick={() => share({ title: 'Check this!', url: location.href })}>Share</button>
+{/if}`,
+		notes: ['Must be triggered by a user gesture (button click).', 'Returns `true` on success, `false` on cancel/error.']
+	},
+
+	'use-vibrate': {
+		slug: 'use-vibrate',
+		title: 'useVibrate',
+		description: 'Reactive wrapper around the Vibration API.',
+		usage: `import { useVibrate } from '@ariefsn/svelte-use';
+const { isSupported, vibrate, stop } = useVibrate();`,
+		params: [
+			{ name: 'pattern', type: 'VibratePattern', default: '200', description: 'Default vibration pattern in ms' }
+		],
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether Vibration API is available' },
+			{ name: 'vibrate', type: '(pattern?) => boolean', description: 'Starts vibration' },
+			{ name: 'stop', type: '() => void', description: 'Stops vibration' }
+		],
+		example: `<script lang="ts">
+  import { useVibrate } from '@ariefsn/svelte-use';
+  const { isSupported, vibrate, stop } = useVibrate();
+</script>
+<button onclick={() => vibrate([200, 100, 200])}>Vibrate</button>
+<button onclick={stop}>Stop</button>`,
+		notes: ['Pattern is an array of alternating vibrate/pause durations in ms.', 'Mobile devices only.']
+	},
+
+	'use-web-notification': {
+		slug: 'use-web-notification',
+		title: 'useWebNotification',
+		description: 'Reactive wrapper around the Web Notifications API for desktop notifications.',
+		usage: `import { useWebNotification } from '@ariefsn/svelte-use';
+const { isSupported, show, close } = useWebNotification({ title: 'Hello!' });`,
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether Notification API is available' },
+			{ name: 'isPermissionGranted', type: '() => boolean', description: 'Whether permission is granted' },
+			{ name: 'show', type: '(overrides?) => Promise<Notification | null>', description: 'Shows notification' },
+			{ name: 'close', type: '() => void', description: 'Closes active notification' }
+		],
+		example: `<script lang="ts">
+  import { useWebNotification } from '@ariefsn/svelte-use';
+  const { isSupported, show } = useWebNotification({ title: 'Svelte Use' });
+</script>
+<button onclick={() => show({ body: 'Hello from Svelte!' })}>Notify</button>`,
+		notes: ['Auto-requests permission by default.', 'Cleaned up on component destroy.']
+	},
+
+	'use-permission': {
+		slug: 'use-permission',
+		title: 'usePermission',
+		description: 'Reactive wrapper around the Permissions API to query browser permission states.',
+		usage: `import { usePermission } from '@ariefsn/svelte-use';
+const { isSupported, state } = usePermission('camera');`,
+		params: [
+			{ name: 'name', type: 'PermissionName', description: 'Permission to query (e.g., camera, microphone)' }
+		],
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether Permissions API is available' },
+			{ name: 'state', type: '() => PermissionState | undefined', description: 'granted, denied, or prompt' }
+		],
+		example: `<script lang="ts">
+  import { usePermission } from '@ariefsn/svelte-use';
+  const cam = usePermission('camera');
+</script>
+<p>Camera: {cam.state() ?? 'unknown'}</p>`,
+		notes: ['Reactively updates when permission state changes.', 'Not all permission names are supported in all browsers.']
+	},
+
+	'use-wake-lock': {
+		slug: 'use-wake-lock',
+		title: 'useWakeLock',
+		description: 'Prevents the device screen from dimming or locking using the Screen Wake Lock API.',
+		usage: `import { useWakeLock } from '@ariefsn/svelte-use';
+const { isSupported, isActive, request, release } = useWakeLock();`,
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether Wake Lock API is available' },
+			{ name: 'isActive', type: '() => boolean', description: 'Whether lock is active' },
+			{ name: 'request', type: '() => Promise<void>', description: 'Request wake lock' },
+			{ name: 'release', type: '() => Promise<void>', description: 'Release wake lock' }
+		],
+		example: `<script lang="ts">
+  import { useWakeLock } from '@ariefsn/svelte-use';
+  const { isSupported, isActive, request, release } = useWakeLock();
+</script>
+<button onclick={request}>Keep Screen On</button>
+<button onclick={release}>Allow Sleep</button>
+<p>Active: {isActive()}</p>`,
+		notes: ['Released automatically on component destroy.', 'May be released by the browser when tab becomes hidden.']
+	},
+
+	'use-event-listener': {
+		slug: 'use-event-listener',
+		title: 'useEventListener',
+		description: 'Generic event listener utility with automatic cleanup on component destroy.',
+		usage: `import { useEventListener } from '@ariefsn/svelte-use';
+useEventListener(window, 'resize', (e) => console.log(e));`,
+		params: [
+			{ name: 'target', type: 'EventTarget | (() => EventTarget)', description: 'Event target' },
+			{ name: 'event', type: 'string | string[]', description: 'Event name(s)' },
+			{ name: 'handler', type: '(e) => void', description: 'Event handler' },
+			{ name: 'options', type: 'AddEventListenerOptions', default: 'undefined', description: 'Listener options' }
+		],
+		returns: [
+			{ name: '()', type: '() => void', description: 'Manual cleanup function' }
+		],
+		example: `<script lang="ts">
+  import { useEventListener } from '@ariefsn/svelte-use';
+  let size = $state({ w: 0, h: 0 });
+  useEventListener(window, 'resize', () => {
+    size = { w: window.innerWidth, h: window.innerHeight };
+  });
+</script>
+<p>{size.w} × {size.h}</p>`,
+		notes: ['Supports multiple events via array.', 'Supports getter functions for dynamic targets.']
+	},
+
+	'use-text-direction': {
+		slug: 'use-text-direction',
+		title: 'useTextDirection',
+		description: 'Reactively tracks and sets the text directionality (dir attribute) of an element.',
+		usage: `import { useTextDirection } from '@ariefsn/svelte-use';
+const { current, set } = useTextDirection();`,
+		returns: [
+			{ name: 'current', type: '() => TextDirection', description: 'Current direction (ltr, rtl, auto)' },
+			{ name: 'set', type: '(dir) => void', description: 'Set the direction' }
+		],
+		example: `<script lang="ts">
+  import { useTextDirection } from '@ariefsn/svelte-use';
+  const { current, set } = useTextDirection();
+</script>
+<button onclick={() => set(current() === 'ltr' ? 'rtl' : 'ltr')}>
+  Toggle ({current()})
+</button>`,
+		notes: ['Defaults to `document.documentElement`.', 'Uses MutationObserver to track external changes.']
+	},
+
+	'use-text-selection': {
+		slug: 'use-text-selection',
+		title: 'useTextSelection',
+		description: 'Reactively tracks the current text selection in the document.',
+		usage: `import { useTextSelection } from '@ariefsn/svelte-use';
+const { text, rects, ranges } = useTextSelection();`,
+		returns: [
+			{ name: 'text', type: '() => string', description: 'Selected text content' },
+			{ name: 'rects', type: '() => DOMRect[]', description: 'Bounding rectangles' },
+			{ name: 'ranges', type: '() => Range[]', description: 'Selection ranges' },
+			{ name: 'selection', type: '() => Selection | null', description: 'Current Selection object' }
+		],
+		example: `<script lang="ts">
+  import { useTextSelection } from '@ariefsn/svelte-use';
+  const { text } = useTextSelection();
+</script>
+<p>Select some text on this page</p>
+<p>Selected: "{text()}"</p>`,
+		notes: ['Listens to `selectionchange` event.', 'SSR-safe.']
+	},
+
+	// --------------------------------------------------------------- New v1.1.0 Sensors
+	'use-document-visibility': {
+		slug: 'use-document-visibility',
+		title: 'useDocumentVisibility',
+		description: 'Reactively tracks the document visibility state (visible/hidden).',
+		usage: `import { useDocumentVisibility } from '@ariefsn/svelte-use';
+const { current } = useDocumentVisibility();`,
+		returns: [
+			{ name: 'current', type: '() => DocumentVisibilityState', description: 'visible or hidden' }
+		],
+		example: `<script lang="ts">
+  import { useDocumentVisibility } from '@ariefsn/svelte-use';
+  const { current } = useDocumentVisibility();
+</script>
+<p>Tab is {current()}</p>`,
+		notes: ['Useful for pausing animations when tab is hidden.']
+	},
+
+	'use-window-focus': {
+		slug: 'use-window-focus',
+		title: 'useWindowFocus',
+		description: 'Reactively tracks whether the browser window has focus.',
+		usage: `import { useWindowFocus } from '@ariefsn/svelte-use';
+const { focused } = useWindowFocus();`,
+		returns: [
+			{ name: 'focused', type: '() => boolean', description: 'Whether window is focused' }
+		],
+		example: `<script lang="ts">
+  import { useWindowFocus } from '@ariefsn/svelte-use';
+  const { focused } = useWindowFocus();
+</script>
+<p>Window {focused() ? 'focused' : 'blurred'}</p>`,
+		notes: ['SSR-safe — defaults to `false`.']
+	},
+
+	'use-device-motion': {
+		slug: 'use-device-motion',
+		title: 'useDeviceMotion',
+		description: 'Reactive wrapper around the DeviceMotion API for tracking device acceleration and rotation.',
+		usage: `import { useDeviceMotion } from '@ariefsn/svelte-use';
+const { isSupported, acceleration, rotationRate } = useDeviceMotion();`,
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether DeviceMotion is available' },
+			{ name: 'acceleration', type: '() => DeviceMotionEventAcceleration | null', description: 'Acceleration excluding gravity' },
+			{ name: 'accelerationIncludingGravity', type: '() => DeviceMotionEventAcceleration | null', description: 'Acceleration including gravity' },
+			{ name: 'rotationRate', type: '() => DeviceMotionEventRotationRate | null', description: 'Rotation rate' },
+			{ name: 'interval', type: '() => number', description: 'Sampling interval in ms' }
+		],
+		example: `<script lang="ts">
+  import { useDeviceMotion } from '@ariefsn/svelte-use';
+  const { acceleration } = useDeviceMotion();
+</script>
+<p>X: {acceleration()?.x?.toFixed(2) ?? 'N/A'}</p>`,
+		notes: ['Mobile devices only.', 'May require HTTPS and user permission.']
+	},
+
+	'use-device-orientation': {
+		slug: 'use-device-orientation',
+		title: 'useDeviceOrientation',
+		description: 'Reactive wrapper around the DeviceOrientation API for tracking physical device orientation.',
+		usage: `import { useDeviceOrientation } from '@ariefsn/svelte-use';
+const { alpha, beta, gamma } = useDeviceOrientation();`,
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether DeviceOrientation is available' },
+			{ name: 'isAbsolute', type: '() => boolean', description: 'Whether data is absolute' },
+			{ name: 'alpha', type: '() => number | null', description: 'Z-axis rotation (0-360°)' },
+			{ name: 'beta', type: '() => number | null', description: 'X-axis rotation (-180 to 180°)' },
+			{ name: 'gamma', type: '() => number | null', description: 'Y-axis rotation (-90 to 90°)' }
+		],
+		example: `<script lang="ts">
+  import { useDeviceOrientation } from '@ariefsn/svelte-use';
+  const { alpha, beta, gamma } = useDeviceOrientation();
+</script>
+<p>α: {alpha()?.toFixed(1)} β: {beta()?.toFixed(1)} γ: {gamma()?.toFixed(1)}</p>`,
+		notes: ['Mobile devices only.']
+	},
+
+	'use-device-pixel-ratio': {
+		slug: 'use-device-pixel-ratio',
+		title: 'useDevicePixelRatio',
+		description: 'Reactively tracks the device pixel ratio (DPR) for Retina display detection.',
+		usage: `import { useDevicePixelRatio } from '@ariefsn/svelte-use';
+const { current } = useDevicePixelRatio();`,
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether DPR is available' },
+			{ name: 'current', type: '() => number', description: 'Current pixel ratio' }
+		],
+		example: `<script lang="ts">
+  import { useDevicePixelRatio } from '@ariefsn/svelte-use';
+  const { current } = useDevicePixelRatio();
+</script>
+<p>DPR: {current()} ({current() > 1 ? 'HiDPI' : 'Standard'})</p>`,
+		notes: ['Updates when DPR changes (e.g., moving window between displays).']
+	},
+
+	'use-scrollbar-width': {
+		slug: 'use-scrollbar-width',
+		title: 'useScrollbarWidth',
+		description: 'Measures the scrollbar width of an element.',
+		usage: `import { useScrollbarWidth } from '@ariefsn/svelte-use';
+let el: HTMLElement;
+const { x, y } = useScrollbarWidth(() => el);`,
+		params: [
+			{ name: 'target', type: '() => HTMLElement | null', description: 'Target element getter' }
+		],
+		returns: [
+			{ name: 'x', type: '() => number', description: 'Horizontal scrollbar height in px' },
+			{ name: 'y', type: '() => number', description: 'Vertical scrollbar width in px' }
+		],
+		example: `<script lang="ts">
+  import { useScrollbarWidth } from '@ariefsn/svelte-use';
+  let el: HTMLDivElement;
+  const { y } = useScrollbarWidth(() => el);
+</script>
+<div bind:this={el} style="height:100px;overflow:auto">
+  <div style="height:500px">Content</div>
+</div>
+<p>Scrollbar width: {y()}px</p>`,
+		notes: ['Uses ResizeObserver to update on size changes.']
+	},
+
+	// --------------------------------------------------------------- New v1.1.0 Interaction
+	'use-active-element': {
+		slug: 'use-active-element',
+		title: 'useActiveElement',
+		description: 'Tracks the currently focused element in the document.',
+		usage: `import { useActiveElement } from '@ariefsn/svelte-use';
+const { current } = useActiveElement();`,
+		returns: [
+			{ name: 'current', type: '() => Element | null', description: 'Currently focused element' }
+		],
+		example: `<script lang="ts">
+  import { useActiveElement } from '@ariefsn/svelte-use';
+  const { current } = useActiveElement();
+</script>
+<input placeholder="Focus me" />
+<button>Or me</button>
+<p>Active: {current()?.tagName ?? 'none'}</p>`,
+		notes: ['Listens to focus/blur events on window (capture phase).', 'Different from useFocus which tracks a specific element.']
+	},
+
+	'use-long-press': {
+		slug: 'use-long-press',
+		title: 'useLongPress',
+		description: 'Detects long press gestures on an element using pointer events.',
+		usage: `import { useLongPress } from '@ariefsn/svelte-use';
+let el: HTMLElement;
+useLongPress(() => el, (e) => console.log('long pressed!'));`,
+		params: [
+			{ name: 'target', type: '() => HTMLElement | null', description: 'Target element getter' },
+			{ name: 'handler', type: '(e: PointerEvent) => void', description: 'Long press callback' },
+			{ name: 'options', type: 'UseLongPressOptions', default: '{}', description: 'Configuration' }
+		],
+		returns: [
+			{ name: '()', type: '() => void', description: 'Manual cleanup function' }
+		],
+		example: `<script lang="ts">
+  import { useLongPress } from '@ariefsn/svelte-use';
+  let el: HTMLDivElement;
+  let pressed = $state(false);
+  useLongPress(() => el, () => pressed = true, { delay: 500 });
+</script>
+<div bind:this={el} style="padding:2rem;background:#1e1e2e;cursor:pointer">
+  {pressed ? 'Long pressed!' : 'Hold me...'}
+</div>`,
+		notes: ['Cancels if pointer moves beyond distance threshold.', 'Default delay: 500ms, threshold: 10px.']
+	},
+
+	'use-start-typing': {
+		slug: 'use-start-typing',
+		title: 'useStartTyping',
+		description: 'Detects when a user starts typing on non-editable elements.',
+		usage: `import { useStartTyping } from '@ariefsn/svelte-use';
+useStartTyping((e) => searchInput.focus());`,
+		params: [
+			{ name: 'callback', type: '(e: KeyboardEvent) => void', description: 'Callback when typing starts' }
+		],
+		returns: [
+			{ name: '()', type: '() => void', description: 'Manual cleanup function' }
+		],
+		example: `<script lang="ts">
+  import { useStartTyping } from '@ariefsn/svelte-use';
+  let input: HTMLInputElement;
+  useStartTyping(() => input?.focus());
+</script>
+<p>Start typing anywhere to focus the search:</p>
+<input bind:this={input} placeholder="Search..." />`,
+		notes: ['Ignores keys when active element is an input/textarea/contentEditable.', 'Ignores modifier keys (Ctrl, Meta, Alt).']
+	},
+
+	'use-swipe': {
+		slug: 'use-swipe',
+		title: 'useSwipe',
+		description: 'Detects touch swipe gestures on an element.',
+		usage: `import { useSwipe } from '@ariefsn/svelte-use';
+let el: HTMLElement;
+const { direction, isSwiping } = useSwipe(() => el);`,
+		params: [
+			{ name: 'target', type: '() => HTMLElement | null', description: 'Target element getter' },
+			{ name: 'options', type: 'UseSwipeOptions', default: '{}', description: 'Configuration' }
+		],
+		returns: [
+			{ name: 'isSwiping', type: '() => boolean', description: 'Whether swiping' },
+			{ name: 'direction', type: '() => SwipeDirection', description: 'up, down, left, right, or none' },
+			{ name: 'coordsStart', type: '() => {x, y}', description: 'Start position' },
+			{ name: 'coordsEnd', type: '() => {x, y}', description: 'End position' },
+			{ name: 'lengthX', type: '() => number', description: 'Horizontal distance' },
+			{ name: 'lengthY', type: '() => number', description: 'Vertical distance' },
+			{ name: 'reset', type: '() => void', description: 'Reset state' }
+		],
+		example: `<script lang="ts">
+  import { useSwipe } from '@ariefsn/svelte-use';
+  let el: HTMLDivElement;
+  const { direction, isSwiping } = useSwipe(() => el, { threshold: 50 });
+</script>
+<div bind:this={el} style="height:200px;background:#1e1e2e;touch-action:none">
+  <p>{isSwiping() ? 'Swiping...' : direction() !== 'none' ? direction() : 'Swipe here'}</p>
+</div>`,
+		notes: ['Uses TouchEvents.', 'Default threshold: 50px.', 'Supports `onStart`, `onMove`, `onEnd` callbacks.']
+	},
+
+	'use-navigation-guard': {
+		slug: 'use-navigation-guard',
+		title: 'useNavigationGuard',
+		description: 'Guards SvelteKit navigation with a confirm/cancel flow for unsaved changes.',
+		usage: `import { useNavigationGuard } from '@ariefsn/svelte-use';
+
+const { confirm, cancel } = useNavigationGuard({
+  shouldBlock: () => hasChanges,
+  onBlock: () => showDialog = true
+});`,
+		params: [
+			{ name: 'options', type: 'UseNavigationGuardOptions', description: 'Guard configuration' }
+		],
+		returns: [
+			{ name: 'confirm', type: '() => void', description: 'Proceed with pending navigation' },
+			{ name: 'cancel', type: '() => void', description: 'Cancel pending navigation' }
+		],
+		example: `<script lang="ts">
+  import { useNavigationGuard } from '@ariefsn/svelte-use';
+  let hasChanges = $state(false);
+  let showDialog = $state(false);
+  const { confirm, cancel } = useNavigationGuard({
+    shouldBlock: () => hasChanges,
+    onBlock: () => showDialog = true
+  });
+</script>
+<textarea oninput={() => hasChanges = true}></textarea>
+{#if showDialog}
+  <div>Unsaved changes! <button onclick={confirm}>Leave</button> <button onclick={cancel}>Stay</button></div>
+{/if}`,
+		notes: ['Requires SvelteKit (`$app/navigation`).', 'Handles popstate, link, and goto navigation types.']
+	},
+
 	'use-scroll-lock': {
 		slug: 'use-scroll-lock',
 		title: 'useScrollLock',

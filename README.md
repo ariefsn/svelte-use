@@ -3,7 +3,7 @@
 
   <h1>@ariefsn/svelte-use</h1>
 
-  <p>A collection of <strong>50+</strong> Svelte 5 runes-first utility composables.<br/>No stores. No external dependencies. SSR-safe. Fully typed.</p>
+  <p>A collection of <strong>80+</strong> Svelte 5 runes-first utility composables.<br/>No stores. No external dependencies. SSR-safe. Fully typed.</p>
 
   <p>
     <a href="https://github.com/ariefsn/svelte-use">
@@ -61,10 +61,11 @@ bun add @ariefsn/svelte-use
 
 ### Async
 
-| Composable     | Description                             |
-| -------------- | --------------------------------------- |
-| `useFetch`     | Reactive fetch with loading/error state |
-| `useWebSocket` | Reactive WebSocket with auto-reconnect  |
+| Composable      | Description                                    |
+| --------------- | ---------------------------------------------- |
+| `useFetch`      | Reactive fetch with loading/error state        |
+| `useWebSocket`  | Reactive WebSocket with auto-reconnect         |
+| `useAsyncState` | Reactive async/promise state with loading/error |
 
 ### Time
 
@@ -88,13 +89,20 @@ bun add @ariefsn/svelte-use
 | `useSorted`    | Reactive sorted copy of an array            |
 | `useCycleList` | Cycle through a list reactively             |
 | `useCountdown` | Countdown timer with start/stop/reset       |
-| `useTimeAgo`   | Human-readable relative time string         |
+| `useTimeAgo`        | Human-readable relative time string         |
+| `useAutoResetState` | State that auto-resets to default after delay |
+| `useDefaultState`   | State with fallback for null/undefined        |
+| `useLastChanged`    | Timestamp of last reactive value change       |
+| `useTrackHistory`   | Undo/redo history for reactive values         |
+| `useHistoryState`   | State with built-in undo/redo history         |
 
 ### Reactivity
 
-| Composable    | Description                  |
-| ------------- | ---------------------------- |
-| `useDebounce` | Debounce any reactive getter |
+| Composable    | Description                                      |
+| ------------- | ------------------------------------------------ |
+| `useDebounce` | Debounce any reactive getter                     |
+| `useWatch`    | Watch reactive values with current/previous args |
+| `useWhenever` | Watch that fires only when value becomes truthy  |
 
 ### Browser – Keyboard & Scroll
 
@@ -134,6 +142,12 @@ bun add @ariefsn/svelte-use
 | `useNavigatorLanguage` | Reactive navigator language                            |
 | `useOnline`            | Reactive online/offline status                         |
 | `usePageLeave`         | Detect when user leaves the page                       |
+| `useDocumentVisibility`| Reactive document visibility state                     |
+| `useWindowFocus`       | Track whether browser window is focused                |
+| `useDeviceMotion`      | Device acceleration and rotation data                  |
+| `useDeviceOrientation` | Device physical orientation (alpha/beta/gamma)         |
+| `useDevicePixelRatio`  | Reactive device pixel ratio for Retina detection       |
+| `useScrollbarWidth`    | Measure scrollbar width of an element                  |
 
 ### Browser – Storage
 
@@ -153,6 +167,10 @@ bun add @ariefsn/svelte-use
 | `useDropZone`     | Drag-and-drop zone with file/data support |
 | `useElementHover` | Detect hover state of an element          |
 | `useFocus`        | Reactive focus state of an element        |
+| `useActiveElement`| Track currently focused element globally   |
+| `useLongPress`    | Long press gesture detection               |
+| `useStartTyping`  | Detect typing on non-editable elements     |
+| `useSwipe`        | Touch swipe gesture detection              |
 
 ### Performance
 
@@ -175,6 +193,22 @@ bun add @ariefsn/svelte-use
 | `useClipboard`         | Reactive clipboard read/write       |
 | `useBattery`           | Reactive Battery Status API         |
 | `useSpeechRecognition` | Reactive Web Speech Recognition API |
+| `useEyeDropper`        | EyeDropper API for color picking    |
+| `useFileDialog`        | Programmatic file input dialog      |
+| `useShare`             | Native Web Share API                |
+| `useVibrate`           | Vibration API                       |
+| `useWebNotification`   | Desktop notifications API           |
+| `usePermission`        | Browser Permissions API             |
+| `useWakeLock`          | Screen Wake Lock API                |
+| `useEventListener`     | Generic event listener with cleanup |
+| `useTextDirection`     | Track/set text directionality       |
+| `useTextSelection`     | Track text selection                |
+
+### Browser – Navigation
+
+| Composable            | Description                                 |
+| --------------------- | ------------------------------------------- |
+| `useNavigationGuard`  | SvelteKit navigation guard with confirm/cancel |
 
 ---
 

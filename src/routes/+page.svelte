@@ -77,9 +77,12 @@
 		{ icon: '🎞️', label: 'Animation', desc: 'useAnimate, useParallax, useTransition' },
 		{ icon: '🔌', label: 'Async & WebSocket', desc: 'useFetch, useWebSocket' },
 		{ icon: '⏱️', label: 'Time utilities', desc: 'useInterval, useTimeout, useNow, useTimestamp…' },
-		{ icon: '🖱️', label: 'Pointer & Drag', desc: 'useMouse, useDraggable, useDropZone…' },
-		{ icon: '📡', label: 'Sensors', desc: 'useGeolocation, useNetwork, useIdle, useBreakpoints…' },
-		{ icon: '💾', label: 'Storage', desc: 'useLocalStorage, useIndexedDB, useSessionStorage…' }
+		{ icon: '🖱️', label: 'Pointer & Drag', desc: 'useMouse, useDraggable, useDropZone, useSwipe…' },
+		{ icon: '📡', label: 'Sensors', desc: 'useGeolocation, useDeviceMotion, useDeviceOrientation…' },
+		{ icon: '💾', label: 'Storage', desc: 'useLocalStorage, useIndexedDB, useSessionStorage…' },
+		{ icon: '🔔', label: 'Notifications & APIs', desc: 'useWebNotification, usePermission, useShare, useVibrate…' },
+		{ icon: '👆', label: 'Gestures', desc: 'useLongPress, useSwipe, useStartTyping…' },
+		{ icon: '↩️', label: 'History & State', desc: 'useHistoryState, useTrackHistory, useAutoResetState…' }
 	];
 
 	// Total composable count from sidebar
