@@ -59,6 +59,37 @@
 	import DemoUseVirtualList from './demos/use-virtual-list.svelte';
 	import DemoUseWebSocket from './demos/use-web-socket.svelte';
 
+	// ── v1.1.0 demo imports ──────────────────────────────────────────────────
+	import DemoUseAutoResetState from './demos/use-auto-reset-state.svelte';
+	import DemoUseDefaultState from './demos/use-default-state.svelte';
+	import DemoUseLastChanged from './demos/use-last-changed.svelte';
+	import DemoUseTrackHistory from './demos/use-track-history.svelte';
+	import DemoUseHistoryState from './demos/use-history-state.svelte';
+	import DemoUseWatch from './demos/use-watch.svelte';
+	import DemoUseWhenever from './demos/use-whenever.svelte';
+	import DemoUseAsyncState from './demos/use-async-state.svelte';
+	import DemoUseEyeDropper from './demos/use-eye-dropper.svelte';
+	import DemoUseFileDialog from './demos/use-file-dialog.svelte';
+	import DemoUseShare from './demos/use-share.svelte';
+	import DemoUseVibrate from './demos/use-vibrate.svelte';
+	import DemoUseWebNotification from './demos/use-web-notification.svelte';
+	import DemoUsePermission from './demos/use-permission.svelte';
+	import DemoUseWakeLock from './demos/use-wake-lock.svelte';
+	import DemoUseEventListener from './demos/use-event-listener.svelte';
+	import DemoUseActiveElement from './demos/use-active-element.svelte';
+	import DemoUseDocumentVisibility from './demos/use-document-visibility.svelte';
+	import DemoUseWindowFocus from './demos/use-window-focus.svelte';
+	import DemoUseTextDirection from './demos/use-text-direction.svelte';
+	import DemoUseTextSelection from './demos/use-text-selection.svelte';
+	import DemoUseDeviceMotion from './demos/use-device-motion.svelte';
+	import DemoUseDeviceOrientation from './demos/use-device-orientation.svelte';
+	import DemoUseDevicePixelRatio from './demos/use-device-pixel-ratio.svelte';
+	import DemoUseScrollbarWidth from './demos/use-scrollbar-width.svelte';
+	import DemoUseLongPress from './demos/use-long-press.svelte';
+	import DemoUseStartTyping from './demos/use-start-typing.svelte';
+	import DemoUseSwipe from './demos/use-swipe.svelte';
+	import DemoUseNavigationGuard from './demos/use-navigation-guard.svelte';
+
 	// ── Static slug → component map ──────────────────────────────────────────
 	const demoMap: Record<string, any> = {
 		'use-animate': DemoUseAnimate,
@@ -115,7 +146,37 @@
 		'use-click-outside': DemoUseClickOutside,
 		'use-drop-zone': DemoUseDropZone,
 		'use-element-hover': DemoUseElementHover,
-		'use-focus': DemoUseFocus
+		'use-focus': DemoUseFocus,
+		// v1.1.0
+		'use-auto-reset-state': DemoUseAutoResetState,
+		'use-default-state': DemoUseDefaultState,
+		'use-last-changed': DemoUseLastChanged,
+		'use-track-history': DemoUseTrackHistory,
+		'use-history-state': DemoUseHistoryState,
+		'use-watch': DemoUseWatch,
+		'use-whenever': DemoUseWhenever,
+		'use-async-state': DemoUseAsyncState,
+		'use-eye-dropper': DemoUseEyeDropper,
+		'use-file-dialog': DemoUseFileDialog,
+		'use-share': DemoUseShare,
+		'use-vibrate': DemoUseVibrate,
+		'use-web-notification': DemoUseWebNotification,
+		'use-permission': DemoUsePermission,
+		'use-wake-lock': DemoUseWakeLock,
+		'use-event-listener': DemoUseEventListener,
+		'use-active-element': DemoUseActiveElement,
+		'use-document-visibility': DemoUseDocumentVisibility,
+		'use-window-focus': DemoUseWindowFocus,
+		'use-text-direction': DemoUseTextDirection,
+		'use-text-selection': DemoUseTextSelection,
+		'use-device-motion': DemoUseDeviceMotion,
+		'use-device-orientation': DemoUseDeviceOrientation,
+		'use-device-pixel-ratio': DemoUseDevicePixelRatio,
+		'use-scrollbar-width': DemoUseScrollbarWidth,
+		'use-long-press': DemoUseLongPress,
+		'use-start-typing': DemoUseStartTyping,
+		'use-swipe': DemoUseSwipe,
+		'use-navigation-guard': DemoUseNavigationGuard
 	};
 
 	// ── Page data + nav ───────────────────────────────────────────────────────

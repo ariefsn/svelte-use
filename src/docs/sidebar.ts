@@ -21,7 +21,8 @@ export const sidebar: SidebarGroup[] = [
 		title: 'Async',
 		items: [
 			{ label: 'useFetch', slug: 'use-fetch' },
-			{ label: 'useWebSocket', slug: 'use-web-socket' }
+			{ label: 'useWebSocket', slug: 'use-web-socket' },
+			{ label: 'useAsyncState', slug: 'use-async-state' }
 		]
 	},
 	{
@@ -45,15 +46,24 @@ export const sidebar: SidebarGroup[] = [
 			{ label: 'useTimeAgo', slug: 'use-time-ago' },
 			{ label: 'useToggle', slug: 'use-toggle' },
 			{ label: 'useCounter', slug: 'use-counter' },
-			{ label: 'usePrevious', slug: 'use-previous' }
+			{ label: 'usePrevious', slug: 'use-previous' },
+			{ label: 'useAutoResetState', slug: 'use-auto-reset-state' },
+			{ label: 'useDefaultState', slug: 'use-default-state' },
+			{ label: 'useLastChanged', slug: 'use-last-changed' },
+			{ label: 'useTrackHistory', slug: 'use-track-history' },
+			{ label: 'useHistoryState', slug: 'use-history-state' }
 		]
 	},
 	{
 		title: 'Reactivity',
-		items: [{ label: 'useDebounce', slug: 'use-debounce' }]
+		items: [
+			{ label: 'useDebounce', slug: 'use-debounce' },
+			{ label: 'useWatch', slug: 'use-watch' },
+			{ label: 'useWhenever', slug: 'use-whenever' }
+		]
 	},
 	{
-		title: 'Browser – Keyboard & Scroll',
+		title: 'Browser - Keyboard & Scroll',
 		items: [
 			{ label: 'useMagicKeys', slug: 'use-magic-keys' },
 			{ label: 'useKeyModifier', slug: 'use-key-modifier' },
@@ -62,7 +72,7 @@ export const sidebar: SidebarGroup[] = [
 		]
 	},
 	{
-		title: 'Browser – Pointer & Drag',
+		title: 'Browser - Pointer & Drag',
 		items: [
 			{ label: 'useMouse', slug: 'use-mouse' },
 			{ label: 'useMousePressed', slug: 'use-mouse-pressed' },
@@ -70,7 +80,7 @@ export const sidebar: SidebarGroup[] = [
 		]
 	},
 	{
-		title: 'Browser – Observers',
+		title: 'Browser - Observers',
 		items: [
 			{ label: 'useElementSize', slug: 'use-element-size' },
 			{ label: 'useIntersectionObserver', slug: 'use-intersection-observer' },
@@ -79,7 +89,7 @@ export const sidebar: SidebarGroup[] = [
 		]
 	},
 	{
-		title: 'Browser – Sensors',
+		title: 'Browser - Sensors',
 		items: [
 			{ label: 'useIdle', slug: 'use-idle' },
 			{ label: 'useNetwork', slug: 'use-network' },
@@ -88,11 +98,17 @@ export const sidebar: SidebarGroup[] = [
 			{ label: 'useBrowserLocation', slug: 'use-browser-location' },
 			{ label: 'useNavigatorLanguage', slug: 'use-navigator-language' },
 			{ label: 'useOnline', slug: 'use-online' },
-			{ label: 'usePageLeave', slug: 'use-page-leave' }
+			{ label: 'usePageLeave', slug: 'use-page-leave' },
+			{ label: 'useDocumentVisibility', slug: 'use-document-visibility' },
+			{ label: 'useWindowFocus', slug: 'use-window-focus' },
+			{ label: 'useDeviceMotion', slug: 'use-device-motion' },
+			{ label: 'useDeviceOrientation', slug: 'use-device-orientation' },
+			{ label: 'useDevicePixelRatio', slug: 'use-device-pixel-ratio' },
+			{ label: 'useScrollbarWidth', slug: 'use-scrollbar-width' }
 		]
 	},
 	{
-		title: 'Browser – Storage',
+		title: 'Browser - Storage',
 		items: [
 			{ label: 'useLocalStorage', slug: 'use-local-storage' },
 			{ label: 'useIndexedDB', slug: 'use-indexed-db' },
@@ -102,13 +118,21 @@ export const sidebar: SidebarGroup[] = [
 		]
 	},
 	{
-		title: 'Browser – Interaction',
+		title: 'Browser - Interaction',
 		items: [
 			{ label: 'useClickOutside', slug: 'use-click-outside' },
 			{ label: 'useDropZone', slug: 'use-drop-zone' },
 			{ label: 'useElementHover', slug: 'use-element-hover' },
-			{ label: 'useFocus', slug: 'use-focus' }
+			{ label: 'useFocus', slug: 'use-focus' },
+			{ label: 'useActiveElement', slug: 'use-active-element' },
+			{ label: 'useLongPress', slug: 'use-long-press' },
+			{ label: 'useStartTyping', slug: 'use-start-typing' },
+			{ label: 'useSwipe', slug: 'use-swipe' }
 		]
+	},
+	{
+		title: 'Browser - Navigation',
+		items: [{ label: 'useNavigationGuard', slug: 'use-navigation-guard' }]
 	},
 	{
 		title: 'Performance',
@@ -127,9 +151,19 @@ export const sidebar: SidebarGroup[] = [
 		items: [
 			{ label: 'useClipboard', slug: 'use-clipboard' },
 			{ label: 'useBattery', slug: 'use-battery' },
-			{ label: 'useSpeechRecognition', slug: 'use-speech-recognition' }
+			{ label: 'useSpeechRecognition', slug: 'use-speech-recognition' },
+			{ label: 'useEyeDropper', slug: 'use-eye-dropper' },
+			{ label: 'useFileDialog', slug: 'use-file-dialog' },
+			{ label: 'useShare', slug: 'use-share' },
+			{ label: 'useVibrate', slug: 'use-vibrate' },
+			{ label: 'useWebNotification', slug: 'use-web-notification' },
+			{ label: 'usePermission', slug: 'use-permission' },
+			{ label: 'useWakeLock', slug: 'use-wake-lock' },
+			{ label: 'useEventListener', slug: 'use-event-listener' },
+			{ label: 'useTextDirection', slug: 'use-text-direction' },
+			{ label: 'useTextSelection', slug: 'use-text-selection' }
 		]
-	}
+	},
 ];
 
 export const allSlugs = sidebar.flatMap((g) => g.items.map((i) => i.slug));
