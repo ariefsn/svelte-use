@@ -123,9 +123,9 @@
 
 	<!-- Sidebar / mobile drawer -->
 	<nav
-		class="bg-bg-sunken border-border sticky top-0 z-200 flex h-screen w-[240px] shrink-0 flex-col overflow-y-auto border-r py-5 max-md:fixed max-md:w-[260px] max-md:transition-[left] max-md:duration-250 {mobileMenuOpen
+		class="bg-bg-sunken border-border sticky top-0 z-200 flex h-screen w-[304px] shrink-0 flex-col overflow-y-auto border-r py-5 max-md:fixed max-md:w-[320px] max-md:transition-[left] max-md:duration-250 {mobileMenuOpen
 			? 'max-md:left-0 max-md:shadow-[4px_0_24px_var(--color-overlay)]'
-			: 'max-md:-left-[260px]'}"
+			: 'max-md:-left-[320px]'}"
 		aria-label="Documentation navigation"
 	>
 		<a
@@ -249,38 +249,46 @@
 							: 'text-text-faint hover:text-text-muted'}"
 						onclick={() => toggleGroup(group.title)}
 					>
-						<span class="inline-flex min-w-0 items-center gap-1.5">
-							{group.title}
-							{#if groupHasNew(group) && !openGroups[group.title]}
-								<!--
-									Only while collapsed: once open, each new child carries its
-									own badge and the dot would be redundant noise.
-								-->
-								<span
-									class="bg-accent ring-accent-border h-1.5 w-1.5 shrink-0 rounded-full ring-2"
-									title="Contains utils added in v{NEW_IN_VERSION}"
-									aria-label="Contains new utils"
-								></span>
-							{/if}
+						<span class="min-w-0 flex-1 truncate whitespace-nowrap">{group.title}</span>
+						<!--
+							The dot and chevron sit in a fixed-width trailing cluster rather
+							than inline after the title. Inline, the dot landed at a different
+							x for every group, because the title length varies. The slot is
+							rendered even when empty so the chevron never shifts either.
+						-->
+						<span class="ml-2 flex shrink-0 items-center gap-2">
+							<span class="flex h-1.5 w-1.5 items-center justify-center">
+								{#if groupHasNew(group) && !openGroups[group.title]}
+									<!--
+										Only while collapsed: once open, each new child carries its
+										own badge and the dot would be redundant noise.
+									-->
+									<span
+										class="bg-accent ring-accent-border h-1.5 w-1.5 rounded-full ring-2"
+										title="Contains utils added in v{NEW_IN_VERSION}"
+										aria-label="Contains new utils"
+									></span>
+								{/if}
+							</span>
+							<svg
+								class="opacity-50 transition-transform duration-200 {openGroups[group.title]
+									? 'rotate-180'
+									: ''}"
+								width="12"
+								height="12"
+								viewBox="0 0 12 12"
+								fill="none"
+								aria-hidden="true"
+							>
+								<path
+									d="M2 4L6 8L10 4"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								/>
+							</svg>
 						</span>
-						<svg
-							class="opacity-50 transition-transform duration-200 {openGroups[group.title]
-								? 'rotate-180'
-								: ''}"
-							width="12"
-							height="12"
-							viewBox="0 0 12 12"
-							fill="none"
-							aria-hidden="true"
-						>
-							<path
-								d="M2 4L6 8L10 4"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg>
 					</button>
 
 					{#if openGroups[group.title]}

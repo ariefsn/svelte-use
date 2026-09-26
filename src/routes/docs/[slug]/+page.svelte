@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page as appPage } from '$app/stores';
 	import { resolve } from '$app/paths';
-	import { sidebar } from '../../../docs/sidebar.js';
+	import { findItem, isNew, sidebar } from '../../../docs/sidebar.js';
 	import { formatInline, stripInline } from '../../../docs/format.js';
 	import type { Component } from 'svelte';
 	import type { PageData } from './$types.js';
@@ -229,6 +229,13 @@
 	const page = $derived(data.page);
 	const Demo = $derived(demoMap[page.slug] ?? null);
 
+	// `since` lives on the sidebar entry, so it is read from there rather than
+	// duplicated into pages.ts. Utils predating version tracking have none, and
+	// correctly show no badge.
+	const entry = $derived(findItem(page.slug));
+	const since = $derived(entry?.since);
+	const isNewInThisRelease = $derived(entry ? isNew(entry) : false);
+
 	const flat = sidebar.flatMap((g) => g.items);
 	const currentIndex = $derived(flat.findIndex((i) => i.slug === page.slug));
 	const prev = $derived(currentIndex > 0 ? flat[currentIndex - 1] : null);
@@ -275,9 +282,28 @@
 <article class="max-w-[780px]">
 	<!-- ─── Title ─── -->
 	<header class="border-border mb-8 border-b pb-8">
-		<h1 class="text-accent m-0 mb-2.5 font-mono text-[2.25rem] font-extrabold tracking-[-0.04em]">
-			{page.title}
-		</h1>
+		<div class="mb-2.5 flex flex-wrap items-center gap-3">
+			<h1 class="text-accent m-0 font-mono text-[2.25rem] font-extrabold tracking-[-0.04em]">
+				{page.title}
+			</h1>
+			{#if since}
+				<!--
+					Outside the <h1> on purpose: the heading text is what feeds the
+					document outline, and "useColorMode v1.2.0" would read oddly there.
+					The title attribute carries the same information for a pointer user.
+				-->
+				<span
+					class="shrink-0 rounded-full border px-2.5 py-1 font-sans text-[0.7rem] leading-none font-semibold tracking-wide {isNewInThisRelease
+						? 'text-accent-strong bg-accent-bg border-accent-border'
+						: 'text-text-muted bg-surface border-border'}"
+					title={isNewInThisRelease
+						? `Added in v${since}, the current release`
+						: `Added in v${since}`}
+				>
+					{isNewInThisRelease ? `New in v${since}` : `v${since}`}
+				</span>
+			{/if}
+		</div>
 		<p class="doc-prose text-text-muted m-0 text-base leading-relaxed">
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags, and the source is repo-authored doc copy, not user input -->
 			{@html formatInline(page.description)}

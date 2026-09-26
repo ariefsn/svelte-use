@@ -45,12 +45,38 @@ describe('docs coverage', () => {
 		expect(empty).toEqual([]);
 	});
 
+	it('every item records the version it shipped in', () => {
+		// The docs page renders `since` as a badge next to the title. A missing
+		// one silently rendered nothing, which read as "this util has no
+		// history" rather than "someone forgot".
+		const missing = sidebar
+			.flatMap((group) => group.items)
+			.filter((item) => !item.since)
+			.map((item) => item.slug);
+		expect(missing).toEqual([]);
+	});
+
 	it('every `since` is a valid semver-ish version', () => {
 		const malformed = sidebar
 			.flatMap((group) => group.items)
-			.filter((item) => item.since !== undefined && !/^\d+\.\d+\.\d+$/.test(item.since))
+			.filter((item) => !/^\d+\.\d+\.\d+$/.test(item.since))
 			.map((item) => `${item.slug} → ${item.since}`);
 		expect(malformed).toEqual([]);
+	});
+
+	it('no `since` is newer than the release being highlighted', () => {
+		// Catches a typo like `since: '1.3.0'` while NEW_IN_VERSION is 1.2.0 —
+		// which would badge a util as shipped in a release that does not exist.
+		const order = (v: string) => v.split('.').map(Number);
+		const newer = sidebar
+			.flatMap((group) => group.items)
+			.filter((item) => {
+				const [a, b, c] = order(item.since);
+				const [x, y, z] = order(NEW_IN_VERSION);
+				return a > x || (a === x && (b > y || (b === y && c > z)));
+			})
+			.map((item) => `${item.slug} → ${item.since}`);
+		expect(newer).toEqual([]);
 	});
 
 	it('NEW_IN_VERSION matches the version in package.json', () => {
