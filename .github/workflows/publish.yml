@@ -1,0 +1,58 @@
+name: Publish to npm
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Required for npm provenance attestation (see --provenance below).
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+          always-auth: true
+
+      - run: bun install --frozen-lockfile
+
+      # The `client` test project runs the .svelte.test.ts suites in a real
+      # browser, so Chromium is required for the gate below to mean anything.
+      # Runners start clean, so this is cached rather than reused.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+      - name: Install Chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: bunx playwright install --with-deps chromium
+
+      # Publishing is irreversible for a given version number, so fail here
+      # rather than shipping a broken build.
+      - name: Verify package.json version matches the release tag
+        if: github.event_name == 'release'
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(node -p "require('./package.json').version")
+          if [ "$TAG" != "$PKG" ]; then
+            echo "Release tag ($TAG) does not match package.json version ($PKG)."
+            exit 1
+          fi
+
+      - run: bun run check
+      - run: bun run lint
+      - run: bun run test:unit -- --run
+
+      - run: bun run prepack
+      - run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
