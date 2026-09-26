@@ -1,6 +1,16 @@
+/**
+ * The release whose additions are badged "new" in the sidebar.
+ *
+ * Bumping this on each release retires the previous badges automatically,
+ * rather than needing every `since` field swept by hand.
+ */
+export const NEW_IN_VERSION = '1.2.0';
+
 export interface SidebarItem {
 	label: string;
 	slug: string;
+	/** Version this util shipped in, e.g. `'1.2.0'`. Omit for anything older. */
+	since?: string;
 }
 
 export interface SidebarGroup {
@@ -8,11 +18,27 @@ export interface SidebarGroup {
 	items: SidebarItem[];
 }
 
+/** Whether an item shipped in the release currently being highlighted. */
+export function isNew(item: SidebarItem): boolean {
+	return item.since === NEW_IN_VERSION;
+}
+
+/**
+ * Whether a group contains any newly added item.
+ *
+ * Lets a collapsed group show that something new is hidden inside it —
+ * otherwise the only signal lives on children the user cannot see.
+ */
+export function groupHasNew(group: SidebarGroup): boolean {
+	return group.items.some(isNew);
+}
+
 export const sidebar: SidebarGroup[] = [
 	{
 		title: 'Animation',
 		items: [
 			{ label: 'useAnimate', slug: 'use-animate' },
+			{ label: 'useRafFn', slug: 'use-raf-fn', since: '1.2.0' },
 			{ label: 'useParallax', slug: 'use-parallax' },
 			{ label: 'useTransition', slug: 'use-transition' }
 		]
@@ -59,7 +85,8 @@ export const sidebar: SidebarGroup[] = [
 		items: [
 			{ label: 'useDebounce', slug: 'use-debounce' },
 			{ label: 'useWatch', slug: 'use-watch' },
-			{ label: 'useWhenever', slug: 'use-whenever' }
+			{ label: 'useWhenever', slug: 'use-whenever' },
+			{ label: 'useUntil', slug: 'use-until', since: '1.2.0' }
 		]
 	},
 	{
@@ -91,6 +118,7 @@ export const sidebar: SidebarGroup[] = [
 	{
 		title: 'Browser - Sensors',
 		items: [
+			{ label: 'useMediaQuery', slug: 'use-media-query', since: '1.2.0' },
 			{ label: 'useIdle', slug: 'use-idle' },
 			{ label: 'useNetwork', slug: 'use-network' },
 			{ label: 'useGeolocation', slug: 'use-geolocation' },
@@ -110,6 +138,7 @@ export const sidebar: SidebarGroup[] = [
 	{
 		title: 'Browser - Storage',
 		items: [
+			{ label: 'useStorage', slug: 'use-storage', since: '1.2.0' },
 			{ label: 'useLocalStorage', slug: 'use-local-storage' },
 			{ label: 'useIndexedDB', slug: 'use-indexed-db' },
 			{ label: 'useBase64', slug: 'use-base64' },
@@ -159,6 +188,7 @@ export const sidebar: SidebarGroup[] = [
 			{ label: 'useWebNotification', slug: 'use-web-notification' },
 			{ label: 'usePermission', slug: 'use-permission' },
 			{ label: 'useWakeLock', slug: 'use-wake-lock' },
+			{ label: 'useSupported', slug: 'use-supported', since: '1.2.0' },
 			{ label: 'useEventListener', slug: 'use-event-listener' },
 			{ label: 'useTextDirection', slug: 'use-text-direction' },
 			{ label: 'useTextSelection', slug: 'use-text-selection' }

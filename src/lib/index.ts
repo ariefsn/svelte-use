@@ -193,3 +193,21 @@ export type { UseTimestampOptions } from './time/useTimestamp.svelte.js';
 
 // Virtual
 export { useVirtualList } from './virtual/useVirtualList.svelte.js';
+
+// Foundational primitives
+export { useSupported } from './browser/useSupported.svelte.js';
+export { useMediaQuery } from './browser/sensors/useMediaQuery.svelte.js';
+export { useRafFn } from './animation/useRafFn.svelte.js';
+export type {
+	UseRafFnOptions,
+	UseRafFnReturn,
+	UseRafFnCallbackArgs
+} from './animation/useRafFn.svelte.js';
+export { useUntil } from './reactivity/useUntil.svelte.js';
+export type { UseUntilOptions, UseUntilChain } from './reactivity/useUntil.svelte.js';
+export { useStorage } from './browser/storage/useStorage.svelte.js';
+export type {
+	UseStorageOptions,
+	UseStorageReturn,
+	StorageArea
+} from './browser/storage/useStorage.svelte.js';

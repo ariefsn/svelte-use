@@ -7,6 +7,11 @@
 	import type { PageData } from './$types.js';
 	// ── Demo components ──────────────────────────────────────────────────────
 	import DemoUseAnimate from './demos/use-animate.svelte';
+	import DemoUseMediaQuery from './demos/use-media-query.svelte';
+	import DemoUseRafFn from './demos/use-raf-fn.svelte';
+	import DemoUseStorage from './demos/use-storage.svelte';
+	import DemoUseSupported from './demos/use-supported.svelte';
+	import DemoUseUntil from './demos/use-until.svelte';
 	import DemoUseBase64 from './demos/use-base64.svelte';
 	import DemoUseBattery from './demos/use-battery.svelte';
 	import DemoUseBreakpoints from './demos/use-breakpoints.svelte';
@@ -96,6 +101,11 @@
 	// ── Static slug → component map ──────────────────────────────────────────
 	const demoMap: Record<string, Component> = {
 		'use-animate': DemoUseAnimate,
+		'use-media-query': DemoUseMediaQuery,
+		'use-raf-fn': DemoUseRafFn,
+		'use-storage': DemoUseStorage,
+		'use-supported': DemoUseSupported,
+		'use-until': DemoUseUntil,
 		'use-parallax': DemoUseParallax,
 		'use-transition': DemoUseTransition,
 		'use-fetch': DemoUseFetch,

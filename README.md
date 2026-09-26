@@ -3,7 +3,7 @@
 
   <h1>@ariefsn/svelte-use</h1>
 
-  <p>A collection of <strong>80+</strong> Svelte 5 runes-first utility composables.<br/>No stores. No external dependencies. SSR-safe. Fully typed.</p>
+  <p>A collection of <strong>85+</strong> Svelte 5 runes-first utility composables.<br/>No stores. No external dependencies. SSR-safe. Fully typed.</p>
 
   <p>
     <a href="https://github.com/ariefsn/svelte-use">
@@ -56,6 +56,7 @@ bun add @ariefsn/svelte-use
 | Composable      | Description                                     |
 | --------------- | ----------------------------------------------- |
 | `useAnimate`    | Reactive Web Animations API wrapper             |
+| `useRafFn`      | Run a callback on every animation frame         |
 | `useParallax`   | Parallax effect based on pointer or device tilt |
 | `useTransition` | Animated numeric transitions with easing        |
 
@@ -103,6 +104,7 @@ bun add @ariefsn/svelte-use
 | `useDebounce` | Debounce any reactive getter                     |
 | `useWatch`    | Watch reactive values with current/previous args |
 | `useWhenever` | Watch that fires only when value becomes truthy  |
+| `useUntil`    | Await a reactive value reaching a condition      |
 
 ### Browser – Keyboard & Scroll
 
@@ -134,6 +136,7 @@ bun add @ariefsn/svelte-use
 
 | Composable              | Description                                            |
 | ----------------------- | ------------------------------------------------------ |
+| `useMediaQuery`         | Reactively track whether a CSS media query matches     |
 | `useIdle`               | Detect user idle state                                 |
 | `useNetwork`            | Network Information API (downlink, RTT, effectiveType) |
 | `useGeolocation`        | Reactive geolocation via watchPosition                 |
@@ -153,6 +156,7 @@ bun add @ariefsn/svelte-use
 
 | Composable          | Description                             |
 | ------------------- | --------------------------------------- |
+| `useStorage`        | Reactive Web Storage (local or session) |
 | `useLocalStorage`   | Reactive localStorage with SSR safety   |
 | `useIndexedDB`      | Reactive IndexedDB with CRUD & querying |
 | `useBase64`         | Reactive Base64 encode/decode           |
@@ -200,6 +204,7 @@ bun add @ariefsn/svelte-use
 | `useWebNotification`   | Desktop notifications API           |
 | `usePermission`        | Browser Permissions API             |
 | `useWakeLock`          | Screen Wake Lock API                |
+| `useSupported`         | SSR-safe one-shot feature detection |
 | `useEventListener`     | Generic event listener with cleanup |
 | `useTextDirection`     | Track/set text directionality       |
 | `useTextSelection`     | Track text selection                |

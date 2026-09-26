@@ -151,6 +151,54 @@ describe('useTransition', () => {
 		cleanup();
 	});
 
+	test('completes on schedule when stepped frame by frame', () => {
+		// Regression: the effect read `current`, which the per-frame tick
+		// writes, so every frame re-ran the effect and restarted the tween
+		// with a fresh startTime. The single-jump tests above never caught it
+		// because they drain the whole duration in one frame.
+		let source = $state(0);
+		let result: ReturnType<typeof useTransition> | undefined;
+
+		const cleanup = $effect.root(() => {
+			result = useTransition(() => source, { duration: 200, easing: linear });
+			flushSync();
+			source = 100;
+			flushSync();
+		});
+
+		// Ten 20ms frames = exactly the 200ms duration.
+		for (let i = 0; i < 10; i++) {
+			fakeRAF.advanceTime(20);
+			flushSync();
+		}
+
+		expect(result!()).toBeCloseTo(100, 1);
+
+		cleanup();
+	});
+
+	test('follows linear easing across successive frames', () => {
+		let source = $state(0);
+		let result: ReturnType<typeof useTransition> | undefined;
+
+		const cleanup = $effect.root(() => {
+			result = useTransition(() => source, { duration: 100, easing: linear });
+			flushSync();
+			source = 100;
+			flushSync();
+		});
+
+		fakeRAF.advanceTime(25);
+		flushSync();
+		expect(result!()).toBeCloseTo(25, 0);
+
+		fakeRAF.advanceTime(25);
+		flushSync();
+		expect(result!()).toBeCloseTo(50, 0);
+
+		cleanup();
+	});
+
 	test('cancels pending frame and restarts when source changes mid-animation', () => {
 		let source = $state(0);
 		let result: ReturnType<typeof useTransition> | undefined;

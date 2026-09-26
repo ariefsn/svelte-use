@@ -1,3 +1,5 @@
+import { useSupported } from '../useSupported.svelte.js';
+
 export interface UseDevicePixelRatioReturn {
 	/** Whether devicePixelRatio is supported */
 	isSupported: () => boolean;
@@ -9,6 +11,8 @@ export interface UseDevicePixelRatioReturn {
  * Reactively tracks the device pixel ratio (DPR).
  *
  * Useful for detecting high-DPI/Retina displays and optimizing rendering.
+ * Updates when the user zooms or the window moves to a display with a
+ * different pixel density.
  *
  * @returns Object with `isSupported` and reactive `current` getter
  *
@@ -19,24 +23,23 @@ export interface UseDevicePixelRatioReturn {
  * ```
  */
 export function useDevicePixelRatio(): UseDevicePixelRatioReturn {
-	const isBrowser = typeof window !== 'undefined';
-	const supported = isBrowser && 'devicePixelRatio' in window;
+	const isSupported = useSupported(() => 'devicePixelRatio' in window);
 
-	let ratio = $state(isBrowser ? window.devicePixelRatio : 1);
+	let ratio = $state(isSupported() ? window.devicePixelRatio : 1);
 
 	$effect(() => {
-		if (!supported) return;
+		if (!isSupported()) return;
 
 		// Reading `ratio` here is load-bearing, not incidental: a
-		// `(resolution: Xdppx)` query only fires when the DPR *leaves* X, so the
-		// listener must be rebuilt around each new value. Tracking `ratio` makes
-		// this effect re-run and re-subscribe after every change.
+		// `(resolution: Xdppx)` query only fires when the DPR *leaves* X, so
+		// the listener must be rebuilt around each new value. Tracking `ratio`
+		// makes this effect re-run and re-subscribe after every change.
 		//
-		// This is safe despite the effect also writing `ratio` (via the handler)
-		// because the write happens in an event callback, not during the run —
-		// so there is no read-modify-write cycle. Do not "optimise" the read
-		// away with untrack(); that would freeze the listener on the initial
-		// ratio and it would fire exactly once.
+		// Safe despite the effect also writing `ratio` (via the handler),
+		// because that write happens in an event callback rather than during
+		// the run — so there is no read-modify-write cycle. Do not "optimise"
+		// the read away with untrack(); the listener would freeze on the
+		// initial ratio and fire exactly once.
 		const mql = window.matchMedia(`(resolution: ${ratio}dppx)`);
 
 		function onChange() {
@@ -51,7 +54,7 @@ export function useDevicePixelRatio(): UseDevicePixelRatioReturn {
 	});
 
 	return {
-		isSupported: () => supported,
+		isSupported,
 		current: () => ratio
 	};
 }

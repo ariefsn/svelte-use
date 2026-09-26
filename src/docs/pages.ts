@@ -18,6 +18,339 @@ export interface DocPage {
 }
 
 export const pages: Record<string, DocPage> = {
+	// ----------------------------------------------- Foundational primitives
+	'use-supported': {
+		slug: 'use-supported',
+		title: 'useSupported',
+		description:
+			'Evaluates a feature-detection predicate once, with SSR safety. Replaces the `typeof window !== "undefined" && "X" in window` guard that browser composables would otherwise hand-roll.',
+		usage: `import { useSupported } from '@ariefsn/svelte-use';
+
+const isSupported = useSupported(() => 'geolocation' in navigator);
+isSupported(); // → true in a browser with geolocation, false during SSR`,
+		params: [
+			{
+				name: 'predicate',
+				type: '() => boolean',
+				description: 'Feature test. Only invoked in a browser, never during SSR.'
+			}
+		],
+		returns: [
+			{
+				name: '()',
+				type: '() => boolean',
+				description: 'Whether the feature is available'
+			}
+		],
+		example: `<script lang="ts">
+  import { useSupported } from '@ariefsn/svelte-use';
+
+  const hasClipboard = useSupported(() => 'clipboard' in navigator);
+  const hasVibrate = useSupported(() => 'vibrate' in navigator);
+</script>
+
+{#if hasClipboard()}
+  <button onclick={copy}>Copy</button>
+{:else}
+  <p>Clipboard is unavailable in this browser.</p>
+{/if}`,
+		notes: [
+			'The predicate runs **immediately**, not inside an `$effect`, so the result is available during initialisation and this can be called outside a reactive scope.',
+			'A predicate that throws is treated as unsupported. Touching some APIs throws under a restrictive permissions policy, which is indistinguishable from unavailable.',
+			'Returns `false` during SSR, matching how every browser API behaves there. If you render on that value, expect the server HTML to show the unsupported branch until hydration.',
+			'Support does not change at runtime, so the result is a stable value rather than reactive state — the predicate is evaluated exactly once.'
+		]
+	},
+
+	'use-media-query': {
+		slug: 'use-media-query',
+		title: 'useMediaQuery',
+		description:
+			'Reactively tracks whether a CSS media query matches. Accepts a plain string or a getter, rebuilding the listener when a reactive query changes.',
+		usage: `import { useMediaQuery } from '@ariefsn/svelte-use';
+
+const isWide = useMediaQuery('(min-width: 768px)');
+isWide(); // → true when the viewport is at least 768px`,
+		params: [
+			{
+				name: 'query',
+				type: 'string | (() => string)',
+				description: 'Media query string, or a getter returning one'
+			}
+		],
+		returns: [
+			{
+				name: '()',
+				type: '() => boolean',
+				description: 'Whether the query currently matches'
+			}
+		],
+		example: `<script lang="ts">
+  import { useMediaQuery } from '@ariefsn/svelte-use';
+
+  const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
+  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+
+  // Reactive query — the listener is rebuilt as \`width\` changes
+  let width = $state(768);
+  const matches = useMediaQuery(() => \`(min-width: \${width}px)\`);
+</script>
+
+<p>Theme: {prefersDark() ? 'dark' : 'light'}</p>`,
+		notes: [
+			'The initial match is read **synchronously**, so the first render already has the correct answer rather than flashing the non-matching branch for a frame.',
+			'Returns `false` during SSR, since `matchMedia` does not exist on the server.',
+			'When `query` is a getter, changing it tears down the old listener and attaches a new one.',
+			'`useBreakpoints` is built on this — prefer it when you have a named set of breakpoints.'
+		]
+	},
+
+	'use-raf-fn': {
+		slug: 'use-raf-fn',
+		title: 'useRafFn',
+		description:
+			'Runs a callback on every animation frame, passing the frame `timestamp` and the `delta` since the previous invocation. Optionally throttled with `fpsLimit`.',
+		usage: `import { useRafFn } from '@ariefsn/svelte-use';
+
+const { isActive, pause, resume } = useRafFn(({ delta }) => {
+  position += velocity * delta;
+});`,
+		params: [
+			{
+				name: 'fn',
+				type: '(args: { delta: number; timestamp: number }) => void',
+				description: 'Called once per frame'
+			},
+			{ name: 'options', type: 'UseRafFnOptions', default: '{}', description: 'Loop options' }
+		],
+		options: [
+			{
+				name: 'immediate',
+				type: 'boolean',
+				default: 'true',
+				description: 'Start the loop immediately'
+			},
+			{
+				name: 'fpsLimit',
+				type: 'number',
+				description: 'Cap the callback rate in frames per second. Unlimited when omitted.'
+			}
+		],
+		returns: [
+			{ name: 'isActive', type: '() => boolean', description: '`true` while the loop is running' },
+			{ name: 'pause', type: '() => void', description: 'Stops the loop' },
+			{ name: 'resume', type: '() => void', description: 'Starts the loop' }
+		],
+		example: `<script lang="ts">
+  import { useRafFn } from '@ariefsn/svelte-use';
+
+  let angle = $state(0);
+
+  // Degrees per millisecond keeps the speed frame-rate independent
+  const { isActive, pause, resume } = useRafFn(({ delta }) => {
+    angle = (angle + delta * 0.18) % 360;
+  });
+</script>
+
+<div style="transform: rotate({angle}deg)">spinning</div>
+<button onclick={isActive() ? pause : resume}>
+  {isActive() ? 'pause' : 'resume'}
+</button>`,
+		notes: [
+			'Use `delta` rather than a fixed increment so animation speed stays constant across refresh rates — a 120Hz display fires twice as often as a 60Hz one.',
+			'`delta` is `0` on the first frame, where there is no previous frame to measure against.',
+			'`fpsLimit` throttles the **callback**, not the loop: frames are still requested, they just skip the callback until enough time has elapsed.',
+			'Safe during SSR — no frame is ever requested and `isActive()` stays `false`.',
+			'The loop is cancelled when the owning reactive scope is destroyed.'
+		]
+	},
+
+	'use-until': {
+		slug: 'use-until',
+		title: 'useUntil',
+		description:
+			'Waits for a reactive value to reach a condition, as a promise. Fills the gap left by `useWatch` and `useWhenever`, which are callback-based — this lets you `await` a state change inside ordinary async code.',
+		usage: `import { useUntil } from '@ariefsn/svelte-use';
+
+const { isLoading, data } = useFetch(url);
+await useUntil(isLoading).toBe(false);
+console.log(data());`,
+		params: [
+			{
+				name: 'source',
+				type: '() => T',
+				description: 'Getter returning the reactive value to watch'
+			}
+		],
+		returns: [
+			{
+				name: 'toBe',
+				type: '(expected: T, options?) => Promise<T>',
+				description: 'Strict equality'
+			},
+			{ name: 'toBeTruthy', type: '(options?) => Promise<T>', description: 'Value becomes truthy' },
+			{ name: 'toBeFalsy', type: '(options?) => Promise<T>', description: 'Value becomes falsy' },
+			{
+				name: 'toBeNullish',
+				type: '(options?) => Promise<T>',
+				description: 'Value becomes `null` or `undefined`'
+			},
+			{
+				name: 'toBeDefined',
+				type: '(options?) => Promise<T>',
+				description: 'Value becomes neither `null` nor `undefined`'
+			},
+			{ name: 'toBeNaN', type: '(options?) => Promise<T>', description: 'Value becomes `NaN`' },
+			{
+				name: 'toContain',
+				type: '(item: UseUntilItem<T>, options?) => Promise<T>',
+				description:
+					'Container gains `item`. Works with arrays, strings, `Set`, and `Map` (by key).'
+			},
+			{
+				name: 'toHaveLength',
+				type: '(length: number, options?) => Promise<T>',
+				description: '`length` or `size` reaches the given number'
+			},
+			{
+				name: 'toMatch',
+				type: '(predicate: (value: T) => boolean, options?) => Promise<T>',
+				description: 'Arbitrary predicate passes'
+			},
+			{
+				name: 'changed',
+				type: '(options?) => Promise<T>',
+				description: 'Value changes from what it is now'
+			},
+			{
+				name: 'changedTimes',
+				type: '(times: number, options?) => Promise<T>',
+				description: 'Value changes `times` times'
+			},
+			{
+				name: 'not',
+				type: 'UseUntilChain<T>',
+				description: 'Inverts every matcher, e.g. `not.toBe(5)`'
+			}
+		],
+		options: [
+			{
+				name: 'timeout',
+				type: 'number',
+				description: 'Reject after this many milliseconds. Waits forever when omitted.'
+			},
+			{
+				name: 'resolveOnTimeout',
+				type: 'boolean',
+				default: 'false',
+				description: 'Resolve with the current value on timeout instead of rejecting'
+			}
+		],
+		example: `<script lang="ts">
+  import { useUntil } from '@ariefsn/svelte-use';
+
+  let items = $state<string[]>([]);
+  let status = $state('pending');
+
+  async function run() {
+    // Containment, negation and a timeout
+    await useUntil(() => items).toContain('ready');
+    await useUntil(() => items).toHaveLength(3);
+
+    try {
+      await useUntil(() => status).not.toBe('pending', { timeout: 5000 });
+    } catch {
+      console.warn('still pending after 5s');
+    }
+  }
+</script>`,
+		notes: [
+			'The condition is checked **immediately**, so an already-satisfied value resolves without waiting for a change.',
+			'Creates its own `$effect.root` internally, so it can be called from anywhere — including event handlers and plain async functions outside a component.',
+			'Watching stops as soon as the promise settles, and a pending timeout timer is cleared.',
+			'`toContain` is typed as the container’s element type: calling it on a value that cannot contain anything, or with a mismatched item, is a **compile error** rather than a call that silently never matches.',
+			'`changedTimes` counts transitions, so writing the same value again does not advance the count.'
+		]
+	},
+
+	'use-storage': {
+		slug: 'use-storage',
+		title: 'useStorage',
+		description:
+			'Reactive Web Storage utility with SSR safety and cross-tab sync. The shared implementation behind `useLocalStorage` and `useSessionStorage` — use those unless the storage area needs to be chosen at runtime.',
+		usage: `import { useStorage } from '@ariefsn/svelte-use';
+
+const theme = useStorage('theme', 'light');
+theme.set('dark');
+theme.value;    // 'dark'
+theme.remove(); // back to 'light'`,
+		params: [
+			{ name: 'key', type: 'string', description: 'Storage key' },
+			{
+				name: 'initial',
+				type: 'T',
+				description: 'Fallback used when the key is absent, unreadable, or in SSR'
+			},
+			{
+				name: 'area',
+				type: "'local' | 'session'",
+				default: "'local'",
+				description: 'Which Web Storage area to read and write'
+			},
+			{
+				name: 'options',
+				type: 'UseStorageOptions<T>',
+				default: '{}',
+				description: 'Optional custom serialiser / deserialiser pair'
+			}
+		],
+		options: [
+			{
+				name: 'serializer',
+				type: '(value: T) => string',
+				default: 'JSON.stringify',
+				description: 'Custom serialiser'
+			},
+			{
+				name: 'deserializer',
+				type: '(raw: string) => T',
+				default: 'JSON.parse',
+				description: 'Custom deserialiser'
+			}
+		],
+		returns: [
+			{ name: 'value', type: 'T', description: 'The reactive stored value' },
+			{
+				name: 'set',
+				type: '(value: T) => void',
+				description: 'Writes a new value and persists it'
+			},
+			{
+				name: 'remove',
+				type: '() => void',
+				description: 'Removes the key from storage and resets the value to `initial`'
+			}
+		],
+		example: `<script lang="ts">
+  import { useStorage } from '@ariefsn/svelte-use';
+
+  // Non-JSON values need a serialiser pair
+  const seen = useStorage('last-seen', new Date(), 'session', {
+    serializer: (d) => d.toISOString(),
+    deserializer: (raw) => new Date(raw)
+  });
+</script>
+
+<p>Last seen: {seen.value.toLocaleString()}</p>
+<button onclick={() => seen.set(new Date())}>Update</button>`,
+		notes: [
+			'Storage access is wrapped throughout: quota errors, blocked cookies and private-mode restrictions degrade to the in-memory value rather than throwing.',
+			'A `storage` event listener keeps the value in sync with other tabs on the same origin. Note that only `localStorage` fires these across tabs.',
+			'After `remove()` the write-back is suppressed, so the key is not immediately re-created by the effect that mirrors the value.',
+			'The storage object is resolved lazily rather than captured once, because touching `localStorage` can throw when cookies are blocked.'
+		]
+	},
+
 	// ------------------------------------------------------------------ State
 	'use-sorted': {
 		slug: 'use-sorted',

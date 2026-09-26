@@ -1,0 +1,89 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { pages } from './pages.js';
+import { NEW_IN_VERSION, allSlugs, groupHasNew, isNew, sidebar } from './sidebar.js';
+
+const DEMOS_DIR = join(process.cwd(), 'src/routes/docs/[slug]/demos');
+
+/**
+ * The docs site is assembled from four places that must agree: the sidebar,
+ * the page content, the demo components, and the demo registry in
+ * `+page.svelte`. Nothing links them at compile time, so a util added to one
+ * and forgotten in another only shows up as a 404 or a missing demo in the
+ * browser. These checks fail the build instead.
+ */
+describe('docs coverage', () => {
+	it('every sidebar slug has a pages.ts entry', () => {
+		expect(allSlugs.filter((slug) => !(slug in pages))).toEqual([]);
+	});
+
+	it('every pages.ts entry appears in the sidebar', () => {
+		expect(Object.keys(pages).filter((slug) => !allSlugs.includes(slug))).toEqual([]);
+	});
+
+	it('every page key matches its own slug field', () => {
+		const mismatched = Object.entries(pages)
+			.filter(([key, page]) => key !== page.slug)
+			.map(([key, page]) => `${key} → ${page.slug}`);
+		expect(mismatched).toEqual([]);
+	});
+
+	it('every sidebar slug has a demo component on disk', () => {
+		const missing = allSlugs.filter((slug) => !existsSync(join(DEMOS_DIR, `${slug}.svelte`)));
+		expect(missing).toEqual([]);
+	});
+
+	it('has no duplicate slugs across sidebar groups', () => {
+		const seen = new Set<string>();
+		const duplicates = allSlugs.filter((slug) => !seen.add(slug));
+		expect(duplicates).toEqual([]);
+	});
+
+	it('every sidebar group has a title and at least one item', () => {
+		const empty = sidebar.filter((group) => !group.title || group.items.length === 0);
+		expect(empty).toEqual([]);
+	});
+
+	it('every `since` is a valid semver-ish version', () => {
+		const malformed = sidebar
+			.flatMap((group) => group.items)
+			.filter((item) => item.since !== undefined && !/^\d+\.\d+\.\d+$/.test(item.since))
+			.map((item) => `${item.slug} → ${item.since}`);
+		expect(malformed).toEqual([]);
+	});
+
+	it('NEW_IN_VERSION matches the version in package.json', () => {
+		// Otherwise the badges silently vanish (or linger) after a release bump.
+		const pkg = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8'));
+		expect(NEW_IN_VERSION).toBe(pkg.version);
+	});
+
+	it('groupHasNew is true exactly for groups containing a new item', () => {
+		for (const group of sidebar) {
+			expect(groupHasNew(group)).toBe(group.items.some(isNew));
+		}
+	});
+
+	it('every new item is reachable through a group flagged as having new items', () => {
+		// Guards the collapsed-group case: a new util whose group is not
+		// flagged would be invisible until the user expanded it at random.
+		const unreachable = sidebar
+			.filter((group) => group.items.some(isNew) && !groupHasNew(group))
+			.map((group) => group.title);
+		expect(unreachable).toEqual([]);
+	});
+
+	it('at least one item is badged new', () => {
+		// A release with no new-flagged utils usually means the `since` fields
+		// were forgotten rather than that nothing was added.
+		expect(sidebar.flatMap((g) => g.items).filter(isNew).length).toBeGreaterThan(0);
+	});
+
+	it('every page has the fields the template renders', () => {
+		const incomplete = Object.values(pages)
+			.filter((page) => !page.title || !page.description || !page.usage || !page.example)
+			.map((page) => page.slug);
+		expect(incomplete).toEqual([]);
+	});
+});

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { resolve } from '$app/paths';
-	import { sidebar } from '../docs/sidebar.js';
+	import { NEW_IN_VERSION, groupHasNew, isNew, sidebar } from '../docs/sidebar.js';
 
 	let { children } = $props();
 
@@ -146,7 +146,12 @@
 							class:active={$page.params.slug === item.slug}
 							onclick={() => (searchQuery = '')}
 						>
-							<span>{item.label}</span>
+							<span class="result-main">
+								<span class="nav-label">{item.label}</span>
+								{#if isNew(item)}
+									<span class="new-badge" title="Added in v{NEW_IN_VERSION}">new</span>
+								{/if}
+							</span>
 							<span class="result-group">{item.group}</span>
 						</a>
 					{/each}
@@ -160,7 +165,16 @@
 						class:open={openGroups[group.title]}
 						onclick={() => toggleGroup(group.title)}
 					>
-						<span>{group.title}</span>
+						<span class="group-label">
+							{group.title}
+							{#if groupHasNew(group) && !openGroups[group.title]}
+								<span
+									class="new-dot"
+									title="Contains utils added in v{NEW_IN_VERSION}"
+									aria-label="Contains new utils"
+								></span>
+							{/if}
+						</span>
 						<svg
 							class="chevron"
 							class:rotated={openGroups[group.title]}
@@ -189,7 +203,10 @@
 										class="nav-item"
 										class:active={$page.params.slug === item.slug}
 									>
-										{item.label}
+										<span class="nav-label">{item.label}</span>
+										{#if isNew(item)}
+											<span class="new-badge" title="Added in v{NEW_IN_VERSION}">new</span>
+										{/if}
 									</a>
 								</li>
 							{/each}
@@ -415,6 +432,13 @@
 		gap: 0.5rem;
 	}
 
+	.result-main {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		min-width: 0;
+	}
+
 	.result-group {
 		font-size: 0.7rem;
 		color: #444;
@@ -485,7 +509,9 @@
 	}
 
 	.nav-item {
-		display: block;
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
 		padding: 0.3rem 0.6rem 0.3rem 1rem;
 		border-radius: 5px;
 		text-decoration: none;
@@ -495,6 +521,75 @@
 		transition:
 			color 0.15s,
 			background 0.15s;
+	}
+
+	.nav-label {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.group-label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		min-width: 0;
+	}
+
+	/*
+	 * Only shown while the group is collapsed. Once it is open each new child
+	 * carries its own badge, so the dot would be redundant noise.
+	 */
+	.new-dot {
+		flex-shrink: 0;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: #a78bfa;
+		box-shadow: 0 0 0 2px #2e2547;
+	}
+
+	.new-badge {
+		flex-shrink: 0;
+		font-family: system-ui, sans-serif;
+		font-size: 0.6rem;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		line-height: 1;
+		padding: 0.15rem 0.3rem;
+		border-radius: 4px;
+		color: #c4b5fd;
+		background: #2e2547;
+		border: 1px solid #4c3f80;
+	}
+
+	/* The badge is decorative; the accessible name comes from the label. */
+	@media (prefers-reduced-motion: no-preference) {
+		.group-label {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.4rem;
+			min-width: 0;
+		}
+
+		/*
+	 * Only shown while the group is collapsed. Once it is open each new child
+	 * carries its own badge, so the dot would be redundant noise.
+	 */
+		.new-dot {
+			flex-shrink: 0;
+			width: 6px;
+			height: 6px;
+			border-radius: 50%;
+			background: #a78bfa;
+			box-shadow: 0 0 0 2px #2e2547;
+		}
+
+		.new-badge {
+			transition: background 0.15s;
+		}
 	}
 
 	.nav-item:hover {

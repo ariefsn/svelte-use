@@ -1,3 +1,5 @@
+import { useRafFn } from '../animation/useRafFn.svelte.js';
+
 /**
  * Measures the current frames-per-second rate using `requestAnimationFrame`.
  *
@@ -15,33 +17,11 @@
  * ```
  */
 export function useFps(): () => number {
-	const isBrowser = typeof requestAnimationFrame !== 'undefined';
-
 	let fps = $state<number>(0);
-	let rafId: number | undefined;
-	let lastTime: number | undefined;
 
-	$effect(() => {
-		if (!isBrowser) return;
-
-		function loop(timestamp: number): void {
-			if (lastTime !== undefined) {
-				const delta = timestamp - lastTime;
-				fps = delta > 0 ? Math.round(1000 / delta) : 0;
-			}
-			lastTime = timestamp;
-			rafId = requestAnimationFrame(loop);
-		}
-
-		rafId = requestAnimationFrame(loop);
-
-		return () => {
-			if (rafId !== undefined) {
-				cancelAnimationFrame(rafId);
-			}
-			rafId = undefined;
-			lastTime = undefined;
-		};
+	useRafFn(({ delta }) => {
+		// delta is 0 on the first frame, where there is no interval to measure.
+		if (delta > 0) fps = Math.round(1000 / delta);
 	});
 
 	return () => fps;

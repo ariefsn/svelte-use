@@ -1,3 +1,5 @@
+import { useMediaQuery } from './useMediaQuery.svelte.js';
+
 /**
  * Shape of the return value from {@link useBreakpoints}.
  */
@@ -39,37 +41,14 @@ export interface UseBreakpointsReturn {
  * ```
  */
 export function useBreakpoints(breakpoints: Record<string, number>): UseBreakpointsReturn {
-	const isBrowser = typeof window !== 'undefined';
+	// One useMediaQuery per breakpoint; it owns the matchMedia listener and its
+	// cleanup, so there is no MediaQueryList bookkeeping here.
+	const matchers = Object.entries(breakpoints).map(([key, value]) => ({
+		key,
+		matches: useMediaQuery(`(min-width: ${value}px)`)
+	}));
 
-	function computeActive(): string[] {
-		if (!isBrowser) return [];
-		return Object.entries(breakpoints)
-			.filter(([, value]) => window.matchMedia(`(min-width: ${value}px)`).matches)
-			.map(([key]) => key);
-	}
-
-	let activeKeys = $state<string[]>(computeActive());
-
-	$effect(() => {
-		if (!isBrowser) return;
-
-		const queries = Object.entries(breakpoints).map(([, value]) => {
-			const mql = window.matchMedia(`(min-width: ${value}px)`);
-
-			function handleChange() {
-				activeKeys = computeActive();
-			}
-
-			mql.addEventListener('change', handleChange);
-			return { mql, handleChange };
-		});
-
-		return () => {
-			for (const { mql, handleChange } of queries) {
-				mql.removeEventListener('change', handleChange);
-			}
-		};
-	});
+	const activeKeys = $derived(matchers.filter((m) => m.matches()).map((m) => m.key));
 
 	return {
 		active: () => activeKeys,

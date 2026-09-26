@@ -1,3 +1,4 @@
+import { untrack } from 'svelte';
 /**
  * Built-in linear easing — identity function `t → t`.
  *
@@ -77,7 +78,11 @@ export function useTransition(
 			return;
 		}
 
-		const from = current;
+		// Snapshot, not a dependency. `tick` writes `current` every frame; if
+		// this read were tracked the effect would re-run per frame, cancel the
+		// in-flight frame and restart the tween with a fresh startTime — so
+		// the animation would never honour `duration` or `easing`.
+		const from = untrack(() => current);
 
 		if (from === to) return;
 
