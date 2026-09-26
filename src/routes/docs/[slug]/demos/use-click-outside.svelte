@@ -30,7 +30,7 @@
 
 	{#if log.length > 0}
 		<ul class="log">
-			{#each log as entry}
+			{#each log as entry, i (i)}
 				<li>{entry}</li>
 			{/each}
 		</ul>

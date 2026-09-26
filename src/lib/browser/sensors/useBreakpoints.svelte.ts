@@ -53,7 +53,7 @@ export function useBreakpoints(breakpoints: Record<string, number>): UseBreakpoi
 	$effect(() => {
 		if (!isBrowser) return;
 
-		const queries = Object.entries(breakpoints).map(([key, value]) => {
+		const queries = Object.entries(breakpoints).map(([, value]) => {
 			const mql = window.matchMedia(`(min-width: ${value}px)`);
 
 			function handleChange() {

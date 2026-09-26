@@ -163,7 +163,7 @@ export const sidebar: SidebarGroup[] = [
 			{ label: 'useTextDirection', slug: 'use-text-direction' },
 			{ label: 'useTextSelection', slug: 'use-text-selection' }
 		]
-	},
+	}
 ];
 
 export const allSlugs = sidebar.flatMap((g) => g.items.map((i) => i.slug));

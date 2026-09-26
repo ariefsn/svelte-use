@@ -19,9 +19,7 @@ export interface UsePermissionReturn {
  * // state() → 'granted' | 'denied' | 'prompt' | undefined
  * ```
  */
-export function usePermission(
-	name: PermissionName | (string & {})
-): UsePermissionReturn {
+export function usePermission(name: PermissionName | (string & {})): UsePermissionReturn {
 	const isBrowser = typeof navigator !== 'undefined';
 	const supported = isBrowser && 'permissions' in navigator;
 

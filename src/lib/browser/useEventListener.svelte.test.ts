@@ -32,7 +32,7 @@ describe('useEventListener', () => {
 	test('supports multiple events', () => {
 		const handler = vi.fn();
 		const cleanup = $effect.root(() => {
-			useEventListener(document, ['mousedown', 'mouseup'] as any, handler);
+			useEventListener(document, ['mousedown', 'mouseup'] as const, handler);
 			flushSync();
 		});
 

@@ -1,5 +1,5 @@
 import { flushSync } from 'svelte';
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useFetch } from './useFetch.svelte.js';
 
 // ---------------------------------------------------------------------------

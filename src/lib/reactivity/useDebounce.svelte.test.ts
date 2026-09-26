@@ -13,7 +13,7 @@ describe('useDebounce', () => {
 
 	test('returns the initial value immediately', () => {
 		const cleanup = $effect.root(() => {
-			let val = $state('hello');
+			const val = $state('hello');
 			const debounced = useDebounce(() => val, 300);
 			expect(debounced()).toBe('hello');
 		});

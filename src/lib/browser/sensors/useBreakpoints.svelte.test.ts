@@ -4,8 +4,6 @@ import { useBreakpoints } from './useBreakpoints.svelte.js';
 
 const BREAKPOINTS = { sm: 640, md: 768, lg: 1024, xl: 1280 };
 
-type MQLCallback = (event: MediaQueryListEvent) => void;
-
 interface MockMQL extends EventTarget {
 	matches: boolean;
 	media: string;

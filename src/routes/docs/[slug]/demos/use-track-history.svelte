@@ -6,6 +6,7 @@
 		(v) => (count = v)
 	);
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">count</span>

@@ -35,9 +35,7 @@ export interface UseNavigationGuardReturn {
  * // cancel() → stays on current page
  * ```
  */
-export function useNavigationGuard(
-	options: UseNavigationGuardOptions
-): UseNavigationGuardReturn {
+export function useNavigationGuard(options: UseNavigationGuardOptions): UseNavigationGuardReturn {
 	let pendingUrl: string | null = null;
 
 	beforeNavigate((nav) => {
@@ -54,6 +52,7 @@ export function useNavigationGuard(
 		if (!pendingUrl) return;
 		const url = pendingUrl;
 		pendingUrl = null;
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- `url` is the pending navigation target captured from beforeNavigate, already a resolved href
 		goto(url);
 	}
 

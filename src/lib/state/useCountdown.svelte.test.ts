@@ -1,3 +1,4 @@
+import { flushSync } from 'svelte';
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { useCountdown } from './useCountdown.svelte.js';
 
@@ -140,6 +141,8 @@ describe('useCountdown', () => {
 		const cleanup = $effect.root(() => {
 			const { start } = useCountdown(10, 1000);
 			start();
+			// The interval is created by an $effect, which only runs on flush.
+			flushSync();
 		});
 
 		cleanup();

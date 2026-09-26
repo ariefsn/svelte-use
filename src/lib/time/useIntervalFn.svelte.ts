@@ -43,14 +43,11 @@ export function useIntervalFn(fn: () => void, delay: number) {
 		timerId = setInterval(fn, delay);
 	}
 
-	// The $effect tracks `active` to ensure it always has a reactive
-	// dependency so its teardown is reliably registered. The teardown
-	// cancels any in-flight interval when the owning scope is destroyed.
+	// Dependency-free on purpose: the teardown is registered regardless of
+	// whether the effect reads any state, and it must NOT re-run when `active`
+	// changes — a re-run fires the previous teardown first, which would clear
+	// the interval `resume()` has just created.
 	$effect(() => {
-		// Track `active` as a reactive dependency so this effect re-runs
-		// when `active` changes, ensuring the teardown is always registered.
-		void active;
-
 		return () => {
 			clearTimer();
 		};

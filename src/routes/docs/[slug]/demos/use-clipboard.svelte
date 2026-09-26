@@ -13,7 +13,7 @@
 <div class="demo-wrap">
 	<p class="hint">Click any snippet to copy it to your clipboard.</p>
 
-	{#each snippets as snippet}
+	{#each snippets as snippet (snippet)}
 		<button class="snippet-btn" onclick={() => clipboard.copy(snippet)}>
 			<code>{snippet}</code>
 			<span class="copy-icon">{clipboard.text() === snippet && clipboard.copied() ? '✓' : '⎘'}</span

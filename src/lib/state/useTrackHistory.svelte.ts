@@ -41,7 +41,7 @@ export function useTrackHistory<T>(
 	getter: () => T,
 	setter: (v: T) => void
 ): UseTrackHistoryReturn<T> {
-	let history = $state<HistorySnapshot<T>[]>([]);
+	const history = $state<HistorySnapshot<T>[]>([]);
 	let redoStack = $state<HistorySnapshot<T>[]>([]);
 	let ignoreNext = false;
 

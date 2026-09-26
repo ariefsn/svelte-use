@@ -1,3 +1,10 @@
+/* eslint-disable svelte/prefer-svelte-reactivity --
+ * The Set/Map here are module-scoped bookkeeping shared by every caller, not
+ * reactive state: reactivity is driven by the `pressed` $state each instance
+ * owns, updated through subscriber callbacks. Making them SvelteSet/SvelteMap
+ * would add reactive state at module scope, which on the server is shared
+ * across concurrent requests.
+ */
 /** Modifier key names supported by `useKeyModifier`. */
 export type KeyModifier = 'ctrl' | 'shift' | 'alt' | 'meta';
 

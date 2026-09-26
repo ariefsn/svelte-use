@@ -12,7 +12,7 @@
 
 	<div class="section-label">Modifier keys</div>
 	<div class="key-grid">
-		{#each singles as k}
+		{#each singles as k (k)}
 			<div class="key-chip" class:active={keys[k]()}>
 				<span class="key-name">{k}</span>
 			</div>
@@ -21,7 +21,7 @@
 
 	<div class="section-label">Combos</div>
 	<div class="key-grid">
-		{#each combos as combo}
+		{#each combos as combo (combo)}
 			<div class="key-chip wide" class:active={keys[combo]()}>
 				<span class="key-name">{combo}</span>
 			</div>

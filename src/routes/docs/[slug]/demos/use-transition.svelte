@@ -22,7 +22,7 @@
 	</div>
 
 	<div class="actions">
-		{#each presets as p}
+		{#each presets as p (p)}
 			<button class:active={target === p} onclick={() => (target = p)}>{p}%</button>
 		{/each}
 	</div>

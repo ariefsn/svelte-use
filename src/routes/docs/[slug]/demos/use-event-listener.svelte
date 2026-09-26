@@ -10,6 +10,7 @@
 		size = { w: window.innerWidth, h: window.innerHeight };
 	}
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">window size</span>

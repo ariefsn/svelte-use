@@ -23,7 +23,7 @@
 
 	{#if dropped.length > 0}
 		<ul class="file-list">
-			{#each dropped as name}
+			{#each dropped as name, i (i)}
 				<li>{name}</li>
 			{/each}
 		</ul>

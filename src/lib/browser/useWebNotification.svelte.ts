@@ -16,6 +16,15 @@ export interface UseWebNotificationReturn {
 	isPermissionGranted: () => boolean;
 	/** The active Notification instance, or null */
 	notification: () => Notification | null;
+	/**
+	 * Last error from `show()`, or `null`.
+	 *
+	 * Note that a `null` error with a non-null {@link notification} means the
+	 * notification was constructed successfully — if nothing appeared on
+	 * screen the operating system suppressed it (macOS Focus mode, or the
+	 * browser disabled in System Settings → Notifications).
+	 */
+	error: () => Error | null;
 	/** Shows a notification with optional overrides */
 	show: (overrides?: Partial<UseWebNotificationOptions>) => Promise<Notification | null>;
 	/** Closes the active notification */
@@ -46,6 +55,14 @@ export function useWebNotification(
 
 	let permissionGranted = $state(supported ? Notification.permission === 'granted' : false);
 	let notification = $state<Notification | null>(null);
+	let error = $state<Error | null>(null);
+
+	/** Reads the live permission rather than the snapshot taken at init. */
+	function syncPermission(): boolean {
+		if (!supported) return false;
+		permissionGranted = Notification.permission === 'granted';
+		return permissionGranted;
+	}
 
 	if (supported && autoRequestPermission && Notification.permission === 'default') {
 		Notification.requestPermission().then((p) => {
@@ -56,28 +73,45 @@ export function useWebNotification(
 	async function show(
 		overrides?: Partial<UseWebNotificationOptions>
 	): Promise<Notification | null> {
-		if (!supported) return null;
+		error = null;
+
+		if (!supported) {
+			error = new Error('The Notification API is not supported in this browser.');
+			return null;
+		}
 
 		if (Notification.permission === 'default') {
 			const result = await Notification.requestPermission();
 			permissionGranted = result === 'granted';
+		} else {
+			// Re-read the live permission: it may have changed since init, and
+			// trusting the stale snapshot made show() fail silently.
+			syncPermission();
 		}
 
-		if (!permissionGranted) return null;
+		if (!permissionGranted) {
+			error = new Error(`Notification permission is "${Notification.permission}", not "granted".`);
+			return null;
+		}
 
 		const opts = { ...options, ...overrides };
 		close();
 
-		const n = new Notification(opts.title ?? '', {
-			body: opts.body,
-			icon: opts.icon,
-			tag: opts.tag,
-			requireInteraction: opts.requireInteraction,
-			silent: opts.silent
-		});
+		try {
+			const n = new Notification(opts.title ?? '', {
+				body: opts.body,
+				icon: opts.icon,
+				tag: opts.tag,
+				requireInteraction: opts.requireInteraction,
+				silent: opts.silent
+			});
 
-		notification = n;
-		return n;
+			notification = n;
+			return n;
+		} catch (err) {
+			error = err instanceof Error ? err : new Error(String(err));
+			return null;
+		}
 	}
 
 	function close() {
@@ -97,6 +131,7 @@ export function useWebNotification(
 		isSupported: () => supported,
 		isPermissionGranted: () => permissionGranted,
 		notification: () => notification,
+		error: () => error,
 		show,
 		close
 	};

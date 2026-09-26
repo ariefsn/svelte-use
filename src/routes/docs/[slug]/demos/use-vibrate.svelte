@@ -2,6 +2,7 @@
 	import { useVibrate } from '$lib/browser/useVibrate.svelte.js';
 	const { isSupported, vibrate, stop } = useVibrate();
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">supported</span>

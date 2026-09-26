@@ -304,7 +304,7 @@ describe('useScroll', () => {
 		const el = makeScrollable({ scrollTop: 0 });
 		document.body.appendChild(el);
 
-		let targetEl = $state<HTMLElement | null>(el);
+		const targetEl = $state<HTMLElement | null>(el);
 		let scroll!: ReturnType<typeof useScroll>;
 
 		const cleanup = $effect.root(() => {

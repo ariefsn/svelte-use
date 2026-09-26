@@ -19,10 +19,14 @@ export { useDebounce } from './reactivity/useDebounce.svelte.js';
 export { useWatch } from './reactivity/useWatch.svelte.js';
 export { useWhenever } from './reactivity/useWhenever.svelte.js';
 export { useAsyncState } from './reactivity/useAsyncState.svelte.js';
-export type { UseAsyncStateOptions, UseAsyncStateReturn } from './reactivity/useAsyncState.svelte.js';
+export type {
+	UseAsyncStateOptions,
+	UseAsyncStateReturn
+} from './reactivity/useAsyncState.svelte.js';
 
 // Browser – Storage
 export { useLocalStorage } from './browser/useLocalStorage.svelte.js';
+export type { UseLocalStorageOptions } from './browser/useLocalStorage.svelte.js';
 export { useIndexedDB } from './browser/useIndexedDB.svelte.js';
 export type { UseIndexedDBOptions } from './browser/useIndexedDB.svelte.js';
 export { useSessionStorage } from './browser/storage/useSessionStorage.svelte.js';
@@ -108,7 +112,11 @@ export { useLongPress } from './browser/interaction/useLongPress.svelte.js';
 export type { UseLongPressOptions } from './browser/interaction/useLongPress.svelte.js';
 export { useStartTyping } from './browser/interaction/useStartTyping.svelte.js';
 export { useSwipe } from './browser/interaction/useSwipe.svelte.js';
-export type { SwipeDirection, UseSwipeOptions, UseSwipeReturn } from './browser/interaction/useSwipe.svelte.js';
+export type {
+	SwipeDirection,
+	UseSwipeOptions,
+	UseSwipeReturn
+} from './browser/interaction/useSwipe.svelte.js';
 
 // Browser – Web APIs
 export { useBattery } from './browser/useBattery.svelte.js';
@@ -126,7 +134,10 @@ export type { UseShareData, UseShareReturn } from './browser/useShare.svelte.js'
 export { useVibrate } from './browser/useVibrate.svelte.js';
 export type { UseVibrateReturn } from './browser/useVibrate.svelte.js';
 export { useWebNotification } from './browser/useWebNotification.svelte.js';
-export type { UseWebNotificationOptions, UseWebNotificationReturn } from './browser/useWebNotification.svelte.js';
+export type {
+	UseWebNotificationOptions,
+	UseWebNotificationReturn
+} from './browser/useWebNotification.svelte.js';
 export { usePermission } from './browser/usePermission.svelte.js';
 export type { UsePermissionReturn } from './browser/usePermission.svelte.js';
 export { useWakeLock } from './browser/useWakeLock.svelte.js';
@@ -141,7 +152,10 @@ export type { UseScrollbarWidthReturn } from './browser/useScrollbarWidth.svelte
 
 // Browser – Navigation
 export { useNavigationGuard } from './browser/useNavigationGuard.svelte.js';
-export type { UseNavigationGuardOptions, UseNavigationGuardReturn } from './browser/useNavigationGuard.svelte.js';
+export type {
+	UseNavigationGuardOptions,
+	UseNavigationGuardReturn
+} from './browser/useNavigationGuard.svelte.js';
 
 // Performance
 export { useFps } from './performance/useFps.svelte.js';

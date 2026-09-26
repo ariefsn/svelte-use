@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
 	import { sidebar } from '../docs/sidebar.js';
 
 	let { children } = $props();
@@ -32,7 +33,9 @@
 
 	// Close mobile menu on navigation
 	$effect(() => {
-		$page.url.pathname;
+		// Read the pathname so this effect re-runs on navigation. Assigned
+		// rather than left as a bare expression so the intent is explicit.
+		const _pathname = $page.url.pathname;
 		mobileMenuOpen = false;
 	});
 
@@ -48,7 +51,7 @@
 <div class="layout">
 	<!-- Mobile top bar -->
 	<div class="mobile-topbar">
-		<a href="/" class="logo">
+		<a href={resolve('/')} class="logo">
 			<img src="/logo.svg" alt="svelte-use logo" class="logo-img" width="28" height="28" />
 			<span class="logo-text">Svelte Use</span>
 		</a>
@@ -82,13 +85,13 @@
 
 	<!-- Sidebar / mobile drawer -->
 	<nav class="sidebar" class:mobile-open={mobileMenuOpen} aria-label="Documentation navigation">
-		<a href="/" class="logo desktop-logo">
+		<a href={resolve('/')} class="logo desktop-logo">
 			<img src="/logo.svg" alt="svelte-use logo" class="logo-img" width="28" height="28" />
 			<span class="logo-text">Svelte Use</span>
 		</a>
 
 		<div class="nav-section">
-			<a href="/" class="nav-home" class:active={$page.url.pathname === '/'}>Home</a>
+			<a href={resolve('/')} class="nav-home" class:active={$page.url.pathname === '/'}>Home</a>
 		</div>
 
 		<div class="search-section">
@@ -117,11 +120,7 @@
 					aria-label="Search composables"
 				/>
 				{#if searchQuery}
-					<button
-						class="search-clear"
-						onclick={() => (searchQuery = '')}
-						aria-label="Clear search"
-					>
+					<button class="search-clear" onclick={() => (searchQuery = '')} aria-label="Clear search">
 						<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
 							<path
 								d="M1 1L9 9M9 1L1 9"
@@ -140,9 +139,9 @@
 				{#if filteredItems.length === 0}
 					<p class="no-results">No results</p>
 				{:else}
-					{#each filteredItems as item}
+					{#each filteredItems as item (item.slug)}
 						<a
-							href="/docs/{item.slug}"
+							href={resolve('/docs/[slug]', { slug: item.slug })}
 							class="nav-item search-result-item"
 							class:active={$page.params.slug === item.slug}
 							onclick={() => (searchQuery = '')}
@@ -154,7 +153,7 @@
 				{/if}
 			</div>
 		{:else}
-			{#each sidebar as group}
+			{#each sidebar as group (group.title)}
 				<div class="nav-group">
 					<button
 						class="group-title"
@@ -183,10 +182,10 @@
 
 					{#if openGroups[group.title]}
 						<ul class="group-items">
-							{#each group.items as item}
+							{#each group.items as item (item.slug)}
 								<li>
 									<a
-										href="/docs/{item.slug}"
+										href={resolve('/docs/[slug]', { slug: item.slug })}
 										class="nav-item"
 										class:active={$page.params.slug === item.slug}
 									>

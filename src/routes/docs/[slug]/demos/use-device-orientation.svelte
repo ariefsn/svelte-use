@@ -2,6 +2,7 @@
 	import { useDeviceOrientation } from '$lib/browser/sensors/useDeviceOrientation.svelte.js';
 	const { isSupported, alpha, beta, gamma, isAbsolute } = useDeviceOrientation();
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">supported</span>

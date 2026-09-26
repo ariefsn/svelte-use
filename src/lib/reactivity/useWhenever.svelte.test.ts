@@ -6,7 +6,7 @@ describe('useWhenever', () => {
 	test('calls callback on mount when truthy', () => {
 		const fn = vi.fn();
 		const cleanup = $effect.root(() => {
-			let ready = $state(true);
+			const ready = $state(true);
 			useWhenever(() => ready, fn);
 			flushSync();
 		});
@@ -17,7 +17,7 @@ describe('useWhenever', () => {
 	test('does not call callback on mount when falsy', () => {
 		const fn = vi.fn();
 		const cleanup = $effect.root(() => {
-			let ready = $state(false);
+			const ready = $state(false);
 			useWhenever(() => ready, fn);
 			flushSync();
 		});
@@ -82,7 +82,7 @@ describe('useWhenever', () => {
 	test('respects runOnMounted false', () => {
 		const fn = vi.fn();
 		const cleanup = $effect.root(() => {
-			let ready = $state(true);
+			const ready = $state(true);
 			useWhenever(() => ready, fn, { runOnMounted: false });
 			flushSync();
 		});

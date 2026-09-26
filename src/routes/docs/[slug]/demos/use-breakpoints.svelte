@@ -8,7 +8,7 @@
 	<p class="hint">Resize your browser window to see the active breakpoints change.</p>
 
 	<div class="grid">
-		{#each ['sm', 'md', 'lg', 'xl'] as key}
+		{#each ['sm', 'md', 'lg', 'xl'] as key (key)}
 			<div class="chip" class:active={bp.is(key)}>
 				<span class="key">{key}</span>
 				<span class="px"

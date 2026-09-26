@@ -20,9 +20,7 @@ export interface UseEyeDropperReturn {
  * // current() → '#ff0000'
  * ```
  */
-export function useEyeDropper(options?: {
-	initialValue?: string;
-}): UseEyeDropperReturn {
+export function useEyeDropper(options?: { initialValue?: string }): UseEyeDropperReturn {
 	const isBrowser = typeof window !== 'undefined';
 	const supported = isBrowser && 'EyeDropper' in window;
 

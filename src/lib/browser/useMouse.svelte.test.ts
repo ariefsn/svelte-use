@@ -1,5 +1,5 @@
 import { flushSync } from 'svelte';
-import { describe, expect, test, beforeEach, afterEach } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { useMouse } from './useMouse.svelte.js';
 
 // ---------------------------------------------------------------------------

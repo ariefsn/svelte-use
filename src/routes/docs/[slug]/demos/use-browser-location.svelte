@@ -29,6 +29,7 @@
 	<div class="actions">
 		<a href="#section-1">Set #section-1</a>
 		<a href="#section-2">Set #section-2</a>
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- runtime pathname from useBrowserLocation; not a static route id -->
 		<a href={loc.pathname()}>Clear hash</a>
 	</div>
 </div>

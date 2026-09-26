@@ -25,6 +25,7 @@
 		<span class="label">blob URL</span>
 		<span class="value accent">
 			{#if objectUrl()}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- blob: URL from createObjectURL, not an app route -->
 				<a href={objectUrl()} target="_blank" rel="noreferrer">{objectUrl()}</a>
 			{:else}
 				—

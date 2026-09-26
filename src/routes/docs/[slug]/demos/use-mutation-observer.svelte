@@ -35,14 +35,14 @@
 	</div>
 
 	<div class="target-box" bind:this={container}>
-		{#each items as item}<div class="item">{item}</div>{/each}
+		{#each items as item, i (i)}<div class="item">{item}</div>{/each}
 	</div>
 
 	<div class="log-box">
 		{#if log.length === 0}
 			<span class="muted">No mutations yet…</span>
 		{:else}
-			{#each log as entry}<div class="log-entry">{entry}</div>{/each}
+			{#each log as entry, i (i)}<div class="log-entry">{entry}</div>{/each}
 		{/if}
 	</div>
 </div>

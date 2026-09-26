@@ -1,3 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any --
+ * `(...args: any[])` is a variadic pass-through: whatever the caller
+ * supplies to `execute()` is forwarded verbatim to their own promise
+ * factory. `unknown[]` would reject ordinary typed factories such as
+ * `(id: number) => Promise<User>`. The resolved value stays typed as `T`.
+ */
 export interface UseAsyncStateOptions<T> {
 	/** Execute immediately on creation (default: `true`) */
 	immediate?: boolean;

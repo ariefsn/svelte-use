@@ -10,7 +10,7 @@
 
 <div class="demo-wrap" style="gap:0.75rem">
 	<div class="scroll-box" bind:this={container}>
-		{#each Array.from({ length: 30 }, (_, i) => i + 1) as n}
+		{#each Array.from({ length: 30 }, (_, i) => i + 1) as n (n)}
 			<div class="scroll-item">Row {n}</div>
 		{/each}
 	</div>

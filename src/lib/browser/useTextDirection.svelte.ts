@@ -28,9 +28,7 @@ export function useTextDirection(options?: {
 	const el = options?.element ?? (isBrowser ? document.documentElement : null);
 	const initial = options?.initial ?? 'ltr';
 
-	let dir = $state<TextDirection>(
-		(el?.getAttribute('dir') as TextDirection) || initial
-	);
+	let dir = $state<TextDirection>((el?.getAttribute('dir') as TextDirection) || initial);
 
 	function set(value: TextDirection) {
 		dir = value;

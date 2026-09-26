@@ -6,8 +6,6 @@ import { useWebSocket } from './useWebSocket.svelte.js';
 // Mock WebSocket
 // ---------------------------------------------------------------------------
 
-type WsEventType = 'open' | 'message' | 'error' | 'close';
-
 class MockWebSocket {
 	static readonly CONNECTING = 0;
 	static readonly OPEN = 1;
@@ -352,6 +350,8 @@ describe('useWebSocket', () => {
 	});
 
 	test('reconnect timer is cancelled when scope is destroyed', () => {
+		// `cleanup` cannot be called inside the callback that produces it —
+		// doing so hits the temporal dead zone.
 		const cleanup = $effect.root(() => {
 			useWebSocket(() => 'wss://example.com', {
 				autoReconnect: true,
@@ -362,15 +362,15 @@ describe('useWebSocket', () => {
 			MockWebSocket.instances[0].triggerOpen();
 			MockWebSocket.instances[0].triggerClose();
 			flushSync();
-
-			// Destroy scope before reconnect timer fires
-			cleanup();
-
-			vi.advanceTimersByTime(1000);
-
-			// No new socket should be created after scope is destroyed
-			expect(MockWebSocket.instances).toHaveLength(1);
 		});
+
+		// Destroy scope before reconnect timer fires
+		cleanup();
+
+		vi.advanceTimersByTime(1000);
+
+		// No new socket should be created after scope is destroyed
+		expect(MockWebSocket.instances).toHaveLength(1);
 	});
 
 	test('message handlers are removed after socket is closed', () => {

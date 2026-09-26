@@ -17,7 +17,7 @@
 <div class="demo-wrap">
 	<p class="hint">Hold modifier keys — each indicator lights up in real time.</p>
 	<div class="mod-grid">
-		{#each modifiers as m}
+		{#each modifiers as m (m)}
 			<div class="mod-card" class:active={m.getter()}>
 				<span class="mod-label">{m.label}</span>
 				<span class="mod-status">{m.getter() ? 'held' : 'up'}</span>

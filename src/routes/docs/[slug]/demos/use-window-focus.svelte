@@ -2,6 +2,7 @@
 	import { useWindowFocus } from '$lib/browser/sensors/useWindowFocus.svelte.js';
 	const { focused } = useWindowFocus();
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">window focused</span>

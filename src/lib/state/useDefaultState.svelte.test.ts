@@ -31,7 +31,7 @@ describe('useDefaultState', () => {
 		const cleanup = $effect.root(() => {
 			const state = useDefaultState('fallback');
 			state.value = 'hello';
-			state.value = null as any;
+			state.value = null as unknown as string;
 			expect(state.value).toBe('fallback');
 		});
 		cleanup();
@@ -41,7 +41,7 @@ describe('useDefaultState', () => {
 		const cleanup = $effect.root(() => {
 			const state = useDefaultState('fallback');
 			state.value = 'hello';
-			state.value = undefined as any;
+			state.value = undefined as unknown as string;
 			expect(state.value).toBe('fallback');
 		});
 		cleanup();
@@ -52,7 +52,7 @@ describe('useDefaultState', () => {
 			const state = useDefaultState(0);
 			state.value = 42;
 			expect(state.value).toBe(42);
-			state.value = null as any;
+			state.value = null as unknown as number;
 			expect(state.value).toBe(0);
 		});
 		cleanup();
@@ -63,7 +63,7 @@ describe('useDefaultState', () => {
 			const state = useDefaultState('fallback');
 			state.value = '';
 			expect(state.value).toBe('');
-			state.value = 0 as any;
+			state.value = 0 as unknown as string;
 			expect(state.value).toBe(0);
 		});
 		cleanup();

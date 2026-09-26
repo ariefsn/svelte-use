@@ -25,8 +25,10 @@ describe('useFps', () => {
 			const fps = useFps();
 			flushSync();
 
-			// Simulate two animation frames 16ms apart (≈60 fps)
-			vi.runAllTimers();
+			// Simulate two animation frames 16ms apart (≈60 fps).
+			// runAllTimers() would spin forever here: the rAF loop reschedules
+			// itself, so vitest aborts at 10000 timers assuming an infinite loop.
+			vi.advanceTimersByTime(32);
 			flushSync();
 
 			// After the loop has run at least once the FPS should be a positive number

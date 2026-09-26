@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { useSpeechRecognition } from '$lib/browser/useSpeechRecognition.svelte.js';
-	import { browser } from '$app/environment';
-
-	// Detect support at component init time (browser only)
-	const isSupported =
-		browser &&
-		(typeof (window as any).SpeechRecognition !== 'undefined' ||
-			typeof (window as any).webkitSpeechRecognition !== 'undefined');
 
 	const speech = useSpeechRecognition();
+	const isSupported = speech.isSupported();
+
+	const errorHints: Record<string, string> = {
+		'not-allowed': 'Microphone permission was denied. Allow it in your browser site settings.',
+		'service-not-allowed': 'The browser blocked the speech service for this page.',
+		network:
+			"The browser's speech service is unreachable. Chromium forks (Arc, Brave, Vivaldi) ship without Google's speech API keys, so this fails there — try Chrome or Edge.",
+		'no-speech': 'No speech was detected before the session timed out.',
+		aborted: 'The session was aborted.'
+	};
 </script>
 
 <div class="demo-wrap">
@@ -30,6 +33,15 @@
 			<span class="rec-dot" class:active={speech.isListening()}></span>
 			{speech.isListening() ? 'Stop recording' : 'Start recording'}
 		</button>
+
+		{#if speech.error()}
+			<div class="err">
+				<strong>{speech.error()}</strong>
+				{#if errorHints[speech.error() ?? '']}
+					<span>{errorHints[speech.error() ?? '']}</span>
+				{/if}
+			</div>
+		{/if}
 
 		<div class="transcript" class:has-text={!!speech.result()}>
 			{speech.result() || 'Transcript will appear here…'}
@@ -111,5 +123,24 @@
 	}
 	.transcript.has-text {
 		color: #ccc;
+	}
+	.err {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		padding: 0.6rem 0.75rem;
+		border-radius: 8px;
+		background: #2a1e0f;
+		border: 1px solid #92400e;
+		color: #fbbf24;
+		font-size: 0.83rem;
+		line-height: 1.5;
+	}
+	.err strong {
+		font-family: monospace;
+		font-weight: 600;
+	}
+	.err span {
+		color: #d1a55a;
 	}
 </style>

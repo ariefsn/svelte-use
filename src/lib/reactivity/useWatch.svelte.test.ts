@@ -6,7 +6,7 @@ describe('useWatch', () => {
 	test('calls callback on mount by default', () => {
 		const fn = vi.fn();
 		const cleanup = $effect.root(() => {
-			let value = $state(0);
+			const value = $state(0);
 			useWatch(() => value, fn);
 			flushSync();
 		});
@@ -17,7 +17,7 @@ describe('useWatch', () => {
 	test('does not call on mount when runOnMounted is false', () => {
 		const fn = vi.fn();
 		const cleanup = $effect.root(() => {
-			let value = $state(0);
+			const value = $state(0);
 			useWatch(() => value, fn, { runOnMounted: false });
 			flushSync();
 		});
@@ -46,7 +46,7 @@ describe('useWatch', () => {
 		const fn = vi.fn();
 		const cleanup = $effect.root(() => {
 			let a = $state(0);
-			let b = $state('hello');
+			const b = $state('hello');
 			useWatch([() => a, () => b], fn);
 			flushSync();
 			fn.mockClear();

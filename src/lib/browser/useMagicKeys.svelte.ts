@@ -1,3 +1,8 @@
+/* eslint-disable svelte/prefer-svelte-reactivity --
+ * `_pressedKeys` is a $state holding a plain Set that is *replaced* wholesale
+ * on every change (`new Set(prev).add(key)`), never mutated in place, so it is
+ * already reactive. `cache` is a non-reactive memo of getter functions.
+ */
 /**
  * Normalises a raw `KeyboardEvent.key` value to a lowercase canonical name.
  *

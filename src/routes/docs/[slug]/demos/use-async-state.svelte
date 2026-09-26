@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { useAsyncState } from '$lib/reactivity/useAsyncState.svelte.js';
 	const { current, isLoading, isReady, error, execute } = useAsyncState(
-		() =>
-			fetch('https://jsonplaceholder.typicode.com/todos/1').then((r) => r.json()),
+		() => fetch('https://jsonplaceholder.typicode.com/todos/1').then((r) => r.json()),
 		null
 	);
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">isLoading</span>

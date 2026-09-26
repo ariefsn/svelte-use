@@ -5,7 +5,7 @@ import { useLastChanged } from './useLastChanged.svelte.js';
 describe('useLastChanged', () => {
 	test('returns undefined initially', () => {
 		const cleanup = $effect.root(() => {
-			let value = $state(0);
+			const value = $state(0);
 			const lastChanged = useLastChanged(() => value);
 			expect(lastChanged()).toBeUndefined();
 		});

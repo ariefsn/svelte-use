@@ -2,11 +2,6 @@ import { flushSync } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import { useBase64 } from './useBase64.svelte.js';
 
-/** Waits for all pending microtasks and the FileReader async callback. */
-function waitForAsync(): Promise<void> {
-	return new Promise((resolve) => setTimeout(resolve, 0));
-}
-
 describe('useBase64', () => {
 	test('returns undefined when input is undefined', () => {
 		const cleanup = $effect.root(() => {

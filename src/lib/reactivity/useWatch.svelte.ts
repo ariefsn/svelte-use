@@ -1,3 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any --
+ * `any` appears only in the overload *implementation* signature and its
+ * internal bookkeeping. The public overloads above are fully typed and
+ * infer `current`/`previous` from the dependency getters, so no caller
+ * ever sees `any`. Widening these to `unknown` would make the shared
+ * implementation unable to satisfy both overloads.
+ */
 import { untrack } from 'svelte';
 
 /**

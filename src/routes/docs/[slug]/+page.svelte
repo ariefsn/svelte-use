@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { page as appPage } from '$app/stores';
+	import { resolve } from '$app/paths';
 	import { sidebar } from '../../../docs/sidebar.js';
+	import { formatInline, stripInline } from '../../../docs/format.js';
+	import type { Component } from 'svelte';
 	import type { PageData } from './$types.js';
 	// ── Demo components ──────────────────────────────────────────────────────
 	import DemoUseAnimate from './demos/use-animate.svelte';
@@ -91,7 +94,7 @@
 	import DemoUseNavigationGuard from './demos/use-navigation-guard.svelte';
 
 	// ── Static slug → component map ──────────────────────────────────────────
-	const demoMap: Record<string, any> = {
+	const demoMap: Record<string, Component> = {
 		'use-animate': DemoUseAnimate,
 		'use-parallax': DemoUseParallax,
 		'use-transition': DemoUseTransition,
@@ -188,20 +191,24 @@
 	const currentIndex = $derived(flat.findIndex((i) => i.slug === page.slug));
 	const prev = $derived(currentIndex > 0 ? flat[currentIndex - 1] : null);
 	const next = $derived(currentIndex < flat.length - 1 ? flat[currentIndex + 1] : null);
+
+	// Meta tags take the marker-free form — markup would leak into search
+	// results and link previews.
+	const metaDescription = $derived(stripInline(page.description));
 </script>
 
 <svelte:head>
 	<title>{page.title} — Svelte Use</title>
-	<meta name="description" content={page.description} />
+	<meta name="description" content={metaDescription} />
 	<meta property="og:title" content="{page.title} — Svelte Use" />
-	<meta property="og:description" content={page.description} />
+	<meta property="og:description" content={metaDescription} />
 	<meta property="og:type" content="article" />
 	<meta property="og:url" content={$appPage.url.href} />
 	<meta property="og:image" content="{$appPage.url.origin}/logo.svg" />
 	<meta property="og:site_name" content="Svelte Use" />
 	<meta name="twitter:card" content="summary" />
 	<meta name="twitter:title" content="{page.title} — Svelte Use" />
-	<meta name="twitter:description" content={page.description} />
+	<meta name="twitter:description" content={metaDescription} />
 	<meta name="twitter:image" content="{$appPage.url.origin}/logo.svg" />
 </svelte:head>
 
@@ -209,7 +216,8 @@
 	<!-- ─── Title ─── -->
 	<header class="doc-header">
 		<h1 class="doc-title">{page.title}</h1>
-		<p class="doc-desc">{page.description}</p>
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags, and the source is repo-authored doc copy, not user input -->
+		<p class="doc-desc">{@html formatInline(page.description)}</p>
 	</header>
 
 	<!-- ─── Live Demo ─── -->
@@ -243,7 +251,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each page.params as row}
+						{#each page.params as row (row.name)}
 							<tr>
 								<td><code class="inline-code">{row.name}</code></td>
 								<td><code class="inline-code type">{row.type}</code></td>
@@ -254,7 +262,8 @@
 										<span class="muted">—</span>
 									{/if}
 								</td>
-								<td class="desc-cell">{row.description}</td>
+								<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
+								<td class="desc-cell">{@html formatInline(row.description)}</td>
 							</tr>
 						{/each}
 					</tbody>
@@ -278,7 +287,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each page.options as row}
+						{#each page.options as row (row.name)}
 							<tr>
 								<td><code class="inline-code">{row.name}</code></td>
 								<td><code class="inline-code type">{row.type}</code></td>
@@ -289,7 +298,8 @@
 										<span class="muted">—</span>
 									{/if}
 								</td>
-								<td class="desc-cell">{row.description}</td>
+								<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
+								<td class="desc-cell">{@html formatInline(row.description)}</td>
 							</tr>
 						{/each}
 					</tbody>
@@ -312,11 +322,12 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each page.returns as row}
+						{#each page.returns as row (row.name)}
 							<tr>
 								<td><code class="inline-code">{row.name}</code></td>
 								<td><code class="inline-code type">{row.type}</code></td>
-								<td class="desc-cell">{row.description}</td>
+								<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
+								<td class="desc-cell">{@html formatInline(row.description)}</td>
 							</tr>
 						{/each}
 					</tbody>
@@ -336,8 +347,9 @@
 		<section class="doc-section">
 			<h2>Notes</h2>
 			<ul class="notes-list">
-				{#each page.notes as note}
-					<li>{@html note}</li>
+				{#each page.notes as note (note)}
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
+					<li>{@html formatInline(note)}</li>
 				{/each}
 			</ul>
 		</section>
@@ -346,7 +358,7 @@
 	<!-- ─── Prev / Next ─── -->
 	<nav class="page-nav">
 		{#if prev}
-			<a href="/docs/{prev.slug}" class="page-nav-btn prev">
+			<a href={resolve('/docs/[slug]', { slug: prev.slug })} class="page-nav-btn prev">
 				<span class="nav-arrow">←</span>
 				<span class="nav-info">
 					<span class="nav-label">Previous</span>
@@ -358,7 +370,7 @@
 		{/if}
 
 		{#if next}
-			<a href="/docs/{next.slug}" class="page-nav-btn next">
+			<a href={resolve('/docs/[slug]', { slug: next.slug })} class="page-nav-btn next">
 				<span class="nav-info" style="text-align:right">
 					<span class="nav-label">Next</span>
 					<span class="nav-name">{next.label}</span>

@@ -27,15 +27,20 @@ export function useDevicePixelRatio(): UseDevicePixelRatioReturn {
 	$effect(() => {
 		if (!supported) return;
 
-		function update() {
-			ratio = window.devicePixelRatio;
-		}
-
-		// matchMedia approach: watch for DPR changes
+		// Reading `ratio` here is load-bearing, not incidental: a
+		// `(resolution: Xdppx)` query only fires when the DPR *leaves* X, so the
+		// listener must be rebuilt around each new value. Tracking `ratio` makes
+		// this effect re-run and re-subscribe after every change.
+		//
+		// This is safe despite the effect also writing `ratio` (via the handler)
+		// because the write happens in an event callback, not during the run —
+		// so there is no read-modify-write cycle. Do not "optimise" the read
+		// away with untrack(); that would freeze the listener on the initial
+		// ratio and it would fire exactly once.
 		const mql = window.matchMedia(`(resolution: ${ratio}dppx)`);
 
 		function onChange() {
-			update();
+			ratio = window.devicePixelRatio;
 		}
 
 		mql.addEventListener('change', onChange);

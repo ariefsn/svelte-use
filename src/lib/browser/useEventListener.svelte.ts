@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any --
+ * `any` appears only in the overload implementation signature. The three
+ * public overloads above map Window/Document/HTMLElement to their exact
+ * event maps, so callers always get a precisely typed event object.
+ */
 /**
  * Registers an event listener with automatic cleanup on component destroy.
  *

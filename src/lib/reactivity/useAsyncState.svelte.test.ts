@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest';
-import { useAsyncState } from './useAsyncState.svelte.js';
+import { useAsyncState, type UseAsyncStateReturn } from './useAsyncState.svelte.js';
 
 describe('useAsyncState', () => {
 	test('starts with initial value', () => {
@@ -23,7 +23,7 @@ describe('useAsyncState', () => {
 	});
 
 	test('resolves with data', async () => {
-		let state: any;
+		let state!: UseAsyncStateReturn<string>;
 		const cleanup = $effect.root(() => {
 			state = useAsyncState(() => Promise.resolve('data'), 'initial', { immediate: false });
 		});
@@ -37,13 +37,11 @@ describe('useAsyncState', () => {
 	});
 
 	test('handles errors', async () => {
-		let state: any;
+		let state!: UseAsyncStateReturn<string>;
 		const cleanup = $effect.root(() => {
-			state = useAsyncState(
-				() => Promise.reject(new Error('fail')),
-				'initial',
-				{ immediate: false }
-			);
+			state = useAsyncState(() => Promise.reject(new Error('fail')), 'initial', {
+				immediate: false
+			});
 		});
 
 		await state.execute();
@@ -54,7 +52,7 @@ describe('useAsyncState', () => {
 
 	test('calls onSuccess callback', async () => {
 		const onSuccess = vi.fn();
-		let state: any;
+		let state!: UseAsyncStateReturn<string>;
 		const cleanup = $effect.root(() => {
 			state = useAsyncState(() => Promise.resolve('data'), 'initial', {
 				immediate: false,
@@ -70,7 +68,7 @@ describe('useAsyncState', () => {
 	test('calls onError callback', async () => {
 		const onError = vi.fn();
 		const err = new Error('fail');
-		let state: any;
+		let state!: UseAsyncStateReturn<string>;
 		const cleanup = $effect.root(() => {
 			state = useAsyncState(() => Promise.reject(err), 'initial', {
 				immediate: false,
@@ -84,13 +82,12 @@ describe('useAsyncState', () => {
 	});
 
 	test('resets on execute when resetOnExecute is true', async () => {
-		let state: any;
+		let state!: UseAsyncStateReturn<string>;
 		const cleanup = $effect.root(() => {
-			state = useAsyncState(
-				() => new Promise((r) => setTimeout(() => r('data'), 10)),
-				'initial',
-				{ immediate: false, resetOnExecute: true }
-			);
+			state = useAsyncState(() => new Promise((r) => setTimeout(() => r('data'), 10)), 'initial', {
+				immediate: false,
+				resetOnExecute: true
+			});
 		});
 
 		await state.execute();

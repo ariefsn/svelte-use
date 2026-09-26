@@ -27,7 +27,7 @@
 
 	<!-- Scrollable target element -->
 	<div class="scroll-box" bind:this={scrollEl}>
-		{#each { length: 20 } as _, i}
+		{#each { length: 20 } as _, i (i)}
 			<div class="scroll-row">
 				<span class="scroll-index">#{i + 1}</span>
 				<span class="scroll-text">Scroll row {i + 1} of 20</span>

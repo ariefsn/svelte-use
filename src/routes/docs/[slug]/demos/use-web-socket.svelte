@@ -53,7 +53,7 @@
 	{#if log.length > 0}
 		<div class="divider"></div>
 		<div class="log">
-			{#each log as entry}
+			{#each log as entry, i (i)}
 				<div class="log-entry {entry.startsWith('→') ? 'sent' : 'recv'}">{entry}</div>
 			{/each}
 		</div>

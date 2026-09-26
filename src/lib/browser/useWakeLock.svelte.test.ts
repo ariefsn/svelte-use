@@ -19,8 +19,12 @@ describe('useWakeLock', () => {
 	});
 
 	test('release does not throw when no lock', async () => {
-		const cleanup = $effect.root(() => {});
-		const { release } = useWakeLock();
+		// useWakeLock() registers an $effect, so it must be constructed inside
+		// the root — calling it outside throws effect_orphan.
+		let release!: () => Promise<void>;
+		const cleanup = $effect.root(() => {
+			({ release } = useWakeLock());
+		});
 		await expect(release()).resolves.toBeUndefined();
 		cleanup();
 	});

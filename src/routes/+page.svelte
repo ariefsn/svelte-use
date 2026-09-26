@@ -1,67 +1,7 @@
 <script lang="ts">
-	import {
-		useCounter,
-		useDebounce,
-		useIndexedDB,
-		useLocalStorage,
-		usePrevious,
-		useToggle
-	} from '$lib';
 	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
 	import { sidebar } from '../docs/sidebar.js';
-
-	// --- useToggle ---
-	const toggle = useToggle();
-
-	// --- useCounter ---
-	const counter = useCounter(0);
-
-	// --- usePrevious ---
-	let prevSource = $state(0);
-	const previous = usePrevious(() => prevSource);
-
-	// --- useDebounce ---
-	let query = $state('');
-	const debouncedQuery = useDebounce(() => query, 500);
-
-	// --- useLocalStorage ---
-	const theme = useLocalStorage<'light' | 'dark'>('demo-theme', 'light');
-
-	// --- useIndexedDB ---
-	interface Note {
-		id?: number;
-		text: string;
-		done: boolean;
-	}
-	const db = useIndexedDB<Note>('svelte-use-demo', 'notes');
-	let noteInput = $state('');
-	let filterText = $state('');
-	let queryResults = $state<Note[]>([]);
-
-	const visibleNotes = $derived(
-		filterText.trim()
-			? db.items.filter((n) => n.text.toLowerCase().includes(filterText.toLowerCase()))
-			: db.items
-	);
-
-	async function addNote() {
-		const text = noteInput.trim();
-		if (!text) return;
-		await db.add({ text, done: false });
-		noteInput = '';
-	}
-
-	async function toggleNote(note: Note) {
-		await db.update({ ...note, done: !note.done });
-	}
-
-	async function removeNote(id: number) {
-		await db.remove(id);
-	}
-
-	async function runQuery() {
-		queryResults = await db.query((n) => !n.done);
-	}
 
 	const features = [
 		{
@@ -78,11 +18,23 @@
 		{ icon: '🔌', label: 'Async & WebSocket', desc: 'useFetch, useWebSocket' },
 		{ icon: '⏱️', label: 'Time utilities', desc: 'useInterval, useTimeout, useNow, useTimestamp…' },
 		{ icon: '🖱️', label: 'Pointer & Drag', desc: 'useMouse, useDraggable, useDropZone, useSwipe…' },
-		{ icon: '📡', label: 'Sensors', desc: 'useGeolocation, useDeviceMotion, useDeviceOrientation…' },
+		{
+			icon: '📡',
+			label: 'Sensors',
+			desc: 'useGeolocation, useDeviceMotion, useDeviceOrientation…'
+		},
 		{ icon: '💾', label: 'Storage', desc: 'useLocalStorage, useIndexedDB, useSessionStorage…' },
-		{ icon: '🔔', label: 'Notifications & APIs', desc: 'useWebNotification, usePermission, useShare, useVibrate…' },
+		{
+			icon: '🔔',
+			label: 'Notifications & APIs',
+			desc: 'useWebNotification, usePermission, useShare, useVibrate…'
+		},
 		{ icon: '👆', label: 'Gestures', desc: 'useLongPress, useSwipe, useStartTyping…' },
-		{ icon: '↩️', label: 'History & State', desc: 'useHistoryState, useTrackHistory, useAutoResetState…' }
+		{
+			icon: '↩️',
+			label: 'History & State',
+			desc: 'useHistoryState, useTrackHistory, useAutoResetState…'
+		}
 	];
 
 	// Total composable count from sidebar
@@ -158,7 +110,9 @@
 		</p>
 
 		<div class="hero-actions">
-			<a href="/docs/use-toggle" class="btn btn-primary">Browse Docs</a>
+			<a href={resolve('/docs/[slug]', { slug: 'use-toggle' })} class="btn btn-primary"
+				>Browse Docs</a
+			>
 			<a
 				href="https://github.com/ariefsn/svelte-use"
 				class="btn btn-ghost"
@@ -220,7 +174,7 @@ timer.count()    // → 60, 59, 58 …`}</code
 	<section class="section">
 		<h2 class="section-title">Features</h2>
 		<div class="features-grid">
-			{#each features as f}
+			{#each features as f (f.label)}
 				<div class="feature-card">
 					<span class="feature-icon">{f.icon}</span>
 					<strong>{f.label}</strong>
@@ -234,13 +188,15 @@ timer.count()    // → 60, 59, 58 …`}</code
 	<section class="section">
 		<h2 class="section-title">Utilities <span class="count-badge">{totalComposables}</span></h2>
 		<div class="cat-grid">
-			{#each sidebar as group}
+			{#each sidebar as group (group.title)}
 				<div class="cat-card">
 					<h3 class="cat-title">{group.title}</h3>
 					<ul class="cat-list">
-						{#each group.items as item}
+						{#each group.items as item (item.slug)}
 							<li>
-								<a href="/docs/{item.slug}" class="cat-link">{item.label}</a>
+								<a href={resolve('/docs/[slug]', { slug: item.slug })} class="cat-link"
+									>{item.label}</a
+								>
 							</li>
 						{/each}
 					</ul>
