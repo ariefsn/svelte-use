@@ -7,6 +7,123 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-09-28
+
+### Added
+
+- **40 new utility composables and the library's first component**, built in tiers so each one removes duplication rather than adding to it
+
+#### Head & SEO
+
+- `useSeo` — layered SEO metadata as a builder, merged per key and rendered into `<svelte:head>`
+- `Seo` — component that renders `useSeo` output; the first Svelte component this library ships
+
+#### Foundational
+
+- `useSupported` — SSR-safe feature detection, replacing the guard ten composables hand-rolled
+- `useMediaQuery` — reactively track whether a CSS media query matches
+- `useRafFn` — run a callback on every animation frame, with pause and resume
+- `useUntil` — await a reactive value reaching a condition
+- `useStorage` — the shared generic beneath `useLocalStorage` and `useSessionStorage`
+
+#### State
+
+- `useStateMachine` — finite state machine with states and actions inferred from the config
+- `useOffsetPagination` — pagination state that corrects itself when the total shrinks
+- `useConfirmDialog` — confirmation flow as a single `await`, with no markup of its own
+
+#### Reactivity
+
+- `useCloned` — deep copy of a reactive value, for edit buffers
+
+#### Async
+
+- `useEventSource` — server-sent events; the browser's own reconnection is left alone
+- `useBroadcastChannel` — cross-tab messaging by structured clone
+- `useAsyncQueue` — run async tasks with bounded concurrency and per-task status
+
+#### Performance
+
+- `useWebWorkerFn` — run a self-contained function off the main thread
+- `useMemoize` — cache a function's results by its arguments, with optional LRU eviction
+
+#### Browser - Appearance
+
+- `useColorMode` — colour mode with `auto` resolution, persistence and cross-tab sync
+- `usePreferredDark` — whether the OS requests a dark colour scheme
+- `usePreferredColorScheme` — OS colour scheme as `dark` / `light` / `no-preference`
+- `usePreferredReducedMotion` — whether the OS requests reduced motion
+- `usePreferredContrast` — OS contrast preference, including forced colours
+- `useCssVar` — read and write a CSS custom property
+
+#### Browser - Document
+
+- `useTitle` — read and write `document.title`, restored on destroy
+- `useFavicon` — read and write the favicon, adopting an existing link
+- `useStyleTag` — inject a `<style>` element, deduplicated by id
+- `useScriptTag` — load an external script, deduplicated across call sites
+
+#### Browser - Media
+
+- `useUserMedia` — camera and microphone capture, with device switching and preview mirroring
+- `useDisplayMedia` — screen capture that notices the browser's own "Stop sharing"
+- `useDevicesList` — media devices grouped by kind, refreshed on `devicechange`
+
+#### Browser - Sensors
+
+- `useWindowSize` — reactive viewport dimensions
+- `useScreenOrientation` — screen orientation and angle, with locking where available
+- `useGamepad` — gamepad state, polled only while a controller is connected
+
+#### Browser - Elements & Input
+
+- `useElementBounding` — reactive full bounding box, position included
+- `useMouseInElement` — pointer position relative to an element
+- `useInfiniteScroll` — load more content as a container nears its edge
+- `useTextareaAutosize` — grow a textarea to fit its content
+
+#### Browser - Navigation
+
+- `useUrlSearchParams` — reactive URL query parameters, with history and hash modes
+
+#### Web APIs
+
+- `useFullscreen` — display any element fullscreen, driven by `fullscreenchange`
+- `useImage` — preload an image and track its load state
+- `useSpeechSynthesis` — text-to-speech, handling asynchronous voice loading
+- `useFileSystemAccess` — read **and write** real files via file handles (Chromium only)
+
+#### Types
+
+- Exported `UseSpeechRecognitionOptions`, `UseUntilItem`, `VirtualItem`, `UseVirtualListOptions`, `UseVirtualListReturn` and `DEFAULT_COLOR_MODE_STORAGE_KEY`, which existed but were unreachable from the package root
+- Exported `EventTargetEventMap`, used by the widened `useEventListener` overload
+
+### Changed
+
+- `useEventListener` accepts any `EventTarget` — `MediaDevices`, `EventSource`, `BroadcastChannel`, `ScreenOrientation`, `SpeechSynthesis`, `MediaStreamTrack`, `Worker` and more — each resolved to its exact event map. The existing Window, Document and HTMLElement overloads are unchanged
+- `useBreakpoints` and `useDevicePixelRatio` now build on `useMediaQuery` instead of hand-rolling `matchMedia`
+- `useFps` and `useTransition` now build on `useRafFn`
+- `useLocalStorage` and `useSessionStorage` now build on `useStorage`
+- Nine composables — `useDeviceMotion`, `useDeviceOrientation`, `useEyeDropper`, `useGeolocation`, `usePermission`, `useShare`, `useVibrate`, `useWakeLock` and `useWebNotification` — now use `useSupported` rather than their own guards
+- `useWebSocket` now shares its JSON frame parsing with `useEventSource`
+- `package.json` adds an explicit `./Seo.svelte` export. Without it the existing wildcard subpath resolved the component's types but not its runtime file
+- Docs site: migrated to Tailwind v4 with light/dark theming, moved from the deprecated `$app/stores` to `$app/state`, and now dogfoods `useSeo` and `<Seo />` for its own metadata
+
+### Fixed
+
+- Open Graph tags on the documentation site pointed at `http://sveltekit-prerender`, a placeholder SvelteKit substitutes for the origin during prerendering. Every page was affected; `SeoData.baseUrl` and a configured prerender origin resolve it
+- The documentation site's `og:image` was an SVG, which Facebook, X, LinkedIn and WhatsApp do not render, so shared links previewed without an image. It is now a PNG
+- `app.html` carried a static `<title>` that preceded the rendered one. Browsers and crawlers use the first title in a document, so every templated page title was being ignored
+
+### Docs site
+
+- Version badges on every documentation page, with `since` now required for each utility
+- New "Browser - Media", "Head & SEO" and per-tier groupings in the sidebar
+- Documentation pages can describe a component's props, not only a function's parameters
+- Coverage tests now also check the demo registry, the barrel export and the README row — three touchpoints that previously drifted silently
+
+---
+
 ## [1.1.0] - 2026-03-18
 
 ### Added

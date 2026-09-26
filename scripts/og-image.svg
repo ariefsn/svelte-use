@@ -1,0 +1,60 @@
+<!--
+  Source for static/og-image.png, the Open Graph preview card.
+
+  Kept here rather than in static/ because it must NOT be served: Facebook, X,
+  LinkedIn and WhatsApp do not render SVG previews, so shipping both invites
+  pointing og:image at the wrong one.
+
+  Regenerate with:
+    rsvg-convert -w 1200 -h 630 scripts/og-image.svg -o static/og-image.png
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1630"/>
+      <stop offset="100%" style="stop-color:#0f0f1a"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8e8e8"/>
+      <stop offset="100%" style="stop-color:#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c4b5fd"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+
+  <!-- Logo mark, reusing the favicon's circle + bolt -->
+  <g transform="translate(150, 175) scale(1.4)">
+    <circle cx="100" cy="100" r="96" fill="#14112a" stroke="#3b2d6e" stroke-width="2"/>
+    <circle cx="100" cy="100" r="88" fill="none" stroke="#2d1f5e" stroke-width="1.5" stroke-dasharray="4 6"/>
+    <g filter="url(#glow)">
+      <path d="M115 42 L78 98 L100 98 L85 158 L122 102 L100 102 Z"
+            fill="url(#boltGrad)" stroke="#c4b5fd" stroke-width="1.5" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="520" y="290" font-family="'Fira Code','DejaVu Sans Mono','Courier New',monospace"
+        font-size="76" font-weight="700" fill="url(#textGrad)" letter-spacing="-1">svelte-use</text>
+
+  <!-- Tagline -->
+  <text x="522" y="345" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif"
+        font-size="27" fill="#a1a1b5">Svelte 5 runes-first utility composables</text>
+
+  <!-- Feature line -->
+  <text x="522" y="405" font-family="'Fira Code','DejaVu Sans Mono','Courier New',monospace"
+        font-size="18" fill="#7c6fae">No stores · Zero dependencies · SSR-safe · Fully typed</text>
+
+  <!-- Accent underline -->
+  <rect x="522" y="432" width="120" height="4" rx="2" fill="url(#boltGrad)"/>
+</svg>

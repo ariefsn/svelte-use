@@ -68,13 +68,13 @@ describe('mergeSeo', () => {
 	it('merges article per key, like og and twitter', () => {
 		const merged = mergeSeo([
 			{ article: { author: 'Ada Lovelace', section: 'Documentation' } },
-			{ article: { publishedTime: '2026-09-27T10:00:00Z' } }
+			{ article: { publishedTime: '2026-09-28T10:00:00Z' } }
 		]);
 
 		expect(merged.article).toEqual({
 			author: 'Ada Lovelace',
 			section: 'Documentation',
-			publishedTime: '2026-09-27T10:00:00Z'
+			publishedTime: '2026-09-28T10:00:00Z'
 		});
 	});
 

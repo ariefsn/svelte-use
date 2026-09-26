@@ -23,10 +23,15 @@
 			'Svelte 5 runes-first utility composables. No stores, no external dependencies, SSR-safe and fully typed.',
 		og: {
 			siteName: 'Svelte Use',
-			image: '/logo.svg',
+			// A raster image on purpose: Facebook, X, LinkedIn and WhatsApp do
+			// not render SVG previews, so the logo.svg used here previously
+			// meant every shared link showed a card with no image at all.
+			// Regenerate from scripts/og-image.svg — see the note in that file.
+			image: '/og-image.png',
 			imageWidth: 1200,
 			imageHeight: 630,
-			imageType: 'image/svg+xml',
+			imageType: 'image/png',
+			imageAlt: 'svelte-use — Svelte 5 runes-first utility composables',
 			type: 'website'
 		},
 		twitter: { card: 'summary' }

@@ -6,7 +6,13 @@
 		titleTemplate: '%s — Svelte Use',
 		baseUrl: 'https://svelte-use.ariefsn.dev',
 		description: 'Svelte 5 runes-first utility composables.',
-		og: { siteName: 'Svelte Use', image: '/logo.svg', type: 'website' },
+		og: {
+			siteName: 'Svelte Use',
+			image: '/og-image.png',
+			imageWidth: 1200,
+			imageHeight: 630,
+			type: 'website'
+		},
 		twitter: { card: 'summary' }
 	};
 
@@ -23,18 +29,18 @@
 
 <div class="demo-wrap">
 	<div class="row">
-		<span class="label">page title</span>
+		<span class="label" style:min-width="7rem">page title</span>
 		<input type="text" bind:value={title} placeholder="(none)" />
 	</div>
 	<div class="row">
-		<span class="label">og:type</span>
+		<span class="label" style:min-width="7rem">og:type</span>
 		<input type="text" bind:value={ogType} placeholder="(none)" />
 	</div>
 
 	<div class="divider"></div>
 
 	<div class="row">
-		<span class="label">resolved title</span>
+		<span class="label" style:min-width="7rem">resolved title</span>
 		<span class="value accent">{seo.title() ?? '(none — template is skipped)'}</span>
 	</div>
 

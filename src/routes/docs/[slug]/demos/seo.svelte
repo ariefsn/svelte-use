@@ -18,7 +18,13 @@
 		titleTemplate: '%s — Svelte Use',
 		baseUrl: 'https://svelte-use.ariefsn.dev',
 		description: description || undefined,
-		og: { siteName: 'Svelte Use', image: '/logo.svg', type: 'article' },
+		og: {
+			siteName: 'Svelte Use',
+			image: '/og-image.png',
+			imageWidth: 1200,
+			imageHeight: 630,
+			type: 'article'
+		},
 		twitter: { card: 'summary' }
 	});
 
@@ -46,11 +52,11 @@
 
 <div class="demo-wrap">
 	<div class="row">
-		<span class="label">title</span>
+		<span class="label" style:min-width="7rem">title</span>
 		<input type="text" bind:value={title} placeholder="(none)" />
 	</div>
 	<div class="row">
-		<span class="label">description</span>
+		<span class="label" style:min-width="7rem">description</span>
 		<input type="text" bind:value={description} placeholder="(none)" />
 	</div>
 
