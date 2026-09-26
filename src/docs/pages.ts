@@ -18,6 +18,402 @@ export interface DocPage {
 }
 
 export const pages: Record<string, DocPage> = {
+	// -------------------------------------------------- Element & viewport
+	'use-window-size': {
+		slug: 'use-window-size',
+		title: 'useWindowSize',
+		description:
+			'Reactive viewport dimensions. Tracks `resize` and `orientationchange`, so it stays correct when a mobile device is rotated — which does not always fire `resize` on its own.',
+		usage: `import { useWindowSize } from '@ariefsn/svelte-use';
+
+const { width, height } = useWindowSize();
+width();  // → 1280`,
+		params: [
+			{ name: 'options', type: 'UseWindowSizeOptions', default: '{}', description: 'Configuration' }
+		],
+		options: [
+			{
+				name: 'includeScrollbar',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'`true` uses `innerWidth`/`innerHeight`, which count the scrollbar. `false` uses `documentElement.clientWidth`/`clientHeight`, matching what CSS media queries measure.'
+			},
+			{
+				name: 'initialWidth',
+				type: 'number',
+				default: '0',
+				description: 'Width reported before the first measurement, i.e. during SSR'
+			},
+			{
+				name: 'initialHeight',
+				type: 'number',
+				default: '0',
+				description: 'Height reported before the first measurement, i.e. during SSR'
+			}
+		],
+		returns: [
+			{ name: 'width', type: '() => number', description: 'Viewport width in pixels' },
+			{ name: 'height', type: '() => number', description: 'Viewport height in pixels' }
+		],
+		example: `<script lang="ts">
+  import { useWindowSize } from '@ariefsn/svelte-use';
+
+  // Matching CSS media queries means excluding the scrollbar
+  const { width } = useWindowSize({ includeScrollbar: false });
+</script>
+
+{#if width() < 768}
+  <MobileNav />
+{:else}
+  <DesktopNav />
+{/if}`,
+		notes: [
+			'Also listens for `orientationchange`, because some mobile browsers fire only that on rotation.',
+			'For layout decisions prefer `useMediaQuery` or `useBreakpoints` — they use `matchMedia`, which fires only when a threshold is crossed rather than on every resize frame.',
+			'Set `initialWidth`/`initialHeight` to sensible defaults if you render based on these during SSR; otherwise the server renders as if the viewport were 0 wide.'
+		]
+	},
+
+	'use-element-bounding': {
+		slug: 'use-element-bounding',
+		title: 'useElementBounding',
+		description:
+			'Reactive `getBoundingClientRect()` for an element. Where `useElementSize` reports only width and height, this exposes the full viewport-relative box — position included — and recalculates on resize, scroll, and size changes.',
+		usage: `import { useElementBounding } from '@ariefsn/svelte-use';
+
+let el = $state<HTMLDivElement | null>(null);
+const { top, left, width, height } = useElementBounding(() => el);`,
+		params: [
+			{
+				name: 'target',
+				type: '() => Element | null | undefined',
+				description: 'Reactive getter returning the element to measure'
+			},
+			{
+				name: 'options',
+				type: 'UseElementBoundingOptions',
+				default: '{}',
+				description: 'Configuration'
+			}
+		],
+		options: [
+			{
+				name: 'reset',
+				type: 'boolean',
+				default: 'true',
+				description: 'Reset every value to `0` when the target becomes `null`'
+			},
+			{
+				name: 'windowResize',
+				type: 'boolean',
+				default: 'true',
+				description: 'Recalculate on window `resize`'
+			},
+			{
+				name: 'windowScroll',
+				type: 'boolean',
+				default: 'true',
+				description: 'Recalculate on window `scroll`'
+			}
+		],
+		returns: [
+			{ name: 'x', type: '() => number', description: 'Viewport-relative x (same as `left`)' },
+			{ name: 'y', type: '() => number', description: 'Viewport-relative y (same as `top`)' },
+			{ name: 'top', type: '() => number', description: 'Distance from the top of the viewport' },
+			{ name: 'right', type: '() => number', description: "The element's right edge" },
+			{ name: 'bottom', type: '() => number', description: "The element's bottom edge" },
+			{ name: 'left', type: '() => number', description: 'Distance from the left of the viewport' },
+			{ name: 'width', type: '() => number', description: 'Border-box width' },
+			{ name: 'height', type: '() => number', description: 'Border-box height' },
+			{ name: 'update', type: '() => void', description: 'Recalculates immediately' }
+		],
+		example: `<script lang="ts">
+  import { useElementBounding } from '@ariefsn/svelte-use';
+
+  let anchor = $state<HTMLButtonElement | null>(null);
+  const { bottom, left, width } = useElementBounding(() => anchor);
+</script>
+
+<button bind:this={anchor}>Open menu</button>
+
+<!-- Position a dropdown under the button -->
+<div style="position: fixed; top: {bottom()}px; left: {left()}px; width: {width()}px">
+  …
+</div>`,
+		notes: [
+			'All values are viewport-relative, matching `getBoundingClientRect()`. Add `window.scrollX`/`scrollY` for document coordinates.',
+			'Because the rect is viewport-relative, **scrolling changes `top`/`bottom` even when the element has not moved** — which is why scroll is watched by default.',
+			'The scroll listener uses `capture`, so scrolling inside any ancestor container is picked up, not just the document.',
+			'A `ResizeObserver` covers the element changing size; the scroll and resize listeners cover it moving without resizing.',
+			'**An element that moves without resizing is not detected.** `ResizeObserver` watches only the element\u2019s own size, and moving it fires no scroll or resize event — so a sibling appearing above it, or a layout shift elsewhere on the page, leaves `top`/`bottom` stale. Call `update()` after any such change.'
+		]
+	},
+
+	'use-mouse-in-element': {
+		slug: 'use-mouse-in-element',
+		title: 'useMouseInElement',
+		description:
+			'Reactive pointer position relative to an element. Where `useMouse` gives viewport coordinates and `useElementHover` gives a boolean, this gives the offset *within* an element — what spotlight effects, tilt cards and custom sliders need.',
+		usage: `import { useMouseInElement } from '@ariefsn/svelte-use';
+
+let el = $state<HTMLDivElement | null>(null);
+const { elementX, elementY, isOutside } = useMouseInElement(() => el);`,
+		params: [
+			{
+				name: 'target',
+				type: '() => Element | null | undefined',
+				description: 'Reactive getter returning the element to measure against'
+			},
+			{
+				name: 'options',
+				type: 'UseMouseInElementOptions',
+				default: '{}',
+				description: 'Configuration'
+			}
+		],
+		options: [
+			{
+				name: 'handleOutside',
+				type: 'boolean',
+				default: 'true',
+				description: 'Treat the pointer as outside when it leaves the window entirely'
+			},
+			{
+				name: 'touch',
+				type: 'boolean',
+				default: 'true',
+				description: 'Also track `touchmove`, reporting the first touch point'
+			}
+		],
+		returns: [
+			{ name: 'x', type: '() => number', description: 'Pointer x relative to the viewport' },
+			{ name: 'y', type: '() => number', description: 'Pointer y relative to the viewport' },
+			{
+				name: 'elementX',
+				type: '() => number',
+				description: "Pointer x from the element's left edge"
+			},
+			{
+				name: 'elementY',
+				type: '() => number',
+				description: "Pointer y from the element's top edge"
+			},
+			{
+				name: 'elementPositionX',
+				type: '() => number',
+				description: "The element's distance from the left of the viewport"
+			},
+			{
+				name: 'elementPositionY',
+				type: '() => number',
+				description: "The element's distance from the top of the viewport"
+			},
+			{ name: 'elementWidth', type: '() => number', description: "The element's width" },
+			{ name: 'elementHeight', type: '() => number', description: "The element's height" },
+			{
+				name: 'isOutside',
+				type: '() => boolean',
+				description: "Whether the pointer is outside the element's bounds"
+			}
+		],
+		example: `<script lang="ts">
+  import { useMouseInElement } from '@ariefsn/svelte-use';
+
+  let card = $state<HTMLDivElement | null>(null);
+  const { elementX, elementY, elementWidth, elementHeight, isOutside } =
+    useMouseInElement(() => card);
+
+  // 3D tilt that follows the pointer
+  const rotateX = $derived(isOutside() ? 0 : (elementY() / elementHeight() - 0.5) * -20);
+  const rotateY = $derived(isOutside() ? 0 : (elementX() / elementWidth() - 0.5) * 20);
+</script>
+
+<div bind:this={card} style="transform: perspective(600px) rotateX({rotateX}deg) rotateY({rotateY}deg)">
+  tilt me
+</div>`,
+		notes: [
+			'`elementX`/`elementY` are **not clamped** — they go negative or exceed the element size when the pointer is beyond it. Check `isOutside()` rather than assuming a range.',
+			'The listener is on `window`, not the element, so coordinates keep updating while the pointer is outside — needed for effects that ease back to a resting state.',
+			'`isOutside` starts `true` and stays so until the first pointer movement.',
+			'Measures with `getBoundingClientRect()` on each move, so a scrolled or animated element stays correct without extra wiring.'
+		]
+	},
+
+	'use-infinite-scroll': {
+		slug: 'use-infinite-scroll',
+		title: 'useInfiniteScroll',
+		description:
+			'Loads more content as a scroll container nears its edge. Fires once per arrival, never overlaps calls, and re-checks after each load so a short page that does not fill the container keeps loading until it does.',
+		usage: `import { useInfiniteScroll } from '@ariefsn/svelte-use';
+
+let el = $state<HTMLDivElement | null>(null);
+
+const { isLoading } = useInfiniteScroll(() => el, async () => {
+  items = [...items, ...(await fetchNextPage())];
+}, { distance: 100 });`,
+		params: [
+			{
+				name: 'target',
+				type: '() => HTMLElement | null | undefined',
+				description: 'Reactive getter returning the scroll container, or `null` for the window'
+			},
+			{
+				name: 'onLoadMore',
+				type: '() => void | Promise<void>',
+				description: 'Called when the edge comes within `distance`'
+			},
+			{
+				name: 'options',
+				type: 'UseInfiniteScrollOptions',
+				default: '{}',
+				description: 'Configuration'
+			}
+		],
+		options: [
+			{
+				name: 'distance',
+				type: 'number',
+				default: '0',
+				description: 'How close to the edge, in pixels, before loading is triggered'
+			},
+			{
+				name: 'direction',
+				type: "'top' | 'bottom' | 'left' | 'right'",
+				default: "'bottom'",
+				description:
+					"Which edge to watch. `'top'` suits reverse-chronological feeds such as chat transcripts."
+			},
+			{
+				name: 'canLoadMore',
+				type: '() => boolean',
+				default: '() => true',
+				description:
+					'Whether another page may be loaded. Return `false` once the last page has arrived.'
+			}
+		],
+		returns: [
+			{
+				name: 'isLoading',
+				type: '() => boolean',
+				description: '`true` while `onLoadMore` is in flight'
+			},
+			{
+				name: 'check',
+				type: '() => void',
+				description: 'Checks the scroll position and loads now if the edge is already in range'
+			}
+		],
+		example: `<script lang="ts">
+  import { useInfiniteScroll } from '@ariefsn/svelte-use';
+
+  let el = $state<HTMLDivElement | null>(null);
+  let items = $state<Item[]>([]);
+  let page = $state(0);
+
+  const { isLoading } = useInfiniteScroll(
+    () => el,
+    async () => {
+      items = [...items, ...(await fetchPage(page))];
+      page++;
+    },
+    { distance: 100, canLoadMore: () => page < totalPages }
+  );
+</script>
+
+<div bind:this={el} style="overflow-y: auto; height: 400px">
+  {#each items as item (item.id)}<Row {item} />{/each}
+  {#if isLoading()}<Spinner />{/if}
+</div>`,
+		notes: [
+			'**Always provide `canLoadMore`.** Without it the loader keeps firing at the end of the list, since the container never leaves its edge.',
+			'The first load happens immediately when the container starts at its edge — an empty or short list fires no `scroll` event, so waiting for one would stall forever.',
+			'After each load it re-checks, and keeps loading while the content still does not overflow. One short page would otherwise leave no scrollbar and no way to continue.',
+			'Calls never overlap: a scroll burst while a load is in flight is ignored rather than queued.',
+			'`onLoadMore` may be async. A rejected promise stops the run rather than being swallowed — catch inside the callback if loading should continue.'
+		]
+	},
+
+	'use-textarea-autosize': {
+		slug: 'use-textarea-autosize',
+		title: 'useTextareaAutosize',
+		description:
+			'Grows a textarea to fit its content. Recalculates on input, on window resize, and whenever the reactive `value` getter changes — the last case covering programmatic edits, which fire no `input` event.',
+		usage: `import { useTextareaAutosize } from '@ariefsn/svelte-use';
+
+let el = $state<HTMLTextAreaElement | null>(null);
+let text = $state('');
+
+useTextareaAutosize(() => el, { value: () => text, maxRows: 10 });`,
+		params: [
+			{
+				name: 'target',
+				type: '() => HTMLTextAreaElement | null | undefined',
+				description: 'Reactive getter returning the textarea'
+			},
+			{
+				name: 'options',
+				type: 'UseTextareaAutosizeOptions',
+				default: '{}',
+				description: 'Configuration'
+			}
+		],
+		options: [
+			{
+				name: 'value',
+				type: '() => string',
+				description:
+					'Reactive getter for the current value. Needed because a programmatic change fires no `input` event.'
+			},
+			{
+				name: 'minRows',
+				type: 'number',
+				description: 'Smallest height in rows'
+			},
+			{
+				name: 'maxRows',
+				type: 'number',
+				description: 'Largest height in rows. Past this the textarea scrolls instead.'
+			},
+			{
+				name: 'styleProp',
+				type: "'height' | 'minHeight'",
+				default: "'height'",
+				description:
+					"`'height'` resizes immediately; `'minHeight'` lets it grow but never shrink below a user-dragged size."
+			}
+		],
+		returns: [
+			{ name: 'resize', type: '() => void', description: 'Recalculates the height immediately' },
+			{
+				name: 'height',
+				type: '() => number',
+				description: 'The height last applied, in pixels. `0` before the first measurement.'
+			}
+		],
+		example: `<script lang="ts">
+  import { useTextareaAutosize } from '@ariefsn/svelte-use';
+
+  let el = $state<HTMLTextAreaElement | null>(null);
+  let message = $state('');
+
+  useTextareaAutosize(() => el, {
+    value: () => message,
+    minRows: 2,
+    maxRows: 8
+  });
+</script>
+
+<textarea bind:this={el} bind:value={message} rows="1" style="resize: none"></textarea>`,
+		notes: [
+			'Pass `value` whenever the textarea can change programmatically — clearing it after submit, restoring a draft, inserting a template. Without it those edits leave the height stale.',
+			'Resizing works by collapsing the height, reading `scrollHeight`, then applying it. The collapse is required: `scrollHeight` never reports less than the current height, so without it the textarea could grow but never shrink.',
+			'`overflow-y` is only switched to `auto` once `maxRows` actually clips the content, so no scrollbar appears while the textarea is still growing.',
+			'Set `resize: none` in CSS if you do not want the native resize handle fighting the automatic height.',
+			'Recalculates on window resize too, since wrapping depends on width.'
+		]
+	},
+
 	// ----------------------------------------------- Foundational primitives
 	'use-supported': {
 		slug: 'use-supported',

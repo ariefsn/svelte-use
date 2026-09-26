@@ -95,7 +95,8 @@ export const sidebar: SidebarGroup[] = [
 			{ label: 'useMagicKeys', slug: 'use-magic-keys' },
 			{ label: 'useKeyModifier', slug: 'use-key-modifier' },
 			{ label: 'useScroll', slug: 'use-scroll' },
-			{ label: 'useScrollLock', slug: 'use-scroll-lock' }
+			{ label: 'useScrollLock', slug: 'use-scroll-lock' },
+			{ label: 'useInfiniteScroll', slug: 'use-infinite-scroll', since: '1.2.0' }
 		]
 	},
 	{
@@ -103,6 +104,7 @@ export const sidebar: SidebarGroup[] = [
 		items: [
 			{ label: 'useMouse', slug: 'use-mouse' },
 			{ label: 'useMousePressed', slug: 'use-mouse-pressed' },
+			{ label: 'useMouseInElement', slug: 'use-mouse-in-element', since: '1.2.0' },
 			{ label: 'useDraggable', slug: 'use-draggable' }
 		]
 	},
@@ -110,6 +112,7 @@ export const sidebar: SidebarGroup[] = [
 		title: 'Browser - Observers',
 		items: [
 			{ label: 'useElementSize', slug: 'use-element-size' },
+			{ label: 'useElementBounding', slug: 'use-element-bounding', since: '1.2.0' },
 			{ label: 'useIntersectionObserver', slug: 'use-intersection-observer' },
 			{ label: 'useResizeObserver', slug: 'use-resize-observer' },
 			{ label: 'useMutationObserver', slug: 'use-mutation-observer' }
@@ -119,6 +122,7 @@ export const sidebar: SidebarGroup[] = [
 		title: 'Browser - Sensors',
 		items: [
 			{ label: 'useMediaQuery', slug: 'use-media-query', since: '1.2.0' },
+			{ label: 'useWindowSize', slug: 'use-window-size', since: '1.2.0' },
 			{ label: 'useIdle', slug: 'use-idle' },
 			{ label: 'useNetwork', slug: 'use-network' },
 			{ label: 'useGeolocation', slug: 'use-geolocation' },
@@ -156,6 +160,7 @@ export const sidebar: SidebarGroup[] = [
 			{ label: 'useActiveElement', slug: 'use-active-element' },
 			{ label: 'useLongPress', slug: 'use-long-press' },
 			{ label: 'useStartTyping', slug: 'use-start-typing' },
+			{ label: 'useTextareaAutosize', slug: 'use-textarea-autosize', since: '1.2.0' },
 			{ label: 'useSwipe', slug: 'use-swipe' }
 		]
 	},

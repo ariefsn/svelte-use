@@ -3,7 +3,7 @@
 
   <h1>@ariefsn/svelte-use</h1>
 
-  <p>A collection of <strong>85+</strong> Svelte 5 runes-first utility composables.<br/>No stores. No external dependencies. SSR-safe. Fully typed.</p>
+  <p>A collection of <strong>90+</strong> Svelte 5 runes-first utility composables.<br/>No stores. No external dependencies. SSR-safe. Fully typed.</p>
 
   <p>
     <a href="https://github.com/ariefsn/svelte-use">
@@ -108,26 +108,29 @@ bun add @ariefsn/svelte-use
 
 ### Browser – Keyboard & Scroll
 
-| Composable       | Description                                               |
-| ---------------- | --------------------------------------------------------- |
-| `useMagicKeys`   | Reactive keyboard state via Proxy — single keys or combos |
-| `useKeyModifier` | Track Ctrl/Shift/Alt/Meta state                           |
-| `useScroll`      | Scroll position, direction, edge arrival                  |
-| `useScrollLock`  | Lock/unlock body scroll                                   |
+| Composable          | Description                                               |
+| ------------------- | --------------------------------------------------------- |
+| `useMagicKeys`      | Reactive keyboard state via Proxy — single keys or combos |
+| `useKeyModifier`    | Track Ctrl/Shift/Alt/Meta state                           |
+| `useScroll`         | Scroll position, direction, edge arrival                  |
+| `useScrollLock`     | Lock/unlock body scroll                                   |
+| `useInfiniteScroll` | Load more content as a container nears its edge           |
 
 ### Browser – Pointer & Drag
 
-| Composable        | Description                                        |
-| ----------------- | -------------------------------------------------- |
-| `useMouse`        | Viewport-relative pointer position                 |
-| `useMousePressed` | Detect mouse button press state                    |
-| `useDraggable`    | Full-featured draggable with axis, bounds, handles |
+| Composable          | Description                                        |
+| ------------------- | -------------------------------------------------- |
+| `useMouse`          | Viewport-relative pointer position                 |
+| `useMousePressed`   | Detect mouse button press state                    |
+| `useMouseInElement` | Pointer position relative to an element            |
+| `useDraggable`      | Full-featured draggable with axis, bounds, handles |
 
 ### Browser – Observers
 
 | Composable                | Description                                    |
 | ------------------------- | ---------------------------------------------- |
 | `useElementSize`          | Reactive element dimensions via ResizeObserver |
+| `useElementBounding`      | Reactive full bounding box, position included  |
 | `useIntersectionObserver` | Visibility detection via IntersectionObserver  |
 | `useResizeObserver`       | Raw ResizeObserver with callback               |
 | `useMutationObserver`     | DOM mutation observation                       |
@@ -137,6 +140,7 @@ bun add @ariefsn/svelte-use
 | Composable              | Description                                            |
 | ----------------------- | ------------------------------------------------------ |
 | `useMediaQuery`         | Reactively track whether a CSS media query matches     |
+| `useWindowSize`         | Reactive viewport dimensions                           |
 | `useIdle`               | Detect user idle state                                 |
 | `useNetwork`            | Network Information API (downlink, RTT, effectiveType) |
 | `useGeolocation`        | Reactive geolocation via watchPosition                 |
@@ -165,16 +169,17 @@ bun add @ariefsn/svelte-use
 
 ### Browser – Interaction
 
-| Composable         | Description                               |
-| ------------------ | ----------------------------------------- |
-| `useClickOutside`  | Detect clicks outside an element          |
-| `useDropZone`      | Drag-and-drop zone with file/data support |
-| `useElementHover`  | Detect hover state of an element          |
-| `useFocus`         | Reactive focus state of an element        |
-| `useActiveElement` | Track currently focused element globally  |
-| `useLongPress`     | Long press gesture detection              |
-| `useStartTyping`   | Detect typing on non-editable elements    |
-| `useSwipe`         | Touch swipe gesture detection             |
+| Composable            | Description                               |
+| --------------------- | ----------------------------------------- |
+| `useClickOutside`     | Detect clicks outside an element          |
+| `useDropZone`         | Drag-and-drop zone with file/data support |
+| `useElementHover`     | Detect hover state of an element          |
+| `useFocus`            | Reactive focus state of an element        |
+| `useActiveElement`    | Track currently focused element globally  |
+| `useLongPress`        | Long press gesture detection              |
+| `useStartTyping`      | Detect typing on non-editable elements    |
+| `useTextareaAutosize` | Grow a textarea to fit its content        |
+| `useSwipe`            | Touch swipe gesture detection             |
 
 ### Performance
 

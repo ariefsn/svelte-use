@@ -7,7 +7,12 @@
 	import type { PageData } from './$types.js';
 	// ── Demo components ──────────────────────────────────────────────────────
 	import DemoUseAnimate from './demos/use-animate.svelte';
+	import DemoUseElementBounding from './demos/use-element-bounding.svelte';
+	import DemoUseInfiniteScroll from './demos/use-infinite-scroll.svelte';
 	import DemoUseMediaQuery from './demos/use-media-query.svelte';
+	import DemoUseMouseInElement from './demos/use-mouse-in-element.svelte';
+	import DemoUseTextareaAutosize from './demos/use-textarea-autosize.svelte';
+	import DemoUseWindowSize from './demos/use-window-size.svelte';
 	import DemoUseRafFn from './demos/use-raf-fn.svelte';
 	import DemoUseStorage from './demos/use-storage.svelte';
 	import DemoUseSupported from './demos/use-supported.svelte';
@@ -101,7 +106,12 @@
 	// ── Static slug → component map ──────────────────────────────────────────
 	const demoMap: Record<string, Component> = {
 		'use-animate': DemoUseAnimate,
+		'use-element-bounding': DemoUseElementBounding,
+		'use-infinite-scroll': DemoUseInfiniteScroll,
 		'use-media-query': DemoUseMediaQuery,
+		'use-mouse-in-element': DemoUseMouseInElement,
+		'use-textarea-autosize': DemoUseTextareaAutosize,
+		'use-window-size': DemoUseWindowSize,
 		'use-raf-fn': DemoUseRafFn,
 		'use-storage': DemoUseStorage,
 		'use-supported': DemoUseSupported,

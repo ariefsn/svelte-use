@@ -211,3 +211,28 @@ export type {
 	UseStorageReturn,
 	StorageArea
 } from './browser/storage/useStorage.svelte.js';
+
+// Element & viewport
+export { useWindowSize } from './browser/useWindowSize.svelte.js';
+export type { UseWindowSizeOptions, UseWindowSizeReturn } from './browser/useWindowSize.svelte.js';
+export { useElementBounding } from './browser/useElementBounding.svelte.js';
+export type {
+	UseElementBoundingOptions,
+	UseElementBoundingReturn
+} from './browser/useElementBounding.svelte.js';
+export { useMouseInElement } from './browser/input/useMouseInElement.svelte.js';
+export type {
+	UseMouseInElementOptions,
+	UseMouseInElementReturn
+} from './browser/input/useMouseInElement.svelte.js';
+export { useInfiniteScroll } from './browser/useInfiniteScroll.svelte.js';
+export type {
+	UseInfiniteScrollOptions,
+	UseInfiniteScrollReturn,
+	InfiniteScrollDirection
+} from './browser/useInfiniteScroll.svelte.js';
+export { useTextareaAutosize } from './browser/input/useTextareaAutosize.svelte.js';
+export type {
+	UseTextareaAutosizeOptions,
+	UseTextareaAutosizeReturn
+} from './browser/input/useTextareaAutosize.svelte.js';
