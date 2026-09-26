@@ -374,9 +374,23 @@
 		></div>
 	{/if}
 
-	<main
-		class="min-w-0 max-w-[860px] flex-1 px-10 py-12 max-md:max-w-full max-md:px-5 max-md:pt-20 max-md:pb-8"
-	>
-		{@render children()}
+	<main class="min-w-0 flex-1 px-10 py-12 max-md:px-5 max-md:pt-20 max-md:pb-8">
+		<!--
+			`main` is deliberately uncapped and the measure lives here instead.
+			Capping `main` without `mx-auto` was what piled every spare pixel on
+			the right of the page: the flex row packs both children left, so the
+			slack had nowhere else to go.
+
+			Wrapping the slot rather than each page means every route gets the
+			measure, including SvelteKit's built-in error page, which has no
+			wrapper of its own. Pages needing a narrower column cap themselves
+			inside this box; both are centred, so nesting the two lands the
+			inner one exactly where it would have been anyway — a docs page caps its
+			row at 1020, so this outer bound only ever matters to the homepage,
+			which is grids rather than prose and has no reading measure to protect.
+		-->
+		<div class="mx-auto w-full max-w-[1400px]">
+			{@render children()}
+		</div>
 	</main>
 </div>

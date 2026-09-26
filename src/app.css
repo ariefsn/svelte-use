@@ -109,6 +109,17 @@
 	html {
 		background: var(--color-bg);
 		color: var(--color-text);
+		/*
+		 * Animates jumps to a `#section` anchor from the "On this page" rail.
+		 * Note this also animates SvelteKit's scroll-to-top on navigation.
+		 */
+		scroll-behavior: smooth;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		html {
+			scroll-behavior: auto;
+		}
 	}
 
 	body {

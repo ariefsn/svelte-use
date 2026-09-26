@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { pages } from './pages.js';
+import { relatedFor } from './related.js';
 import { NEW_IN_VERSION, allSlugs, groupHasNew, isNew, sidebar } from './sidebar.js';
 
 const DEMOS_DIR = join(process.cwd(), 'src/routes/docs/[slug]/demos');
@@ -145,6 +146,35 @@ describe('docs coverage', () => {
 	it('every sidebar entry has a README row', () => {
 		const missing = labels.filter((label) => !README.includes(`\`${label}\``));
 		expect(missing).toEqual([]);
+	});
+
+	it('every explicit `related` slug exists and is not the page itself', () => {
+		const broken = Object.values(pages).flatMap((page) =>
+			(page.related ?? [])
+				.filter((slug) => !(slug in pages) || slug === page.slug)
+				.map((slug) => `${page.slug} → ${slug}`)
+		);
+		expect(broken).toEqual([]);
+	});
+
+	it('every page yields at least two related links', () => {
+		// Links are derived from cross-references in the copy, topped up with
+		// same-group siblings. A page alone in its group and naming no other util
+		// produces nothing — that is what the explicit `related` override is for,
+		// and this is what tells you a new page needs one.
+		const thin = allSlugs
+			.map((slug) => ({ slug, count: relatedFor(slug).length }))
+			.filter(({ count }) => count < 2)
+			.map(({ slug, count }) => `${slug} → ${count}`);
+		expect(thin).toEqual([]);
+	});
+
+	it('the docs page component does not import pages.ts', () => {
+		// `pages.ts` is ~260KB and is server-only. Importing it from the
+		// component — directly or through `related.js` — would ship all of it to
+		// every visitor, which nothing else in the build would flag.
+		const imports = /import[^;]*from\s+'[^']*\/(pages|related)\.js'/g;
+		expect(PAGE_SVELTE.match(imports)).toBeNull();
 	});
 
 	it('every page has the fields the template renders', () => {

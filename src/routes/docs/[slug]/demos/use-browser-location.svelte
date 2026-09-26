@@ -40,4 +40,14 @@
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- runtime pathname from useBrowserLocation; not a static route id -->
 		<a href={loc.pathname()}>Clear hash</a>
 	</div>
+
+	<!--
+		Real targets for the two links above. Without them the hash still
+		changes and the demo works, but prerendering reports a link to a
+		missing id on every build.
+	-->
+	<div class="text-text-faint flex gap-4 text-[0.78rem]">
+		<span id="section-1" class="scroll-mt-24 max-md:scroll-mt-[112px]">section-1</span>
+		<span id="section-2" class="scroll-mt-24 max-md:scroll-mt-[112px]">section-2</span>
+	</div>
 </div>

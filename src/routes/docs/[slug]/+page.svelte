@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import TableOfContents from '../../../docs/TableOfContents.svelte';
 	import { findItem, isNew, sidebar } from '../../../docs/sidebar.js';
 	import { formatInline } from '../../../docs/format.js';
 	import type { Component } from 'svelte';
@@ -266,7 +267,49 @@
 	// ── Page data + nav ───────────────────────────────────────────────────────
 	let { data }: { data: PageData } = $props();
 	const page = $derived(data.page);
+	const related = $derived(data.related);
 	const Demo = $derived(demoMap[page.slug] ?? null);
+
+	/** One entry in the "On this page" rail. */
+	interface TocEntry {
+		id: string;
+		label: string;
+	}
+
+	/*
+	 * The single source of truth for which sections this page has.
+	 *
+	 * Both the rail and the `{#if}` around each <section> read this, so the
+	 * rail can never link to an anchor that was not rendered. That matters
+	 * because `prerender.handleMissingId` is 'warn': a mismatch would surface
+	 * only as build noise and a dead link, never as a failure.
+	 */
+	const tocEntries = $derived(
+		(
+			[
+				{ id: 'live-demo', label: 'Live Demo', show: Boolean(Demo) },
+				{ id: 'usage', label: 'Usage', show: true },
+				{ id: 'props', label: 'Props', show: (page.props?.length ?? 0) > 0 },
+				{ id: 'parameters', label: 'Parameters', show: (page.params?.length ?? 0) > 0 },
+				{ id: 'options', label: 'Options', show: (page.options?.length ?? 0) > 0 },
+				{ id: 'returns', label: 'Returns', show: (page.returns?.length ?? 0) > 0 },
+				{ id: 'example', label: 'Example', show: true },
+				{ id: 'notes', label: 'Notes', show: (page.notes?.length ?? 0) > 0 },
+				{ id: 'related', label: 'Related', show: related.length > 0 }
+			] satisfies (TocEntry & { show: boolean })[]
+		)
+			.filter((entry) => entry.show)
+			.map(({ id, label }): TocEntry => ({ id, label }))
+	);
+
+	const hasSection = $derived(new Set(tocEntries.map((entry) => entry.id)));
+
+	/*
+	 * 112px clears the mobile stack: the 53px fixed top bar plus the sticky
+	 * "On this page" disclosure docked beneath it, which ends at 102px.
+	 * Measured, not guessed — an anchor landing behind the TOC is invisible.
+	 */
+	const sectionClass = 'mb-10 scroll-mt-24 max-md:scroll-mt-[112px]';
 
 	// `since` lives on the sidebar entry, so it is read from there rather than
 	// duplicated into pages.ts. Utils predating version tracking have none, and
@@ -302,234 +345,264 @@
 	const navName = 'text-text truncate font-mono text-[0.9rem]';
 </script>
 
-<article class="max-w-[780px]">
-	<!-- ─── Title ─── -->
-	<header class="border-border mb-8 border-b pb-8">
-		<div class="mb-2.5 flex flex-wrap items-center gap-3">
-			<h1 class="text-accent m-0 font-mono text-[2.25rem] font-extrabold tracking-[-0.04em]">
-				{page.title}
-			</h1>
-			{#if since}
-				<!--
+<!--
+	The measure sits on this row, not the article: below `xl` the row *is* the
+	780px column, and at `xl` it widens by exactly rail + gap, so the article
+	keeps its own width and the rail fills what used to be dead space.
+-->
+<div class="mx-auto flex w-full max-w-[780px] flex-col gap-8 xl:max-w-[1020px] xl:flex-row">
+	<TableOfContents entries={tocEntries} />
+
+	<article class="min-w-0 flex-1">
+		<!-- ─── Title ─── -->
+		<header class="border-border mb-8 border-b pb-8">
+			<div class="mb-2.5 flex flex-wrap items-center gap-3">
+				<h1 class="text-accent m-0 font-mono text-[2.25rem] font-extrabold tracking-[-0.04em]">
+					{page.title}
+				</h1>
+				{#if since}
+					<!--
 					Outside the <h1> on purpose: the heading text is what feeds the
 					document outline, and "useColorMode v1.2.0" would read oddly there.
 					The title attribute carries the same information for a pointer user.
 				-->
-				<span
-					class="shrink-0 rounded-full border px-2.5 py-1 font-sans text-[0.7rem] leading-none font-semibold tracking-wide {isNewInThisRelease
-						? 'text-accent-strong bg-accent-bg border-accent-border'
-						: 'text-text-muted bg-surface border-border'}"
-					title={isNewInThisRelease
-						? `Added in v${since}, the current release`
-						: `Added in v${since}`}
-				>
-					{isNewInThisRelease ? `New in v${since}` : `v${since}`}
-				</span>
+					<span
+						class="shrink-0 rounded-full border px-2.5 py-1 font-sans text-[0.7rem] leading-none font-semibold tracking-wide {isNewInThisRelease
+							? 'text-accent-strong bg-accent-bg border-accent-border'
+							: 'text-text-muted bg-surface border-border'}"
+						title={isNewInThisRelease
+							? `Added in v${since}, the current release`
+							: `Added in v${since}`}
+					>
+						{isNewInThisRelease ? `New in v${since}` : `v${since}`}
+					</span>
+				{/if}
+			</div>
+			<p class="doc-prose text-text-muted m-0 text-base leading-relaxed">
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags, and the source is repo-authored doc copy, not user input -->
+				{@html formatInline(page.description)}
+			</p>
+		</header>
+
+		<!-- ─── Live Demo ─── -->
+		{#if hasSection.has('live-demo')}
+			<section id="live-demo" class={sectionClass}>
+				<h2 class={sectionHeading}>Live Demo</h2>
+				<div class="bg-bg-elev border-border rounded-[10px] border p-5">
+					<Demo />
+				</div>
+			</section>
+		{/if}
+
+		<!-- ─── Usage ─── -->
+		<section id="usage" class={sectionClass}>
+			<h2 class={sectionHeading}>Usage</h2>
+			<pre class={codeBlock}><code class={codeText}>{page.usage}</code></pre>
+		</section>
+
+		<!-- ─── API: Props (component pages) ─── -->
+		{#if hasSection.has('props')}
+			<section id="props" class={sectionClass}>
+				<h2 class={sectionHeading}>Props</h2>
+				<div class="overflow-x-auto">
+					<table class="w-full border-collapse text-[0.85rem]">
+						<thead>
+							<tr>
+								<th class={tableHead}>Prop</th>
+								<th class={tableHead}>Type</th>
+								<th class={tableHead}>Default</th>
+								<th class={tableHead}>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each page.props as row (row.name)}
+								<tr>
+									<td class={tableCell}><code class="inline-code">{row.name}</code></td>
+									<td class={tableCell}><code class="inline-code type">{row.type}</code></td>
+									<td class={tableCell}>
+										{#if row.default}
+											<code class="inline-code muted">{row.default}</code>
+										{:else}
+											<span class="text-text-faint">—</span>
+										{/if}
+									</td>
+									<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
+									<td class="{tableCell} {descCell}">{@html formatInline(row.description)}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			</section>
+		{/if}
+
+		<!-- ─── API: Parameters ─── -->
+		{#if hasSection.has('parameters')}
+			<section id="parameters" class={sectionClass}>
+				<h2 class={sectionHeading}>Parameters</h2>
+				<div class="overflow-x-auto">
+					<table class="w-full border-collapse text-[0.85rem]">
+						<thead>
+							<tr>
+								<th class={tableHead}>Name</th>
+								<th class={tableHead}>Type</th>
+								<th class={tableHead}>Default</th>
+								<th class={tableHead}>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each page.params as row (row.name)}
+								<tr>
+									<td class={tableCell}><code class="inline-code">{row.name}</code></td>
+									<td class={tableCell}><code class="inline-code type">{row.type}</code></td>
+									<td class={tableCell}>
+										{#if row.default}
+											<code class="inline-code muted">{row.default}</code>
+										{:else}
+											<span class="text-text-faint">—</span>
+										{/if}
+									</td>
+									<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
+									<td class="{tableCell} {descCell}">{@html formatInline(row.description)}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			</section>
+		{/if}
+
+		<!-- ─── API: Options ─── -->
+		{#if hasSection.has('options')}
+			<section id="options" class={sectionClass}>
+				<h2 class={sectionHeading}>Options</h2>
+				<div class="overflow-x-auto">
+					<table class="w-full border-collapse text-[0.85rem]">
+						<thead>
+							<tr>
+								<th class={tableHead}>Option</th>
+								<th class={tableHead}>Type</th>
+								<th class={tableHead}>Default</th>
+								<th class={tableHead}>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each page.options as row (row.name)}
+								<tr>
+									<td class={tableCell}><code class="inline-code">{row.name}</code></td>
+									<td class={tableCell}><code class="inline-code type">{row.type}</code></td>
+									<td class={tableCell}>
+										{#if row.default}
+											<code class="inline-code muted">{row.default}</code>
+										{:else}
+											<span class="text-text-faint">—</span>
+										{/if}
+									</td>
+									<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
+									<td class="{tableCell} {descCell}">{@html formatInline(row.description)}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			</section>
+		{/if}
+
+		<!-- ─── API: Returns ─── -->
+		{#if hasSection.has('returns')}
+			<section id="returns" class={sectionClass}>
+				<h2 class={sectionHeading}>Returns</h2>
+				<div class="overflow-x-auto">
+					<table class="w-full border-collapse text-[0.85rem]">
+						<thead>
+							<tr>
+								<th class={tableHead}>Property</th>
+								<th class={tableHead}>Type</th>
+								<th class={tableHead}>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each page.returns as row (row.name)}
+								<tr>
+									<td class={tableCell}><code class="inline-code">{row.name}</code></td>
+									<td class={tableCell}><code class="inline-code type">{row.type}</code></td>
+									<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
+									<td class="{tableCell} {descCell}">{@html formatInline(row.description)}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			</section>
+		{/if}
+
+		<!-- ─── Example ─── -->
+		<section id="example" class={sectionClass}>
+			<h2 class={sectionHeading}>Example</h2>
+			<pre class={codeBlock}><code class={codeText}>{page.example}</code></pre>
+		</section>
+
+		<!-- ─── Notes ─── -->
+		{#if hasSection.has('notes')}
+			<section id="notes" class={sectionClass}>
+				<h2 class={sectionHeading}>Notes</h2>
+				<ul class="m-0 flex list-disc flex-col gap-2 py-0 pr-0 pl-5">
+					{#each page.notes as note (note)}
+						<li class="doc-prose text-text-muted text-[0.9rem] leading-relaxed">
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
+							{@html formatInline(note)}
+						</li>
+					{/each}
+				</ul>
+			</section>
+		{/if}
+
+		<!-- ─── Related ─── -->
+		{#if hasSection.has('related')}
+			<section id="related" class={sectionClass}>
+				<h2 class={sectionHeading}>Related</h2>
+				<div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
+					{#each related as link (link.slug)}
+						<a
+							href={resolve('/docs/[slug]', { slug: link.slug })}
+							class="bg-bg-elev border-border hover:border-accent hover:bg-accent-bg flex min-w-0 flex-col gap-1 rounded-lg border px-4 py-3 no-underline transition-colors"
+						>
+							<span class="text-text-faint text-[0.7rem] tracking-wider uppercase"
+								>{link.group}</span
+							>
+							<span class="text-accent truncate font-mono text-[0.88rem]">{link.label}</span>
+							<span class="text-text-muted text-[0.78rem] leading-snug">{link.blurb}</span>
+						</a>
+					{/each}
+				</div>
+			</section>
+		{/if}
+
+		<!-- ─── Prev / Next ─── -->
+		<nav class="border-border mt-14 flex justify-between gap-4 border-t pt-8">
+			{#if prev}
+				<a href={resolve('/docs/[slug]', { slug: prev.slug })} class="group {navBtn}">
+					<span class="{navArrow} group-hover:text-accent">←</span>
+					<span class="flex min-w-0 flex-col gap-[0.1rem]">
+						<span class={navKicker}>Previous</span>
+						<span class={navName}>{prev.label}</span>
+					</span>
+				</a>
+			{:else}
+				<div></div>
 			{/if}
-		</div>
-		<p class="doc-prose text-text-muted m-0 text-base leading-relaxed">
-			<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags, and the source is repo-authored doc copy, not user input -->
-			{@html formatInline(page.description)}
-		</p>
-	</header>
 
-	<!-- ─── Live Demo ─── -->
-	{#if Demo}
-		<section class="mb-10">
-			<h2 class={sectionHeading}>Live Demo</h2>
-			<div class="bg-bg-elev border-border rounded-[10px] border p-5">
-				<Demo />
-			</div>
-		</section>
-	{/if}
-
-	<!-- ─── Usage ─── -->
-	<section class="mb-10">
-		<h2 class={sectionHeading}>Usage</h2>
-		<pre class={codeBlock}><code class={codeText}>{page.usage}</code></pre>
-	</section>
-
-	<!-- ─── API: Props (component pages) ─── -->
-	{#if page.props && page.props.length > 0}
-		<section class="mb-10">
-			<h2 class={sectionHeading}>Props</h2>
-			<div class="overflow-x-auto">
-				<table class="w-full border-collapse text-[0.85rem]">
-					<thead>
-						<tr>
-							<th class={tableHead}>Prop</th>
-							<th class={tableHead}>Type</th>
-							<th class={tableHead}>Default</th>
-							<th class={tableHead}>Description</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each page.props as row (row.name)}
-							<tr>
-								<td class={tableCell}><code class="inline-code">{row.name}</code></td>
-								<td class={tableCell}><code class="inline-code type">{row.type}</code></td>
-								<td class={tableCell}>
-									{#if row.default}
-										<code class="inline-code muted">{row.default}</code>
-									{:else}
-										<span class="text-text-faint">—</span>
-									{/if}
-								</td>
-								<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
-								<td class="{tableCell} {descCell}">{@html formatInline(row.description)}</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-		</section>
-	{/if}
-
-	<!-- ─── API: Parameters ─── -->
-	{#if page.params && page.params.length > 0}
-		<section class="mb-10">
-			<h2 class={sectionHeading}>Parameters</h2>
-			<div class="overflow-x-auto">
-				<table class="w-full border-collapse text-[0.85rem]">
-					<thead>
-						<tr>
-							<th class={tableHead}>Name</th>
-							<th class={tableHead}>Type</th>
-							<th class={tableHead}>Default</th>
-							<th class={tableHead}>Description</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each page.params as row (row.name)}
-							<tr>
-								<td class={tableCell}><code class="inline-code">{row.name}</code></td>
-								<td class={tableCell}><code class="inline-code type">{row.type}</code></td>
-								<td class={tableCell}>
-									{#if row.default}
-										<code class="inline-code muted">{row.default}</code>
-									{:else}
-										<span class="text-text-faint">—</span>
-									{/if}
-								</td>
-								<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
-								<td class="{tableCell} {descCell}">{@html formatInline(row.description)}</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-		</section>
-	{/if}
-
-	<!-- ─── API: Options ─── -->
-	{#if page.options && page.options.length > 0}
-		<section class="mb-10">
-			<h2 class={sectionHeading}>Options</h2>
-			<div class="overflow-x-auto">
-				<table class="w-full border-collapse text-[0.85rem]">
-					<thead>
-						<tr>
-							<th class={tableHead}>Option</th>
-							<th class={tableHead}>Type</th>
-							<th class={tableHead}>Default</th>
-							<th class={tableHead}>Description</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each page.options as row (row.name)}
-							<tr>
-								<td class={tableCell}><code class="inline-code">{row.name}</code></td>
-								<td class={tableCell}><code class="inline-code type">{row.type}</code></td>
-								<td class={tableCell}>
-									{#if row.default}
-										<code class="inline-code muted">{row.default}</code>
-									{:else}
-										<span class="text-text-faint">—</span>
-									{/if}
-								</td>
-								<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
-								<td class="{tableCell} {descCell}">{@html formatInline(row.description)}</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-		</section>
-	{/if}
-
-	<!-- ─── API: Returns ─── -->
-	{#if page.returns && page.returns.length > 0}
-		<section class="mb-10">
-			<h2 class={sectionHeading}>Returns</h2>
-			<div class="overflow-x-auto">
-				<table class="w-full border-collapse text-[0.85rem]">
-					<thead>
-						<tr>
-							<th class={tableHead}>Property</th>
-							<th class={tableHead}>Type</th>
-							<th class={tableHead}>Description</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each page.returns as row (row.name)}
-							<tr>
-								<td class={tableCell}><code class="inline-code">{row.name}</code></td>
-								<td class={tableCell}><code class="inline-code type">{row.type}</code></td>
-								<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
-								<td class="{tableCell} {descCell}">{@html formatInline(row.description)}</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-		</section>
-	{/if}
-
-	<!-- ─── Example ─── -->
-	<section class="mb-10">
-		<h2 class={sectionHeading}>Example</h2>
-		<pre class={codeBlock}><code class={codeText}>{page.example}</code></pre>
-	</section>
-
-	<!-- ─── Notes ─── -->
-	{#if page.notes && page.notes.length > 0}
-		<section class="mb-10">
-			<h2 class={sectionHeading}>Notes</h2>
-			<ul class="m-0 flex list-disc flex-col gap-2 py-0 pr-0 pl-5">
-				{#each page.notes as note (note)}
-					<li class="doc-prose text-text-muted text-[0.9rem] leading-relaxed">
-						<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
-						{@html formatInline(note)}
-					</li>
-				{/each}
-			</ul>
-		</section>
-	{/if}
-
-	<!-- ─── Prev / Next ─── -->
-	<nav class="border-border mt-14 flex justify-between gap-4 border-t pt-8">
-		{#if prev}
-			<a href={resolve('/docs/[slug]', { slug: prev.slug })} class="group {navBtn}">
-				<span class="{navArrow} group-hover:text-accent">←</span>
-				<span class="flex min-w-0 flex-col gap-[0.1rem]">
-					<span class={navKicker}>Previous</span>
-					<span class={navName}>{prev.label}</span>
-				</span>
-			</a>
-		{:else}
-			<div></div>
-		{/if}
-
-		{#if next}
-			<a href={resolve('/docs/[slug]', { slug: next.slug })} class="group {navBtn}">
-				<span class="flex min-w-0 flex-col gap-[0.1rem] text-right">
-					<span class={navKicker}>Next</span>
-					<span class={navName}>{next.label}</span>
-				</span>
-				<span class="{navArrow} group-hover:text-accent">→</span>
-			</a>
-		{:else}
-			<div></div>
-		{/if}
-	</nav>
-</article>
+			{#if next}
+				<a href={resolve('/docs/[slug]', { slug: next.slug })} class="group {navBtn}">
+					<span class="flex min-w-0 flex-col gap-[0.1rem] text-right">
+						<span class={navKicker}>Next</span>
+						<span class={navName}>{next.label}</span>
+					</span>
+					<span class="{navArrow} group-hover:text-accent">→</span>
+				</a>
+			{:else}
+				<div></div>
+			{/if}
+		</nav>
+	</article>
+</div>

@@ -9,7 +9,9 @@ import { sidebar } from '../docs/sidebar.js';
  * here would emit duplicate meta tags, and crawlers take the first.
  */
 export const load = () => {
-	const totalComposables = sidebar.reduce((count, group) => count + group.items.length, 0);
+	const allItems = sidebar.flatMap((group) => group.items);
+	// Matches the split in +page.svelte: `Seo` is a component, not a composable.
+	const composableCount = allItems.filter((item) => item.label.startsWith('use')).length;
 
 	return {
 		seo: {
@@ -17,7 +19,7 @@ export const load = () => {
 			// The layout's `%s — Svelte Use` template would read oddly on the
 			// homepage, so this one supplies its own full title.
 			titleTemplate: '%s · Svelte Use',
-			description: `A collection of ${totalComposables}+ Svelte 5 runes-first utility composables. No stores, no external dependencies, SSR-safe, fully typed.`,
+			description: `A collection of ${composableCount} Svelte 5 runes-first utility composables plus an SEO component. No stores, no external dependencies, SSR-safe, fully typed.`,
 			og: { type: 'website' }
 		} satisfies SeoData
 	};

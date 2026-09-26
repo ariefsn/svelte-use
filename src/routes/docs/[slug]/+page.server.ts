@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { SeoData } from '$lib';
 import { stripInline } from '../../../docs/format.js';
+import { relatedFor } from '../../../docs/related.js';
 import { pages } from '../../../docs/pages.js';
 import { allSlugs } from '../../../docs/sidebar.js';
 import type { PageServerLoad } from './$types.js';
@@ -18,6 +19,12 @@ export const load: PageServerLoad = ({ params }) => {
 	}
 	return {
 		page,
+		/*
+		 * Derived server-side on purpose. `related.ts` imports `pages.ts`, which
+		 * is 260KB — deriving this in the component would pull all of it into the
+		 * client bundle for the sake of four links.
+		 */
+		related: relatedFor(params.slug),
 		/*
 		 * Merged into the layout defaults by the single `<Seo />` there.
 		 * `stripInline` is what keeps the doc copy's backticks and asterisks

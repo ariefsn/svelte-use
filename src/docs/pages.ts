@@ -11,6 +11,15 @@ export interface DocPage {
 	description: string;
 	usage: string;
 	/**
+	 * Slugs to surface in "Related" ahead of the automatic picks.
+	 *
+	 * Expected to stay near-empty: `related.ts` derives links from backticked
+	 * cross-references in the doc copy and falls back to same-group siblings.
+	 * This is for the few pages where that finds too little — `use-virtual-list`
+	 * is alone in its group, for instance.
+	 */
+	related?: string[];
+	/**
 	 * Component props, rendered as a "Props" table.
 	 *
 	 * Only a component page has these — a component has no params, options or
@@ -4377,6 +4386,9 @@ search('svelte'); // ← this one fires`,
 	// ──────────────────────────────────────────── Virtualization
 	'use-virtual-list': {
 		slug: 'use-virtual-list',
+		// The only page the automatic picks cannot serve: it is alone in the
+		// Virtualization group and its copy names no other utility.
+		related: ['use-infinite-scroll', 'use-scroll', 'use-element-size', 'use-intersection-observer'],
 		title: 'useVirtualList',
 		description:
 			'Renders only the items currently visible in a scrollable container. Handles lists of any size with a fixed row height, dramatically reducing DOM nodes.',
