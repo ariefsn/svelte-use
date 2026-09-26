@@ -62,11 +62,13 @@ bun add @ariefsn/svelte-use
 
 ### Async
 
-| Composable      | Description                                     |
-| --------------- | ----------------------------------------------- |
-| `useFetch`      | Reactive fetch with loading/error state         |
-| `useWebSocket`  | Reactive WebSocket with auto-reconnect          |
-| `useAsyncState` | Reactive async/promise state with loading/error |
+| Composable            | Description                                          |
+| --------------------- | ---------------------------------------------------- |
+| `useFetch`            | Reactive fetch with loading/error state              |
+| `useWebSocket`        | Reactive WebSocket with auto-reconnect               |
+| `useAsyncState`       | Reactive async/promise state with loading/error      |
+| `useEventSource`      | Server-sent events; the browser handles reconnection |
+| `useBroadcastChannel` | Cross-tab messaging by structured clone              |
 
 ### Time
 
@@ -183,11 +185,12 @@ bun add @ariefsn/svelte-use
 
 ### Performance
 
-| Composable      | Description                        |
-| --------------- | ---------------------------------- |
-| `useFps`        | Reactive frames-per-second counter |
-| `useThrottleFn` | Throttle any function              |
-| `useDebounceFn` | Debounce any function              |
+| Composable       | Description                                       |
+| ---------------- | ------------------------------------------------- |
+| `useFps`         | Reactive frames-per-second counter                |
+| `useThrottleFn`  | Throttle any function                             |
+| `useDebounceFn`  | Debounce any function                             |
+| `useWebWorkerFn` | Run a self-contained function off the main thread |
 
 ### Virtualization
 

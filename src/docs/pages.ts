@@ -461,6 +461,283 @@ params.get('page'); // → '2'`,
 			'`useBrowserLocation` does not observe `pushState`/`replaceState`, because neither fires an event — so a sibling `useBrowserLocation` goes stale after a write here.'
 		]
 	},
+	// ----------------------------------------------- Async – Streams & Workers
+	'use-event-source': {
+		slug: 'use-event-source',
+		title: 'useEventSource',
+		description:
+			'Server-sent events with reactive state. One-way and text-only, and the **browser** reconnects on its own — so there is deliberately no `autoReconnect` option.',
+		usage: `import { useEventSource } from '@ariefsn/svelte-use';
+
+const stream = useEventSource<string>(
+  () => 'https://sse.tools.typinks.com/api/story'
+);
+stream.data();   // → each token as it streams in
+stream.status(); // → 'CONNECTING' | 'OPEN' | 'CLOSED'`,
+		params: [
+			{
+				name: 'url',
+				type: '() => string | undefined',
+				description: 'Getter for the endpoint. Return `undefined` to stay disconnected.'
+			},
+			{
+				name: 'options',
+				type: 'UseEventSourceOptions',
+				default: '{}',
+				description: 'Credentials, named events and connect-on-init behaviour'
+			}
+		],
+		options: [
+			{
+				name: 'withCredentials',
+				type: 'boolean',
+				default: 'false',
+				description: 'Send cookies and HTTP auth to a cross-origin endpoint'
+			},
+			{
+				name: 'events',
+				type: 'readonly string[]',
+				default: '[]',
+				description:
+					'Named events to subscribe to. A server sending `event: ping` does **not** reach the default handler, so an unlisted name is silently dropped.'
+			},
+			{
+				name: 'immediate',
+				type: 'boolean',
+				default: 'true',
+				description: 'Connect as soon as the URL resolves. `false` waits for `open()`.'
+			}
+		],
+		returns: [
+			{
+				name: 'data',
+				type: '() => T | null',
+				description: 'The last payload, JSON-parsed when possible'
+			},
+			{
+				name: 'event',
+				type: '() => string | null',
+				description: "Name of the last event — `'message'` for unnamed ones"
+			},
+			{
+				name: 'lastEventId',
+				type: '() => string | null',
+				description:
+					'The last `id:` field the server sent, or `null` if it sends none. Most endpoints do not, so `null` is normal rather than a fault.'
+			},
+			{ name: 'status', type: '() => EventSourceStatus', description: 'Connection state' },
+			{ name: 'error', type: '() => Event | null', description: 'The last error event' },
+			{
+				name: 'source',
+				type: '() => EventSource | null',
+				description: 'The underlying `EventSource`, for anything this does not wrap'
+			},
+			{ name: 'open', type: '() => void', description: 'Connects, if not already connected' },
+			{
+				name: 'close',
+				type: '() => void',
+				description: 'Closes the stream and stops the browser reconnecting'
+			}
+		],
+		example: `<script lang="ts">
+  import { untrack } from 'svelte';
+  import { useEventSource } from '@ariefsn/svelte-use';
+
+  // A live endpoint you can try: it streams a story token by token
+  let endpoint = $state('https://sse.tools.typinks.com/api/story');
+
+  // Named events must be listed, or they never arrive
+  const stream = useEventSource<string>(() => endpoint || undefined, {
+    events: ['ping']
+  });
+
+  // Accumulate, since each frame replaces data()
+  let story = $state('');
+  $effect(() => {
+    const chunk = stream.data();
+    if (chunk !== null) untrack(() => (story += chunk));
+  });
+</script>
+
+<p>Status: {stream.status()}</p>
+<p>{story}</p>
+<button onclick={stream.close}>Stop</button>`,
+		notes: [
+			'**There is no `autoReconnect` option on purpose.** `EventSource` reconnects by itself when a connection drops, honouring the server’s `retry:` interval. Adding another layer on top would fight it.',
+			"What the browser does *not* recover from is an HTTP-level failure — a 404, or a response that is not `text/event-stream`. That closes the stream permanently and shows up as `status() === 'CLOSED'` with a non-null `error()`. A retryable drop reports `'CONNECTING'` instead, so the two are distinguishable.",
+			'Named events bypass the default handler entirely. If a server sends `event: ping` and `ping` is not in `events`, the message is dropped with no warning — this is the most common surprise with SSE.',
+			'Messages are text only. A payload that parses as JSON is parsed; anything else is left as a string.',
+			'Changing the URL closes the old connection first, and a late frame from it is ignored rather than overwriting fresher state.',
+			'`data()` holds the **latest** frame, not an accumulation. A token-streaming endpoint therefore needs the consumer to append, and appending inside an `$effect` must be wrapped in `untrack` — `story += chunk` reads and writes the same state, which would otherwise re-trigger the effect forever.',
+			'**`lastEventId()` is `null` for most endpoints, and that is not a fault.** It reflects the optional `id:` field. Its only job is resumption: when a stream drops, the browser reconnects by itself and sends the last id back as a `Last-Event-ID` request header, so the server can continue from that point instead of replaying from the start. A server that sends only `data:` lines — which is the common case — has nothing to resume from, and the spec leaves the value as an empty string.',
+			"Likewise `event()` reports `'message'` for any frame the server did not name. A non-null `event()` other than `'message'` means the server sent an explicit `event:` line *and* you listed that name in `events`.",
+			"SSR safe: nothing connects and `status()` is `'CLOSED'`."
+		]
+	},
+	'use-broadcast-channel': {
+		slug: 'use-broadcast-channel',
+		title: 'useBroadcastChannel',
+		description:
+			'Cross-tab messaging over `BroadcastChannel`. Every tab, worker and iframe on the same origin using the same channel name receives what the others post — but the sender never receives its own message.',
+		usage: `import { useBroadcastChannel } from '@ariefsn/svelte-use';
+
+const channel = useBroadcastChannel<{ userId: string }>({ name: 'auth' });
+channel.post({ userId: 'u1' });
+channel.data(); // → what another tab posted`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseBroadcastChannelOptions',
+				description: 'The channel name'
+			}
+		],
+		options: [
+			{
+				name: 'name',
+				type: 'string',
+				description:
+					'Channel name. Every context using the same name on the same origin shares the channel.'
+			}
+		],
+		returns: [
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether `BroadcastChannel` exists'
+			},
+			{ name: 'data', type: '() => T | null', description: 'The last message received' },
+			{
+				name: 'error',
+				type: '() => MessageEvent | null',
+				description: 'The last `messageerror` — a payload that could not be deserialised'
+			},
+			{ name: 'isClosed', type: '() => boolean', description: 'Whether the channel is closed' },
+			{
+				name: 'post',
+				type: '(data: T) => void',
+				description: 'Posts to every **other** context on this channel'
+			},
+			{ name: 'close', type: '() => void', description: 'Closes the channel' }
+		],
+		example: `<script lang="ts">
+  import { useBroadcastChannel } from '@ariefsn/svelte-use';
+  import { goto } from '$app/navigation';
+
+  const auth = useBroadcastChannel<{ userId: string | null }>({ name: 'auth' });
+
+  // Signing out in one tab signs out the others
+  $effect(() => {
+    if (auth.data()?.userId === null) goto('/login');
+  });
+</script>
+
+<button onclick={() => auth.post({ userId: null })}>Sign out everywhere</button>`,
+		notes: [
+			'**The sender never receives its own message.** This is the usual source of confusion when testing with a single tab — open a second one, or create two instances.',
+			'Payloads travel by **structured clone**, not JSON. Objects, `Map`, `Set`, `Date`, `ArrayBuffer` and typed arrays all survive, and a string arrives as the string it was. Functions, DOM nodes and class behaviour do not; posting one throws a `DataCloneError`.',
+			'This is why `useBroadcastChannel` deliberately does **not** share the JSON parsing that `useWebSocket` and `useEventSource` use. Running it here would turn a payload of `\'{"a":1}\'` into an object the sender never sent.',
+			'`useColorMode` uses a *same-page* channel internally rather than this one, because `BroadcastChannel` does not deliver to the context that posted — and that util needs sibling instances in the same tab to update.',
+			'Delivery is asynchronous, so a message posted now is not readable on the next line.',
+			'SSR safe: `isSupported()` is `false` and `post()` is a no-op.'
+		]
+	},
+	'use-web-worker-fn': {
+		slug: 'use-web-worker-fn',
+		title: 'useWebWorkerFn',
+		description:
+			'Runs a function on a Web Worker, off the main thread. The function is serialised with `toString()`, so it **must be entirely self-contained** — it cannot see imports, module constants or closures from the file it was written in.',
+		usage: `import { useWebWorkerFn } from '@ariefsn/svelte-use';
+
+const sorter = useWebWorkerFn((numbers: number[]) =>
+  [...numbers].sort((a, b) => a - b)
+);
+
+const sorted = await sorter.run([5, 1, 4]);`,
+		params: [
+			{
+				name: 'fn',
+				type: '(...args: TArgs) => TResult | Promise<TResult>',
+				description: 'A self-contained function to run off-thread'
+			},
+			{
+				name: 'options',
+				type: 'UseWebWorkerFnOptions',
+				default: '{}',
+				description: 'Timeout and `importScripts` dependencies'
+			}
+		],
+		options: [
+			{
+				name: 'timeout',
+				type: 'number',
+				default: 'undefined',
+				description: 'Milliseconds before a run is abandoned and the worker terminated'
+			},
+			{
+				name: 'dependencies',
+				type: 'readonly string[]',
+				default: '[]',
+				description:
+					'Scripts to `importScripts()` inside the worker, as absolute URLs. The supported way to give the function code it does not carry itself.'
+			}
+		],
+		returns: [
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether `Worker`, `Blob` and `URL.createObjectURL` are all available'
+			},
+			{
+				name: 'run',
+				type: '(...args: TArgs) => Promise<TResult>',
+				description: 'Runs the function off-thread. Starting a run cancels the previous one.'
+			},
+			{
+				name: 'status',
+				type: '() => WebWorkerStatus',
+				description:
+					"State of the most recent run: `'PENDING'`, `'RUNNING'`, `'SUCCESS'`, `'ERROR'`, `'TIMEOUT'` or `'TERMINATED'`"
+			},
+			{
+				name: 'terminate',
+				type: '() => void',
+				description:
+					"Terminates the running worker. The pending promise rejects and `status()` becomes `'TERMINATED'`."
+			}
+		],
+		example: `<script lang="ts">
+  import { useWebWorkerFn } from '@ariefsn/svelte-use';
+
+  // Self-contained: everything it touches is an argument or a built-in
+  const primes = useWebWorkerFn((limit: number) => {
+    const sieve = new Uint8Array(limit + 1);
+    const found: number[] = [];
+    for (let n = 2; n <= limit; n++) {
+      if (sieve[n]) continue;
+      found.push(n);
+      for (let m = n * n; m <= limit; m += n) sieve[m] = 1;
+    }
+    return found;
+  }, { timeout: 5000 });
+
+  let result = $state<number[]>([]);
+</script>
+
+<button onclick={async () => (result = await primes.run(5_000_000))}>
+  Compute
+</button>
+<p>{primes.status()} — {result.length} primes</p>`,
+		notes: [
+			'**The function must be self-contained.** It is serialised with `Function.prototype.toString()` and re-created in a fresh worker scope, so imports, module-level constants and closed-over variables are all unavailable. Referencing one throws *inside the worker* — TypeScript cannot catch it, and the call site looks fine.',
+			'Arguments and the return value cross by structured clone, so they may be objects, `Map`, `Set`, `Date` or typed arrays, but not functions, DOM nodes or class instances with behaviour. A non-cloneable argument rejects the promise rather than failing silently.',
+			'**Async functions written in a `.svelte` or `.svelte.ts` file need no special handling, but only because this works around a compiler detail.** Svelte rewrites every `await` to `(await $.track_reactivity_loss(p))()`, where `$` is its internal import — a name that does not exist in a worker. A small shim for `$` is injected into the worker scope, so `$` is a reserved name there.',
+			'Each `run()` gets a fresh worker, so no state leaks between runs, and starting a run cancels the previous one — its promise rejects rather than resolving late.',
+			"`terminate()` moves the status to `'TERMINATED'`, not `'ERROR'` — the run was cancelled deliberately, not broken. It is also a distinct state from `'RUNNING'` on purpose: a button disabled while `status() === 'RUNNING'` would otherwise stay disabled forever after a cancel. Terminating while idle changes nothing.",
+			'The Blob URL backing the worker is revoked on completion, timeout, `terminate()` and scope destroy. Skipping that leaks a URL per run.',
+			'A strict Content Security Policy needs `worker-src blob:`, or worker construction throws.',
+			'SSR safe: `isSupported()` is `false` and `run()` rejects.'
+		]
+	},
 	// ------------------------------------------------------ Browser – Media
 	'use-user-media': {
 		slug: 'use-user-media',

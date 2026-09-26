@@ -58,7 +58,9 @@ const groups: SidebarGroup[] = [
 		items: [
 			{ label: 'useFetch', slug: 'use-fetch', since: '1.0.0' },
 			{ label: 'useWebSocket', slug: 'use-web-socket', since: '1.0.0' },
-			{ label: 'useAsyncState', slug: 'use-async-state', since: '1.1.0' }
+			{ label: 'useAsyncState', slug: 'use-async-state', since: '1.1.0' },
+			{ label: 'useEventSource', slug: 'use-event-source', since: '1.2.0' },
+			{ label: 'useBroadcastChannel', slug: 'use-broadcast-channel', since: '1.2.0' }
 		]
 	},
 	{
@@ -218,7 +220,8 @@ const groups: SidebarGroup[] = [
 		items: [
 			{ label: 'useFps', slug: 'use-fps', since: '1.0.0' },
 			{ label: 'useThrottleFn', slug: 'use-throttle-fn', since: '1.0.0' },
-			{ label: 'useDebounceFn', slug: 'use-debounce-fn', since: '1.0.0' }
+			{ label: 'useDebounceFn', slug: 'use-debounce-fn', since: '1.0.0' },
+			{ label: 'useWebWorkerFn', slug: 'use-web-worker-fn', since: '1.2.0' }
 		]
 	},
 	{

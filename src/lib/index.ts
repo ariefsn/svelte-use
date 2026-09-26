@@ -163,6 +163,12 @@ export { useFps } from './performance/useFps.svelte.js';
 export { useThrottleFn } from './performance/useThrottleFn.svelte.js';
 export { useDebounceFn } from './performance/useDebounceFn.svelte.js';
 export { useIdle } from './performance/useIdle.svelte.js';
+export { useWebWorkerFn } from './performance/useWebWorkerFn.svelte.js';
+export type {
+	WebWorkerStatus,
+	UseWebWorkerFnOptions,
+	UseWebWorkerFnReturn
+} from './performance/useWebWorkerFn.svelte.js';
 
 // Animation
 export { useAnimate } from './animation/useAnimate.svelte.js';
@@ -178,6 +184,17 @@ export type {
 	UseWebSocketOptions,
 	UseWebSocketReturn
 } from './async/useWebSocket.svelte.js';
+export { useEventSource } from './async/useEventSource.svelte.js';
+export type {
+	EventSourceStatus,
+	UseEventSourceOptions,
+	UseEventSourceReturn
+} from './async/useEventSource.svelte.js';
+export { useBroadcastChannel } from './async/useBroadcastChannel.svelte.js';
+export type {
+	UseBroadcastChannelOptions,
+	UseBroadcastChannelReturn
+} from './async/useBroadcastChannel.svelte.js';
 
 // Time
 export { useInterval } from './time/useInterval.svelte.js';

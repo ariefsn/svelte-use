@@ -18,6 +18,9 @@
 	import DemoUseTitle from './demos/use-title.svelte';
 	import DemoUseUrlSearchParams from './demos/use-url-search-params.svelte';
 	import DemoUseUserMedia from './demos/use-user-media.svelte';
+	import DemoUseEventSource from './demos/use-event-source.svelte';
+	import DemoUseBroadcastChannel from './demos/use-broadcast-channel.svelte';
+	import DemoUseWebWorkerFn from './demos/use-web-worker-fn.svelte';
 	import DemoUseDisplayMedia from './demos/use-display-media.svelte';
 	import DemoUseDevicesList from './demos/use-devices-list.svelte';
 	import DemoUseAnimate from './demos/use-animate.svelte';
@@ -131,6 +134,9 @@
 		'use-title': DemoUseTitle,
 		'use-url-search-params': DemoUseUrlSearchParams,
 		'use-user-media': DemoUseUserMedia,
+		'use-event-source': DemoUseEventSource,
+		'use-broadcast-channel': DemoUseBroadcastChannel,
+		'use-web-worker-fn': DemoUseWebWorkerFn,
 		'use-display-media': DemoUseDisplayMedia,
 		'use-devices-list': DemoUseDevicesList,
 		'use-animate': DemoUseAnimate,
