@@ -18,6 +18,12 @@
 	import DemoUseTitle from './demos/use-title.svelte';
 	import DemoUseUrlSearchParams from './demos/use-url-search-params.svelte';
 	import DemoUseUserMedia from './demos/use-user-media.svelte';
+	import DemoUseFullscreen from './demos/use-fullscreen.svelte';
+	import DemoUseScreenOrientation from './demos/use-screen-orientation.svelte';
+	import DemoUseGamepad from './demos/use-gamepad.svelte';
+	import DemoUseImage from './demos/use-image.svelte';
+	import DemoUseSpeechSynthesis from './demos/use-speech-synthesis.svelte';
+	import DemoUseFileSystemAccess from './demos/use-file-system-access.svelte';
 	import DemoUseEventSource from './demos/use-event-source.svelte';
 	import DemoUseBroadcastChannel from './demos/use-broadcast-channel.svelte';
 	import DemoUseWebWorkerFn from './demos/use-web-worker-fn.svelte';
@@ -134,6 +140,12 @@
 		'use-title': DemoUseTitle,
 		'use-url-search-params': DemoUseUrlSearchParams,
 		'use-user-media': DemoUseUserMedia,
+		'use-fullscreen': DemoUseFullscreen,
+		'use-screen-orientation': DemoUseScreenOrientation,
+		'use-gamepad': DemoUseGamepad,
+		'use-image': DemoUseImage,
+		'use-speech-synthesis': DemoUseSpeechSynthesis,
+		'use-file-system-access': DemoUseFileSystemAccess,
 		'use-event-source': DemoUseEventSource,
 		'use-broadcast-channel': DemoUseBroadcastChannel,
 		'use-web-worker-fn': DemoUseWebWorkerFn,

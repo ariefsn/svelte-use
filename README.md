@@ -156,6 +156,8 @@ bun add @ariefsn/svelte-use
 | `useDeviceMotion`       | Device acceleration and rotation data                  |
 | `useDeviceOrientation`  | Device physical orientation (alpha/beta/gamma)         |
 | `useDevicePixelRatio`   | Reactive device pixel ratio for Retina detection       |
+| `useScreenOrientation`  | Screen orientation and angle, with locking             |
+| `useGamepad`            | Gamepad state, polled only while one is connected      |
 | `useScrollbarWidth`     | Measure scrollbar width of an element                  |
 
 ### Browser – Storage
@@ -200,22 +202,26 @@ bun add @ariefsn/svelte-use
 
 ### Web APIs
 
-| Composable             | Description                         |
-| ---------------------- | ----------------------------------- |
-| `useClipboard`         | Reactive clipboard read/write       |
-| `useBattery`           | Reactive Battery Status API         |
-| `useSpeechRecognition` | Reactive Web Speech Recognition API |
-| `useEyeDropper`        | EyeDropper API for color picking    |
-| `useFileDialog`        | Programmatic file input dialog      |
-| `useShare`             | Native Web Share API                |
-| `useVibrate`           | Vibration API                       |
-| `useWebNotification`   | Desktop notifications API           |
-| `usePermission`        | Browser Permissions API             |
-| `useWakeLock`          | Screen Wake Lock API                |
-| `useSupported`         | SSR-safe one-shot feature detection |
-| `useEventListener`     | Generic event listener with cleanup |
-| `useTextDirection`     | Track/set text directionality       |
-| `useTextSelection`     | Track text selection                |
+| Composable             | Description                                      |
+| ---------------------- | ------------------------------------------------ |
+| `useClipboard`         | Reactive clipboard read/write                    |
+| `useBattery`           | Reactive Battery Status API                      |
+| `useSpeechRecognition` | Reactive Web Speech Recognition API              |
+| `useEyeDropper`        | EyeDropper API for color picking                 |
+| `useFileDialog`        | Programmatic file input dialog                   |
+| `useShare`             | Native Web Share API                             |
+| `useVibrate`           | Vibration API                                    |
+| `useWebNotification`   | Desktop notifications API                        |
+| `usePermission`        | Browser Permissions API                          |
+| `useWakeLock`          | Screen Wake Lock API                             |
+| `useFullscreen`        | Display any element fullscreen, Escape-aware     |
+| `useImage`             | Preload an image and track its load state        |
+| `useSpeechSynthesis`   | Text-to-speech, with async voice loading handled |
+| `useFileSystemAccess`  | Read **and write** real files (Chromium only)    |
+| `useSupported`         | SSR-safe one-shot feature detection              |
+| `useEventListener`     | Generic event listener with cleanup              |
+| `useTextDirection`     | Track/set text directionality                    |
+| `useTextSelection`     | Track text selection                             |
 
 ### Browser – Appearance
 

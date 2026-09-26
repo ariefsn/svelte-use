@@ -96,6 +96,13 @@ export { useDeviceOrientation } from './browser/sensors/useDeviceOrientation.sve
 export type { UseDeviceOrientationReturn } from './browser/sensors/useDeviceOrientation.svelte.js';
 export { useDevicePixelRatio } from './browser/sensors/useDevicePixelRatio.svelte.js';
 export type { UseDevicePixelRatioReturn } from './browser/sensors/useDevicePixelRatio.svelte.js';
+export { useScreenOrientation } from './browser/sensors/useScreenOrientation.svelte.js';
+export type {
+	OrientationLockType,
+	UseScreenOrientationReturn
+} from './browser/sensors/useScreenOrientation.svelte.js';
+export { useGamepad } from './browser/sensors/useGamepad.svelte.js';
+export type { UseGamepadOptions, UseGamepadReturn } from './browser/sensors/useGamepad.svelte.js';
 
 // Browser – Interaction
 export { useClickOutside } from './browser/interaction/useClickOutside.svelte.js';
@@ -133,6 +140,23 @@ export { useShare } from './browser/useShare.svelte.js';
 export type { UseShareData, UseShareReturn } from './browser/useShare.svelte.js';
 export { useVibrate } from './browser/useVibrate.svelte.js';
 export type { UseVibrateReturn } from './browser/useVibrate.svelte.js';
+export { useFullscreen } from './browser/useFullscreen.svelte.js';
+export type { UseFullscreenOptions, UseFullscreenReturn } from './browser/useFullscreen.svelte.js';
+export { useImage } from './browser/useImage.svelte.js';
+export type { UseImageSource, UseImageReturn } from './browser/useImage.svelte.js';
+export { useSpeechSynthesis } from './browser/useSpeechSynthesis.svelte.js';
+export type {
+	SpeechSynthesisStatus,
+	UseSpeechSynthesisOptions,
+	UseSpeechSynthesisReturn
+} from './browser/useSpeechSynthesis.svelte.js';
+export { useFileSystemAccess } from './browser/useFileSystemAccess.svelte.js';
+export type {
+	FilePickerAcceptType,
+	FilePickerOptions,
+	UseFileSystemAccessOptions,
+	UseFileSystemAccessReturn
+} from './browser/useFileSystemAccess.svelte.js';
 export { useWebNotification } from './browser/useWebNotification.svelte.js';
 export type {
 	UseWebNotificationOptions,

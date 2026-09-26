@@ -461,6 +461,469 @@ params.get('page'); // → '2'`,
 			'`useBrowserLocation` does not observe `pushState`/`replaceState`, because neither fires an event — so a sibling `useBrowserLocation` goes stale after a write here.'
 		]
 	},
+	// ------------------------------------------------- Web APIs – Device & UI
+	'use-fullscreen': {
+		slug: 'use-fullscreen',
+		title: 'useFullscreen',
+		description:
+			'Displays an element fullscreen. `isFullscreen()` is driven by the `fullscreenchange` event rather than by what was last called, because the user can leave with Escape without telling the page.',
+		usage: `import { useFullscreen } from '@ariefsn/svelte-use';
+
+let player = $state<HTMLElement | null>(null);
+const fullscreen = useFullscreen(() => player);
+await fullscreen.enter();`,
+		params: [
+			{
+				name: 'target',
+				type: 'HTMLElement | (() => HTMLElement | null) | undefined',
+				default: 'document.documentElement',
+				description: 'Element to display. Omit for the whole page.'
+			},
+			{
+				name: 'options',
+				type: 'UseFullscreenOptions',
+				default: '{}',
+				description: 'Destroy behaviour'
+			}
+		],
+		options: [
+			{
+				name: 'exitOnDestroy',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'Leave fullscreen when the owning scope is destroyed. Without it, navigating away leaves the whole page stuck fullscreen.'
+			}
+		],
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether the API is available' },
+			{
+				name: 'isFullscreen',
+				type: '() => boolean',
+				description: 'Whether **this** target is the element currently displayed'
+			},
+			{
+				name: 'enter',
+				type: '() => Promise<void>',
+				description: 'Requests fullscreen. Must be called from a user gesture.'
+			},
+			{
+				name: 'exit',
+				type: '() => Promise<void>',
+				description: 'Leaves fullscreen, if this target is the one displayed'
+			},
+			{ name: 'toggle', type: '() => Promise<void>', description: 'Enters or exits' }
+		],
+		example: `<script lang="ts">
+  import { useFullscreen } from '@ariefsn/svelte-use';
+
+  let player = $state<HTMLElement | null>(null);
+  const fullscreen = useFullscreen(() => player);
+</script>
+
+<div bind:this={player}>
+  <button onclick={fullscreen.toggle}>
+    {fullscreen.isFullscreen() ? 'Exit' : 'Go'} fullscreen
+  </button>
+</div>`,
+		notes: [
+			'`enter()` must be called from a user gesture; browsers reject a request that is not, which surfaces as a rejected promise.',
+			'**`isFullscreen()` is about this target specifically.** Another element being fullscreen reports `false` here, which is what makes per-element toggle buttons behave correctly on a page with several.',
+			'State follows the `fullscreenchange` event, never what was last called — Escape leaves fullscreen without notifying the page, so tracking intent instead of reality would go stale immediately.',
+			'Safari implements only the `webkit`-prefixed API, and TypeScript declares none of it. Both spellings are handled internally.',
+			'SSR safe: `isSupported()` is `false` and `enter()` resolves without doing anything.'
+		]
+	},
+	'use-screen-orientation': {
+		slug: 'use-screen-orientation',
+		title: 'useScreenOrientation',
+		description:
+			'Screen orientation and rotation angle. Reading works everywhere the API exists; **locking** needs fullscreen and is unavailable on desktop entirely.',
+		usage: `import { useScreenOrientation } from '@ariefsn/svelte-use';
+
+const screen = useScreenOrientation();
+screen.orientation(); // → 'portrait-primary'
+screen.angle();       // → 0`,
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether the API is available' },
+			{
+				name: 'orientation',
+				type: '() => OrientationType | null',
+				description: "The current orientation, e.g. `'portrait-primary'`. `null` during SSR."
+			},
+			{
+				name: 'angle',
+				type: '() => number',
+				description: 'Rotation from the natural orientation, in degrees'
+			},
+			{
+				name: 'isLockSupported',
+				type: '() => boolean',
+				description: 'Whether `lock()` exists — it does not on desktop Safari or Firefox'
+			},
+			{
+				name: 'lock',
+				type: '(orientation: OrientationLockType) => Promise<void>',
+				description: 'Locks the screen. Rejects unless the document is fullscreen.'
+			},
+			{ name: 'unlock', type: '() => void', description: 'Releases a lock' }
+		],
+		example: `<script lang="ts">
+  import { useScreenOrientation, useFullscreen } from '@ariefsn/svelte-use';
+
+  const orientation = useScreenOrientation();
+  const fullscreen = useFullscreen();
+
+  // Locking requires fullscreen first — this is the whole dance
+  async function lockLandscape() {
+    await fullscreen.enter();
+    await orientation.lock('landscape');
+  }
+</script>
+
+<p>{orientation.orientation()} at {orientation.angle()}°</p>
+{#if orientation.isLockSupported()}
+  <button onclick={lockLandscape}>Lock landscape</button>
+{/if}`,
+		notes: [
+			'**Locking is far less available than reading.** It requires the document to be fullscreen, and desktop browsers do not implement it at all. Check `isLockSupported()` before offering it.',
+			'`lock()` rejects with a `SecurityError` outside fullscreen and a `NotSupportedError` where it is unavailable. Both are surfaced rather than swallowed, since the caller usually wants to fall back to a CSS-based layout.',
+			"TypeScript's `lib.dom` declares `unlock()` but neither `lock()` nor the `OrientationLockType` union, so both are supplied by this library — `OrientationLockType` is exported for your own signatures.",
+			'SSR safe: `orientation()` is `null` and `angle()` is 0.'
+		]
+	},
+	'use-gamepad': {
+		slug: 'use-gamepad',
+		title: 'useGamepad',
+		description:
+			'Connected gamepads, with button and axis state. The Gamepad API has no events for stick or button movement, so this polls each frame — but **only while a controller is connected**.',
+		usage: `import { useGamepad } from '@ariefsn/svelte-use';
+
+const pads = useGamepad({ fpsLimit: 30 });
+pads.gamepads()[0]?.buttons[0]?.pressed;`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseGamepadOptions',
+				default: '{}',
+				description: 'Polling configuration'
+			}
+		],
+		options: [
+			{
+				name: 'fpsLimit',
+				type: 'number',
+				default: 'undefined',
+				description:
+					'Cap the polling rate. Buttons only change as fast as a human moves them, so ~30 is usually indistinguishable and halves the work.'
+			}
+		],
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether the API is available' },
+			{
+				name: 'gamepads',
+				type: '() => readonly Gamepad[]',
+				description: 'Connected gamepads, refreshed every frame while any are present'
+			},
+			{
+				name: 'isConnected',
+				type: '() => boolean',
+				description: 'Whether at least one gamepad is connected'
+			},
+			{
+				name: 'isPolling',
+				type: '() => boolean',
+				description: 'Whether the frame loop is currently running'
+			},
+			{ name: 'pause', type: '() => void', description: 'Stops polling; state freezes' },
+			{ name: 'resume', type: '() => void', description: 'Resumes polling' }
+		],
+		example: `<script lang="ts">
+  import { useGamepad } from '@ariefsn/svelte-use';
+
+  const pads = useGamepad({ fpsLimit: 30 });
+  const pad = $derived(pads.gamepads()[0]);
+</script>
+
+{#if pad}
+  <p>{pad.id}</p>
+  <p>Left stick: {pad.axes[0].toFixed(2)}, {pad.axes[1].toFixed(2)}</p>
+{:else}
+  <p>Press a button on a connected controller.</p>
+{/if}`,
+		notes: [
+			'**An empty list on load is normal.** Browsers hide gamepads until the user has interacted with one, so a connected controller stays invisible until a button is pressed — this is a deliberate fingerprinting defence, not a bug.',
+			'The polling loop runs **only while a gamepad is connected** and stops when the last one disconnects, so a page with no controller attached does no per-frame work at all.',
+			'`navigator.getGamepads()` returns fresh snapshot objects on every call, not live-updating ones, which is why the whole array is replaced each frame rather than mutated.',
+			'The list is compacted: the raw API returns `null` for empty slots, which would otherwise force every consumer to filter.',
+			'SSR safe: the list is empty and nothing polls.'
+		]
+	},
+	'use-image': {
+		slug: 'use-image',
+		title: 'useImage',
+		description:
+			'Preloads an image and tracks its state. Loading happens on a detached `Image`, so the browser has the bytes before the `<img>` that shows it renders — which is how you avoid a layout jump.',
+		usage: `import { useImage } from '@ariefsn/svelte-use';
+
+const avatar = useImage({ src: '/avatar.png', alt: 'Avatar' });
+avatar.isLoading(); // → true, then false
+avatar.image();     // → HTMLImageElement | null`,
+		params: [
+			{
+				name: 'source',
+				type: 'UseImageSource | (() => UseImageSource)',
+				description: 'What to load. A getter makes it reactive.'
+			}
+		],
+		options: [
+			{ name: 'src', type: 'string', description: 'The image URL' },
+			{ name: 'srcset', type: 'string', description: 'Responsive candidates, as in `srcset`' },
+			{ name: 'sizes', type: 'string', description: 'Which candidate to pick, as in `sizes`' },
+			{ name: 'alt', type: 'string', description: 'Alternative text, forwarded to the element' },
+			{
+				name: 'crossorigin',
+				type: "'anonymous' | 'use-credentials'",
+				description: 'CORS mode. Required before an image can be drawn to a canvas and read back.'
+			},
+			{ name: 'referrerPolicy', type: 'ReferrerPolicy', description: 'Referrer policy' }
+		],
+		returns: [
+			{ name: 'isLoading', type: '() => boolean', description: 'Whether a load is in progress' },
+			{
+				name: 'image',
+				type: '() => HTMLImageElement | null',
+				description: 'The loaded element, or `null` before it resolves or after a failure'
+			},
+			{
+				name: 'error',
+				type: '() => Error | null',
+				description:
+					'The failure. Image errors carry no detail, so this is synthesised from the URL.'
+			},
+			{ name: 'isReady', type: '() => boolean', description: 'Whether the current source loaded' },
+			{ name: 'refresh', type: '() => void', description: 'Loads again, e.g. to retry' }
+		],
+		example: `<script lang="ts">
+  import { useImage } from '@ariefsn/svelte-use';
+
+  let id = $state(1);
+  const avatar = useImage(() => ({ src: \`/avatars/\${id}.png\`, alt: 'Avatar' }));
+</script>
+
+{#if avatar.isLoading()}
+  <div class="skeleton"></div>
+{:else if avatar.error()}
+  <img src="/avatars/fallback.png" alt="Avatar" />
+{:else}
+  <img src={avatar.image()?.src} alt="Avatar" />
+{/if}`,
+		notes: [
+			'The DOM `error` event for an image carries **no detail** — no status code, no reason — so `error()` is a synthesised `Error` naming the URL. That is genuinely all the browser exposes.',
+			'Every attribute is applied **before** `src`, because setting `crossorigin` or `srcset` afterwards can leave the browser fetching with the wrong CORS mode or picking the wrong candidate.',
+			'A reactive source reloads automatically, and the previous result is cleared while the new one is in flight so stale content cannot linger.',
+			'A result arriving for a source that is no longer current is discarded, so a slow first load cannot overwrite a faster second one.',
+			'SSR safe: nothing loads, `isLoading()` is `false` and `image()` is `null`.'
+		]
+	},
+	'use-speech-synthesis': {
+		slug: 'use-speech-synthesis',
+		title: 'useSpeechSynthesis',
+		description:
+			'Text-to-speech via the Speech Synthesis API. Handles the two behaviours that bite: voices load asynchronously, and the utterance queue outlives the page.',
+		usage: `import { useSpeechSynthesis } from '@ariefsn/svelte-use';
+
+const speech = useSpeechSynthesis({ rate: 1.1 });
+speech.speak('Hello there');`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseSpeechSynthesisOptions',
+				default: '{}',
+				description: 'Voice, language and delivery settings'
+			}
+		],
+		options: [
+			{
+				name: 'lang',
+				type: 'string | (() => string)',
+				default: 'document language',
+				description: 'BCP 47 language tag, e.g. `en-GB`'
+			},
+			{
+				name: 'voice',
+				type: 'SpeechSynthesisVoice | null | (() => …)',
+				default: 'null',
+				description: 'Voice to speak with. Pick one from `voices()`.'
+			},
+			{ name: 'rate', type: 'number | (() => number)', default: '1', description: 'Speed, 0.1–10' },
+			{ name: 'pitch', type: 'number | (() => number)', default: '1', description: 'Pitch, 0–2' },
+			{ name: 'volume', type: 'number | (() => number)', default: '1', description: 'Volume, 0–1' }
+		],
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether the API is available' },
+			{
+				name: 'voices',
+				type: '() => readonly SpeechSynthesisVoice[]',
+				description: 'Available voices. Empty until the browser has loaded them.'
+			},
+			{
+				name: 'status',
+				type: '() => SpeechSynthesisStatus',
+				description: "`'idle'`, `'speaking'` or `'paused'`"
+			},
+			{ name: 'isSpeaking', type: '() => boolean', description: 'Whether speech is playing' },
+			{
+				name: 'error',
+				type: '() => SpeechSynthesisErrorEvent | null',
+				description: 'The last genuine error'
+			},
+			{
+				name: 'speak',
+				type: '(text: string) => void',
+				description: 'Speaks the text, replacing anything queued'
+			},
+			{ name: 'pause', type: '() => void', description: 'Pauses playback' },
+			{ name: 'resume', type: '() => void', description: 'Resumes after a pause' },
+			{ name: 'stop', type: '() => void', description: 'Stops and clears the queue' }
+		],
+		example: `<script lang="ts">
+  import { useSpeechSynthesis } from '@ariefsn/svelte-use';
+
+  let text = $state('Hello there');
+  const speech = useSpeechSynthesis();
+
+  // Empty on first render in Chrome — fills in on its own
+  const english = $derived(speech.voices().filter((v) => v.lang.startsWith('en')));
+</script>
+
+<select onchange={(e) => (voice = english[+e.currentTarget.value])}>
+  {#each english as v, i (v.voiceURI)}
+    <option value={i}>{v.name}</option>
+  {/each}
+</select>
+<button onclick={() => speech.speak(text)}>Speak</button>
+<button onclick={speech.stop} disabled={!speech.isSpeaking()}>Stop</button>`,
+		notes: [
+			'**`getVoices()` returns an empty list on first call in Chrome.** Voices load asynchronously and announce themselves with a `voiceschanged` event, so a one-shot read at init would leave the list permanently empty. This listens for that event — but an empty list on the first render is normal, so do not treat it as unsupported.',
+			'**The utterance queue belongs to the browser, not the page.** It keeps speaking after a component unmounts, and after a client-side navigation. The teardown here calls `cancel()`, so leaving the page stops the voice.',
+			'Each `speak()` cancels what is queued rather than appending, since the queue is global and calls would otherwise play one after another in a way nobody intends.',
+			'`canceled` and `interrupted` errors are treated as ordinary control flow — they are what `stop()` and a replacing `speak()` produce — so `error()` reports only genuine failures.',
+			'Voice availability varies enormously by platform, and many voices need a network connection. There is no reliable way to detect that in advance.',
+			'SSR safe: `isSupported()` is `false` and `speak()` does nothing.'
+		]
+	},
+	'use-file-system-access': {
+		slug: 'use-file-system-access',
+		title: 'useFileSystemAccess',
+		description:
+			'Reading and **writing** real files. This is what `useFileDialog` and `useDropZone` cannot do: they hand you a read-only `File`, while this gives a handle, so `save()` writes back to the file the user opened.',
+		usage: `import { useFileSystemAccess } from '@ariefsn/svelte-use';
+
+const fs = useFileSystemAccess({ suggestedName: 'notes.txt' });
+await fs.open();        // picker → reads as text
+await fs.save('edited'); // writes back to the same file`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseFileSystemAccessOptions',
+				default: '{}',
+				description: 'File type filters and the suggested save name'
+			}
+		],
+		options: [
+			{
+				name: 'types',
+				type: 'readonly FilePickerAcceptType[]',
+				default: 'undefined',
+				description: "File types to offer, e.g. `[{ accept: { 'text/plain': ['.txt'] } }]`"
+			},
+			{
+				name: 'excludeAcceptAllOption',
+				type: 'boolean',
+				default: 'false',
+				description: 'Hide the "All files" option'
+			},
+			{
+				name: 'id',
+				type: 'string',
+				default: 'undefined',
+				description: 'Remembers the last directory per id across visits'
+			},
+			{
+				name: 'suggestedName',
+				type: 'string',
+				default: 'undefined',
+				description: 'Default name offered when saving'
+			}
+		],
+		returns: [
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether the API is available — Chromium only today'
+			},
+			{
+				name: 'fileHandle',
+				type: '() => FileSystemFileHandle | null',
+				description: 'The handle to the open file'
+			},
+			{ name: 'file', type: '() => File | null', description: 'The opened `File`' },
+			{ name: 'data', type: '() => string | null', description: 'Text content of the opened file' },
+			{ name: 'fileName', type: '() => string | null', description: "The file's name" },
+			{
+				name: 'error',
+				type: '() => DOMException | null',
+				description: '`AbortError` when the user dismissed the picker'
+			},
+			{ name: 'isBusy', type: '() => boolean', description: 'Whether a picker or IO is running' },
+			{
+				name: 'open',
+				type: '() => Promise<string | null>',
+				description: 'Opens a picker and reads the chosen file as text'
+			},
+			{
+				name: 'save',
+				type: '(contents?: string) => Promise<boolean>',
+				description: 'Writes to the open file, or opens a save picker when none is open'
+			},
+			{
+				name: 'saveAs',
+				type: '(contents?: string) => Promise<boolean>',
+				description: 'Opens a save picker for a new file regardless'
+			},
+			{ name: 'close', type: '() => void', description: 'Clears state without touching the file' }
+		],
+		example: `<script lang="ts">
+  import { useFileSystemAccess } from '@ariefsn/svelte-use';
+
+  const fs = useFileSystemAccess({
+    types: [{ description: 'Text', accept: { 'text/plain': ['.txt', '.md'] } }],
+    suggestedName: 'notes.txt'
+  });
+
+  let draft = $state('');
+
+  async function open() {
+    const text = await fs.open();
+    if (text !== null) draft = text;
+  }
+</script>
+
+<button onclick={open}>Open</button>
+<button onclick={() => fs.save(draft)}>Save</button>
+<textarea bind:value={draft}></textarea>
+<p>{fs.fileName() ?? 'No file open'}</p>`,
+		notes: [
+			'**Chromium only.** Firefox and Safari implement neither picker, so `isSupported()` is `false` there and a download-based fallback is still needed. It is also unavailable inside a cross-origin iframe.',
+			'This is the gap `useFileDialog` and `useDropZone` leave: both are read-only acquisition, handing back a `File` that is a snapshot. A `FileSystemFileHandle` is what makes writing back possible.',
+			'Both pickers must be called from a user gesture. A dismissed picker surfaces as an `AbortError` in `error()` rather than a throw, because cancelling is ordinary behaviour rather than a fault.',
+			'`save()` with no file open falls back to `saveAs()` rather than failing — that is almost always what a Save button should do.',
+			'A write is not committed until the writable stream is closed, which this handles; a partial write left open would silently lose data.',
+			"TypeScript's `lib.dom` declares `FileSystemFileHandle` but not the two picker methods that hand one out, so those are supplied by this library.",
+			'SSR safe: `isSupported()` is `false` and `open()` resolves `null`.'
+		]
+	},
 	// ----------------------------------------------- Async – Streams & Workers
 	'use-event-source': {
 		slug: 'use-event-source',

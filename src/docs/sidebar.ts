@@ -148,6 +148,8 @@ const groups: SidebarGroup[] = [
 			{ label: 'useDeviceMotion', slug: 'use-device-motion', since: '1.1.0' },
 			{ label: 'useDeviceOrientation', slug: 'use-device-orientation', since: '1.1.0' },
 			{ label: 'useDevicePixelRatio', slug: 'use-device-pixel-ratio', since: '1.1.0' },
+			{ label: 'useScreenOrientation', slug: 'use-screen-orientation', since: '1.2.0' },
+			{ label: 'useGamepad', slug: 'use-gamepad', since: '1.2.0' },
 			{ label: 'useScrollbarWidth', slug: 'use-scrollbar-width', since: '1.1.0' }
 		]
 	},
@@ -241,6 +243,10 @@ const groups: SidebarGroup[] = [
 			{ label: 'useWebNotification', slug: 'use-web-notification', since: '1.1.0' },
 			{ label: 'usePermission', slug: 'use-permission', since: '1.1.0' },
 			{ label: 'useWakeLock', slug: 'use-wake-lock', since: '1.1.0' },
+			{ label: 'useFullscreen', slug: 'use-fullscreen', since: '1.2.0' },
+			{ label: 'useImage', slug: 'use-image', since: '1.2.0' },
+			{ label: 'useSpeechSynthesis', slug: 'use-speech-synthesis', since: '1.2.0' },
+			{ label: 'useFileSystemAccess', slug: 'use-file-system-access', since: '1.2.0' },
 			{ label: 'useSupported', slug: 'use-supported', since: '1.2.0' },
 			{ label: 'useEventListener', slug: 'use-event-listener', since: '1.1.0' },
 			{ label: 'useTextDirection', slug: 'use-text-direction', since: '1.1.0' },
