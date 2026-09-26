@@ -1,3 +1,5 @@
+import { useSupported } from './useSupported.svelte.js';
+
 /**
  * Return value of {@link useGeolocation}.
  */
@@ -31,14 +33,13 @@ export interface UseGeolocationReturn {
  * ```
  */
 export function useGeolocation(options?: PositionOptions): UseGeolocationReturn {
-	const isBrowser = typeof navigator !== 'undefined';
-	const supported = isBrowser && 'geolocation' in navigator;
+	const isSupported = useSupported(() => 'geolocation' in navigator);
 
 	let coords = $state<GeolocationCoordinates | null>(null);
 	let error = $state<GeolocationPositionError | null>(null);
 
 	$effect(() => {
-		if (!supported) return;
+		if (!isSupported()) return;
 
 		const watchId = navigator.geolocation.watchPosition(
 			(position) => {

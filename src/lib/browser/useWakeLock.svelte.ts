@@ -1,3 +1,5 @@
+import { useSupported } from './useSupported.svelte.js';
+
 export interface UseWakeLockReturn {
 	/** Whether the Screen Wake Lock API is supported */
 	isSupported: () => boolean;
@@ -24,14 +26,13 @@ export interface UseWakeLockReturn {
  * ```
  */
 export function useWakeLock(): UseWakeLockReturn {
-	const isBrowser = typeof navigator !== 'undefined';
-	const supported = isBrowser && 'wakeLock' in navigator;
+	const isSupported = useSupported(() => 'wakeLock' in navigator);
 
 	let sentinel = $state<WakeLockSentinel | null>(null);
 	let active = $state(false);
 
 	async function request() {
-		if (!supported || sentinel) return;
+		if (!isSupported() || sentinel) return;
 
 		try {
 			sentinel = await navigator.wakeLock.request('screen');
@@ -64,7 +65,7 @@ export function useWakeLock(): UseWakeLockReturn {
 	});
 
 	return {
-		isSupported: () => supported,
+		isSupported,
 		isActive: () => active,
 		request,
 		release

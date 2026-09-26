@@ -1,3 +1,5 @@
+import { useSupported } from '../useSupported.svelte.js';
+
 export interface UseDeviceOrientationReturn {
 	/** Whether the DeviceOrientationEvent API is supported */
 	isSupported: () => boolean;
@@ -23,8 +25,7 @@ export interface UseDeviceOrientationReturn {
  * ```
  */
 export function useDeviceOrientation(): UseDeviceOrientationReturn {
-	const isBrowser = typeof window !== 'undefined';
-	const supported = isBrowser && 'DeviceOrientationEvent' in window;
+	const isSupported = useSupported(() => 'DeviceOrientationEvent' in window);
 
 	let isAbsolute = $state(false);
 	let alpha = $state<number | null>(null);
@@ -32,7 +33,7 @@ export function useDeviceOrientation(): UseDeviceOrientationReturn {
 	let gamma = $state<number | null>(null);
 
 	$effect(() => {
-		if (!supported) return;
+		if (!isSupported()) return;
 
 		function handler(e: DeviceOrientationEvent) {
 			isAbsolute = e.absolute;
@@ -49,7 +50,7 @@ export function useDeviceOrientation(): UseDeviceOrientationReturn {
 	});
 
 	return {
-		isSupported: () => supported,
+		isSupported,
 		isAbsolute: () => isAbsolute,
 		alpha: () => alpha,
 		beta: () => beta,

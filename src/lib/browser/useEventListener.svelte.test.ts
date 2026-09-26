@@ -88,4 +88,70 @@ describe('useEventListener', () => {
 
 		cleanup();
 	});
+
+	// The fourth overload. Window/Document/HTMLElement have their own; these
+	// targets resolve through `EventTargetEventMap`, which is what lets the
+	// Web API composables listen without hand-rolling `addEventListener`.
+	describe('arbitrary event targets', () => {
+		test('listens on a BroadcastChannel and cleans up', () => {
+			const channel = new BroadcastChannel('use-event-listener-test');
+			const handler = vi.fn();
+
+			const cleanup = $effect.root(() => {
+				useEventListener(channel, 'message', handler);
+				flushSync();
+			});
+
+			channel.dispatchEvent(new MessageEvent('message', { data: 'hello' }));
+			expect(handler).toHaveBeenCalledOnce();
+
+			cleanup();
+			flushSync();
+
+			channel.dispatchEvent(new MessageEvent('message', { data: 'ignored' }));
+			expect(handler).toHaveBeenCalledOnce();
+
+			channel.close();
+		});
+
+		test('narrows the event to the target-specific type', () => {
+			const channel = new BroadcastChannel('use-event-listener-types');
+			let seen: string | null = null;
+
+			const cleanup = $effect.root(() => {
+				// `event` is a MessageEvent here, not a bare Event — reading
+				// `.data` would not compile if the overload fell back.
+				useEventListener(channel, 'message', (event) => {
+					seen = typeof event.data === 'string' ? event.data : null;
+				});
+				flushSync();
+			});
+
+			channel.dispatchEvent(new MessageEvent('message', { data: 'typed' }));
+			expect(seen).toBe('typed');
+
+			cleanup();
+			channel.close();
+		});
+
+		test('rejects an event name the target does not emit', () => {
+			// The real assertion here is the `@ts-expect-error`: if the overload
+			// ever widened back to accepting any string, `bun run check` would
+			// fail on an unused directive. The runtime half only records that
+			// the guard is purely type-level and does not change behaviour —
+			// `requireAssertions` is on, so the test needs it either way.
+			const channel = new BroadcastChannel('use-event-listener-bad-name');
+			let stop!: () => void;
+
+			const cleanup = $effect.root(() => {
+				// @ts-expect-error -- 'resize' is not in BroadcastChannelEventMap
+				stop = useEventListener(channel, 'resize', () => {});
+			});
+
+			expect(typeof stop).toBe('function');
+
+			cleanup();
+			channel.close();
+		});
+	});
 });

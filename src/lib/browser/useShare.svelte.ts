@@ -1,3 +1,5 @@
+import { useSupported } from './useSupported.svelte.js';
+
 export interface UseShareData {
 	title?: string;
 	text?: string;
@@ -26,11 +28,10 @@ export interface UseShareReturn {
  * ```
  */
 export function useShare(): UseShareReturn {
-	const isBrowser = typeof navigator !== 'undefined';
-	const supported = isBrowser && 'share' in navigator;
+	const isSupported = useSupported(() => 'share' in navigator);
 
 	async function share(data?: UseShareData): Promise<boolean> {
-		if (!supported || !data) return false;
+		if (!isSupported() || !data) return false;
 
 		try {
 			await navigator.share(data);
@@ -41,7 +42,7 @@ export function useShare(): UseShareReturn {
 	}
 
 	return {
-		isSupported: () => supported,
+		isSupported,
 		share
 	};
 }

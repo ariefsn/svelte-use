@@ -879,6 +879,14 @@ npm publish --access public
 - 📦 **npm**: https://www.npmjs.com/package/@ariefsn/svelte-use
 - 🐙 **GitHub**: https://github.com/ariefsn/svelte-use
 
+## Star History
+
+<p align="center">
+  <a href="https://star-history.dera.page/#ariefsn/svelte-use">
+    <img src="https://star-history.dera.page/svg?repos=ariefsn/svelte-use" alt="Star History Chart" width="800" />
+  </a>
+</p>
+
 ## License
 
 [MIT](./LICENSE.md)

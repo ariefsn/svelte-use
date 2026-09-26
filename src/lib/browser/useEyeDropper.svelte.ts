@@ -1,3 +1,5 @@
+import { useSupported } from './useSupported.svelte.js';
+
 export interface UseEyeDropperReturn {
 	/** Whether the EyeDropper API is supported */
 	isSupported: () => boolean;
@@ -21,13 +23,12 @@ export interface UseEyeDropperReturn {
  * ```
  */
 export function useEyeDropper(options?: { initialValue?: string }): UseEyeDropperReturn {
-	const isBrowser = typeof window !== 'undefined';
-	const supported = isBrowser && 'EyeDropper' in window;
+	const isSupported = useSupported(() => 'EyeDropper' in window);
 
 	let current = $state<string | undefined>(options?.initialValue);
 
 	async function open(opts?: { signal?: AbortSignal }): Promise<string | undefined> {
-		if (!supported) return undefined;
+		if (!isSupported()) return undefined;
 
 		try {
 			// @ts-expect-error EyeDropper is not in all TS libs
@@ -41,7 +42,7 @@ export function useEyeDropper(options?: { initialValue?: string }): UseEyeDroppe
 	}
 
 	return {
-		isSupported: () => supported,
+		isSupported,
 		current: () => current,
 		open
 	};

@@ -1,3 +1,5 @@
+import { useSupported } from './useSupported.svelte.js';
+
 export interface UsePermissionReturn {
 	/** Whether the Permissions API is supported */
 	isSupported: () => boolean;
@@ -20,8 +22,7 @@ export interface UsePermissionReturn {
  * ```
  */
 export function usePermission(name: PermissionName | (string & {})): UsePermissionReturn {
-	const isBrowser = typeof navigator !== 'undefined';
-	const supported = isBrowser && 'permissions' in navigator;
+	const isSupported = useSupported(() => 'permissions' in navigator);
 
 	let state = $state<PermissionState | undefined>(undefined);
 	let status: PermissionStatus | undefined;
@@ -33,7 +34,7 @@ export function usePermission(name: PermissionName | (string & {})): UsePermissi
 	}
 
 	$effect(() => {
-		if (!supported) return;
+		if (!isSupported()) return;
 
 		navigator.permissions
 			.query({ name: name as PermissionName })
@@ -54,7 +55,7 @@ export function usePermission(name: PermissionName | (string & {})): UsePermissi
 	});
 
 	return {
-		isSupported: () => supported,
+		isSupported,
 		state: () => state
 	};
 }

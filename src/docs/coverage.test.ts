@@ -6,6 +6,21 @@ import { NEW_IN_VERSION, allSlugs, groupHasNew, isNew, sidebar } from './sidebar
 
 const DEMOS_DIR = join(process.cwd(), 'src/routes/docs/[slug]/demos');
 
+const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8');
+
+/**
+ * Three touchpoints have no compile-time link to the sidebar and so rot
+ * silently: a util can ship with no `demoMap` entry (caught only by
+ * `bun run build`), no barrel export (caught by nothing), and no README row
+ * (caught by nothing). Reading the three files as text is crude, but it
+ * catches "forgot entirely", which is the failure mode that actually happens.
+ */
+const PAGE_SVELTE = read('src/routes/docs/[slug]/+page.svelte');
+const INDEX_TS = read('src/lib/index.ts');
+const README = read('README.md');
+
+const labels = sidebar.flatMap((group) => group.items.map((item) => item.label));
+
 /**
  * The docs site is assembled from four places that must agree: the sidebar,
  * the page content, the demo components, and the demo registry in
@@ -104,6 +119,26 @@ describe('docs coverage', () => {
 		// A release with no new-flagged utils usually means the `since` fields
 		// were forgotten rather than that nothing was added.
 		expect(sidebar.flatMap((g) => g.items).filter(isNew).length).toBeGreaterThan(0);
+	});
+
+	it('every sidebar slug is registered in demoMap', () => {
+		// `+page.svelte` imports each demo and maps it by slug. A missing entry
+		// renders the page with no Live Demo section and is caught only by a
+		// full `bun run build`, which is the slowest gate we have.
+		const missing = allSlugs.filter((slug) => !PAGE_SVELTE.includes(`'${slug}':`));
+		expect(missing).toEqual([]);
+	});
+
+	it('every sidebar entry is exported from src/lib/index.ts', () => {
+		// The barrel is the public surface. A util documented but not exported
+		// is a doc page for something consumers cannot import.
+		const missing = labels.filter((label) => !INDEX_TS.includes(label));
+		expect(missing).toEqual([]);
+	});
+
+	it('every sidebar entry has a README row', () => {
+		const missing = labels.filter((label) => !README.includes(`\`${label}\``));
+		expect(missing).toEqual([]);
 	});
 
 	it('every page has the fields the template renders', () => {

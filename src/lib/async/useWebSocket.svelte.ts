@@ -1,3 +1,5 @@
+import { parseMessageData } from './internal/parseMessageData.js';
+
 export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSED';
 
 export interface UseWebSocketOptions {
@@ -119,11 +121,7 @@ export function useWebSocket<T = unknown>(
 
 		ws.onmessage = (event: MessageEvent) => {
 			if (socket !== ws) return;
-			try {
-				data = JSON.parse(event.data as string) as T;
-			} catch {
-				data = event.data as T;
-			}
+			data = parseMessageData<T>(event.data);
 		};
 
 		ws.onerror = (event: Event) => {

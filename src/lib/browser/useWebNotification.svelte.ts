@@ -1,3 +1,5 @@
+import { useSupported } from './useSupported.svelte.js';
+
 export interface UseWebNotificationOptions {
 	title?: string;
 	body?: string;
@@ -49,22 +51,21 @@ export interface UseWebNotificationReturn {
 export function useWebNotification(
 	options: UseWebNotificationOptions = {}
 ): UseWebNotificationReturn {
-	const isBrowser = typeof window !== 'undefined';
-	const supported = isBrowser && 'Notification' in window;
+	const isSupported = useSupported(() => 'Notification' in window);
 	const { autoRequestPermission = true } = options;
 
-	let permissionGranted = $state(supported ? Notification.permission === 'granted' : false);
+	let permissionGranted = $state(isSupported() ? Notification.permission === 'granted' : false);
 	let notification = $state<Notification | null>(null);
 	let error = $state<Error | null>(null);
 
 	/** Reads the live permission rather than the snapshot taken at init. */
 	function syncPermission(): boolean {
-		if (!supported) return false;
+		if (!isSupported()) return false;
 		permissionGranted = Notification.permission === 'granted';
 		return permissionGranted;
 	}
 
-	if (supported && autoRequestPermission && Notification.permission === 'default') {
+	if (isSupported() && autoRequestPermission && Notification.permission === 'default') {
 		Notification.requestPermission().then((p) => {
 			permissionGranted = p === 'granted';
 		});
@@ -75,7 +76,7 @@ export function useWebNotification(
 	): Promise<Notification | null> {
 		error = null;
 
-		if (!supported) {
+		if (!isSupported()) {
 			error = new Error('The Notification API is not supported in this browser.');
 			return null;
 		}
@@ -128,7 +129,7 @@ export function useWebNotification(
 	});
 
 	return {
-		isSupported: () => supported,
+		isSupported,
 		isPermissionGranted: () => permissionGranted,
 		notification: () => notification,
 		error: () => error,

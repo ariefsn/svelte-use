@@ -1,3 +1,5 @@
+import { useSupported } from '../useSupported.svelte.js';
+
 export interface UseDeviceMotionReturn {
 	/** Whether the DeviceMotionEvent API is supported */
 	isSupported: () => boolean;
@@ -23,8 +25,7 @@ export interface UseDeviceMotionReturn {
  * ```
  */
 export function useDeviceMotion(): UseDeviceMotionReturn {
-	const isBrowser = typeof window !== 'undefined';
-	const supported = isBrowser && 'DeviceMotionEvent' in window;
+	const isSupported = useSupported(() => 'DeviceMotionEvent' in window);
 
 	let acceleration = $state<DeviceMotionEventAcceleration | null>(null);
 	let accelerationIncludingGravity = $state<DeviceMotionEventAcceleration | null>(null);
@@ -32,7 +33,7 @@ export function useDeviceMotion(): UseDeviceMotionReturn {
 	let interval = $state(0);
 
 	$effect(() => {
-		if (!supported) return;
+		if (!isSupported()) return;
 
 		function handler(e: DeviceMotionEvent) {
 			acceleration = e.acceleration;
@@ -49,7 +50,7 @@ export function useDeviceMotion(): UseDeviceMotionReturn {
 	});
 
 	return {
-		isSupported: () => supported,
+		isSupported,
 		acceleration: () => acceleration,
 		accelerationIncludingGravity: () => accelerationIncludingGravity,
 		rotationRate: () => rotationRate,

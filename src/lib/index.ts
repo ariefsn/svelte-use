@@ -143,6 +143,7 @@ export type { UsePermissionReturn } from './browser/usePermission.svelte.js';
 export { useWakeLock } from './browser/useWakeLock.svelte.js';
 export type { UseWakeLockReturn } from './browser/useWakeLock.svelte.js';
 export { useEventListener } from './browser/useEventListener.svelte.js';
+export type { EventTargetEventMap } from './browser/useEventListener.svelte.js';
 export { useTextDirection } from './browser/useTextDirection.svelte.js';
 export type { TextDirection, UseTextDirectionReturn } from './browser/useTextDirection.svelte.js';
 export { useTextSelection } from './browser/useTextSelection.svelte.js';

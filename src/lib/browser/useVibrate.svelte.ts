@@ -1,3 +1,5 @@
+import { useSupported } from './useSupported.svelte.js';
+
 export interface UseVibrateReturn {
 	/** Whether the Vibration API is supported */
 	isSupported: () => boolean;
@@ -21,22 +23,21 @@ export interface UseVibrateReturn {
  * ```
  */
 export function useVibrate(pattern: VibratePattern = 200): UseVibrateReturn {
-	const isBrowser = typeof navigator !== 'undefined';
-	const supported = isBrowser && 'vibrate' in navigator;
+	const isSupported = useSupported(() => 'vibrate' in navigator);
 
 	function vibrate(p?: VibratePattern): boolean {
-		if (!supported) return false;
+		if (!isSupported()) return false;
 		return navigator.vibrate(p ?? pattern);
 	}
 
 	function stop() {
-		if (supported) {
+		if (isSupported()) {
 			navigator.vibrate(0);
 		}
 	}
 
 	return {
-		isSupported: () => supported,
+		isSupported,
 		vibrate,
 		stop
 	};
