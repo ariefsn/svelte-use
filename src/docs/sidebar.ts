@@ -206,6 +206,14 @@ const groups: SidebarGroup[] = [
 		]
 	},
 	{
+		title: 'Browser - Media',
+		items: [
+			{ label: 'useUserMedia', slug: 'use-user-media', since: '1.2.0' },
+			{ label: 'useDisplayMedia', slug: 'use-display-media', since: '1.2.0' },
+			{ label: 'useDevicesList', slug: 'use-devices-list', since: '1.2.0' }
+		]
+	},
+	{
 		title: 'Performance',
 		items: [
 			{ label: 'useFps', slug: 'use-fps', since: '1.0.0' },

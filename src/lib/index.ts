@@ -284,3 +284,21 @@ export type {
 	UrlSearchParamsRecord,
 	UrlSearchParamValue
 } from './browser/useUrlSearchParams.svelte.js';
+
+// Browser – Media
+export { useDevicesList } from './browser/media/useDevicesList.svelte.js';
+export type {
+	UseDevicesListOptions,
+	UseDevicesListReturn
+} from './browser/media/useDevicesList.svelte.js';
+export { useUserMedia } from './browser/media/useUserMedia.svelte.js';
+export type {
+	UseUserMediaOptions,
+	UseUserMediaReturn,
+	UserMediaFlip
+} from './browser/media/useUserMedia.svelte.js';
+export { useDisplayMedia } from './browser/media/useDisplayMedia.svelte.js';
+export type {
+	UseDisplayMediaOptions,
+	UseDisplayMediaReturn
+} from './browser/media/useDisplayMedia.svelte.js';

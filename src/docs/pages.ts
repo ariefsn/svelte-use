@@ -461,6 +461,291 @@ params.get('page'); // → '2'`,
 			'`useBrowserLocation` does not observe `pushState`/`replaceState`, because neither fires an event — so a sibling `useBrowserLocation` goes stale after a write here.'
 		]
 	},
+	// ------------------------------------------------------ Browser – Media
+	'use-user-media': {
+		slug: 'use-user-media',
+		title: 'useUserMedia',
+		description:
+			'Camera and microphone capture via `getUserMedia`. Nothing is requested until `start()` is called, and changing `constraints` while a stream is live reacquires it — which is how you switch device.',
+		usage: `import { useUserMedia } from '@ariefsn/svelte-use';
+
+const camera = useUserMedia({ constraints: { video: true } });
+await camera.start();
+camera.stream(); // → MediaStream | null`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseUserMediaOptions',
+				default: '{}',
+				description: 'Capture configuration'
+			}
+		],
+		options: [
+			{
+				name: 'constraints',
+				type: 'MediaStreamConstraints | (() => MediaStreamConstraints)',
+				default: '{ audio: true, video: true }',
+				description:
+					'Constraints for `getUserMedia`. A getter makes them reactive: changing them while a stream is live stops it and reacquires with the new ones.'
+			},
+			{
+				name: 'flip',
+				type: 'UserMediaFlip | (() => UserMediaFlip)',
+				default: "'none'",
+				description:
+					"How to mirror the **preview**: `'none'`, `'horizontal'`, `'vertical'` or `'both'`. Display only — it produces a CSS transform and never touches the captured pixels."
+			}
+		],
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether `getUserMedia` exists' },
+			{
+				name: 'stream',
+				type: '() => MediaStream | null',
+				description: 'The live stream, or `null` when nothing is being captured'
+			},
+			{ name: 'isActive', type: '() => boolean', description: 'Whether a stream is live' },
+			{
+				name: 'error',
+				type: '() => DOMException | null',
+				description:
+					"The last failure. `error()?.name === 'NotAllowedError'` is a denied prompt; `NotFoundError` means no matching device."
+			},
+			{
+				name: 'start',
+				type: '() => Promise<MediaStream | null>',
+				description: 'Acquires a stream, or returns the existing one. Resolves `null` on failure.'
+			},
+			{ name: 'stop', type: '() => void', description: 'Stops every track and clears the stream' },
+			{
+				name: 'restart',
+				type: '() => Promise<MediaStream | null>',
+				description: 'Stops, then acquires again'
+			},
+			{ name: 'flip', type: '() => UserMediaFlip', description: 'The current flip setting' },
+			{
+				name: 'transform',
+				type: '() => string',
+				description:
+					"CSS `transform` for the preview element — `'scaleX(-1)'` for a horizontal flip, `'none'` otherwise"
+			}
+		],
+		example: `<script lang="ts">
+  import { useUserMedia } from '@ariefsn/svelte-use';
+
+  let deviceId = $state<string | undefined>(undefined);
+
+  // Switching deviceId reacquires automatically — no manual stop/start.
+  // Mirroring the self-view costs nothing and never re-prompts.
+  const camera = useUserMedia({
+    constraints: () => ({ video: deviceId ? { deviceId } : true }),
+    flip: 'horizontal'
+  });
+</script>
+
+<button onclick={() => camera.start()} disabled={camera.isActive()}>Start</button>
+<button onclick={camera.stop} disabled={!camera.isActive()}>Stop</button>
+
+{#if camera.error()}
+  <p>{camera.error()?.name === 'NotAllowedError' ? 'Permission denied' : 'Capture failed'}</p>
+{/if}
+
+{#if camera.stream()}
+  <video
+    srcobject={camera.stream()!}
+    style:transform={camera.transform()}
+    autoplay
+    playsinline
+    muted
+  ></video>
+{/if}`,
+		notes: [
+			'Capture never starts on its own. A permission prompt should follow a user action, not a page load.',
+			'Calling `start()` twice in the same tick yields **one** stream and one prompt. Without that guard a double click opens two camera streams, and the second leaks.',
+			'A request that resolves after `stop()` has its tracks stopped rather than becoming the live stream — otherwise the camera light stays on with nothing referencing it.',
+			'Constraints are compared by their serialised form, so an inline `() => ({ video: true })` does not reacquire on every render just because the object identity changed.',
+			'Releasing the `MediaStream` reference is not enough to turn the camera off; every track must be stopped. `stop()` and the destroy teardown both do this.',
+			'**`flip` mirrors the preview, not the capture.** A `MediaStream`’s pixels cannot be flipped without reprocessing every frame, so `transform()` is a CSS value for the element showing the stream. Anything you record, upload or send over WebRTC is unmirrored — which is what you want: a self-view reads naturally when mirrored, but the person at the other end should see you the right way round. If you genuinely need flipped *pixels*, draw the video to a canvas and use `canvas.captureStream()`.',
+			'`flip` never reacquires the stream, so it can be toggled live without a second permission prompt — unlike `constraints`, which does reacquire by design.',
+			'Set `srcobject` (lowercase) in Svelte markup; Svelte maps it to the `srcObject` property, which cannot be expressed as a plain HTML attribute.',
+			'SSR safe: `isSupported()` is `false` and `start()` resolves `null`.'
+		]
+	},
+	'use-display-media': {
+		slug: 'use-display-media',
+		title: 'useDisplayMedia',
+		description:
+			'Screen, window or tab capture via `getDisplayMedia`. Watches for the browser’s own “Stop sharing” control, which ends the tracks without notifying the page.',
+		usage: `import { useDisplayMedia } from '@ariefsn/svelte-use';
+
+const screen = useDisplayMedia();
+await screen.start(); // opens the picker — needs a user gesture`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseDisplayMediaOptions',
+				default: '{}',
+				description: 'Capture configuration'
+			}
+		],
+		options: [
+			{
+				name: 'options',
+				type: 'DisplayMediaStreamOptions | (() => DisplayMediaStreamOptions)',
+				default: '{ video: true }',
+				description:
+					'Passed to `getDisplayMedia`. Unlike `useUserMedia`, changing these does **not** reacquire a live stream — they apply to the next `start()`.'
+			}
+		],
+		returns: [
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether `getDisplayMedia` exists'
+			},
+			{
+				name: 'stream',
+				type: '() => MediaStream | null',
+				description: 'The captured stream, or `null`'
+			},
+			{ name: 'isActive', type: '() => boolean', description: 'Whether capture is live' },
+			{
+				name: 'error',
+				type: '() => DOMException | null',
+				description: 'The last failure — `NotAllowedError` when the picker is dismissed'
+			},
+			{
+				name: 'start',
+				type: '() => Promise<MediaStream | null>',
+				description: 'Opens the picker and acquires a stream'
+			},
+			{ name: 'stop', type: '() => void', description: 'Stops capture' },
+			{
+				name: 'restart',
+				type: '() => Promise<MediaStream | null>',
+				description: 'Stops, then opens the picker again'
+			}
+		],
+		example: `<script lang="ts">
+  import { useDisplayMedia } from '@ariefsn/svelte-use';
+
+  const screen = useDisplayMedia({ options: { video: true, audio: false } });
+</script>
+
+<button onclick={() => screen.start()} disabled={screen.isActive()}>Share screen</button>
+<button onclick={screen.stop} disabled={!screen.isActive()}>Stop</button>
+
+<!-- Flips back to false on its own when the browser's "Stop sharing" is used -->
+<p>Sharing: {screen.isActive()}</p>`,
+		notes: [
+			'`start()` must be called from a user gesture; browsers reject a picker opened without one.',
+			'Ending capture from the browser’s own floating “Stop sharing” bar ends the tracks silently. This composable listens for that and clears `stream()`, so `isActive()` is trustworthy — a naive wrapper reports a live stream forever afterwards.',
+			'Reactive `options` deliberately do **not** trigger a reacquire. Reopening the picker because a checkbox changed would be hostile; call `restart()` explicitly instead.',
+			'Audio capture is not universally available — Chromium can capture tab audio, and Safari captures none.',
+			'SSR safe: `isSupported()` is `false` and `start()` resolves `null`.'
+		]
+	},
+	'use-devices-list': {
+		slug: 'use-devices-list',
+		title: 'useDevicesList',
+		description:
+			'The list of media input and output devices, grouped by kind and refreshed on `devicechange`. Until access is granted every `label` is an empty string, which `permissionGranted()` reports and `ensurePermissions()` resolves.',
+		usage: `import { useDevicesList } from '@ariefsn/svelte-use';
+
+const devices = useDevicesList();
+devices.videoInputs(); // → readonly MediaDeviceInfo[]`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseDevicesListOptions',
+				default: '{}',
+				description: 'Permission behaviour for the initial enumeration'
+			}
+		],
+		options: [
+			{
+				name: 'requestPermissions',
+				type: 'boolean',
+				default: 'false',
+				description:
+					'Ask for access on init so labels are populated immediately. This shows a prompt, so leave it off unless the component only renders after a user action.'
+			},
+			{
+				name: 'constraints',
+				type: 'MediaStreamConstraints',
+				default: '{ audio: true, video: true }',
+				description: 'Constraints for the throwaway stream used to reveal labels'
+			}
+		],
+		returns: [
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether `enumerateDevices` exists'
+			},
+			{
+				name: 'devices',
+				type: '() => readonly MediaDeviceInfo[]',
+				description: 'Every device, in the browser’s order'
+			},
+			{
+				name: 'audioInputs',
+				type: '() => readonly MediaDeviceInfo[]',
+				description: 'Microphones and other audio sources'
+			},
+			{
+				name: 'audioOutputs',
+				type: '() => readonly MediaDeviceInfo[]',
+				description: 'Speakers and other audio sinks'
+			},
+			{
+				name: 'videoInputs',
+				type: '() => readonly MediaDeviceInfo[]',
+				description: 'Cameras'
+			},
+			{
+				name: 'permissionGranted',
+				type: '() => boolean',
+				description: 'Whether labels are populated, i.e. access has been granted'
+			},
+			{
+				name: 'ensurePermissions',
+				type: '() => Promise<boolean>',
+				description: 'Requests access so labels become readable. Resolves whether it worked.'
+			},
+			{
+				name: 'update',
+				type: '() => Promise<void>',
+				description: 'Re-enumerates. Called automatically on `devicechange`.'
+			}
+		],
+		example: `<script lang="ts">
+  import { useDevicesList, useUserMedia } from '@ariefsn/svelte-use';
+
+  const devices = useDevicesList();
+  let deviceId = $state<string | undefined>(undefined);
+  const camera = useUserMedia({
+    constraints: () => ({ video: deviceId ? { deviceId } : true })
+  });
+</script>
+
+{#if !devices.permissionGranted()}
+  <button onclick={devices.ensurePermissions}>Show device names</button>
+{/if}
+
+<select bind:value={deviceId}>
+  {#each devices.videoInputs() as camera (camera.deviceId)}
+    <option value={camera.deviceId}>{camera.label || 'Camera'}</option>
+  {/each}
+</select>`,
+		notes: [
+			'`enumerateDevices()` always resolves, but before access is granted every entry has an empty `label` and an empty `deviceId`. A picker built on it renders a list of blanks, which is why `permissionGranted()` exists.',
+			'`ensurePermissions()` opens a stream purely so the browser reveals labels, then stops it immediately. It is a no-op when labels are already present.',
+			'The list refreshes on `devicechange`, so plugging in a headset updates it without a reload.',
+			'This is the composable that drives a device picker for `useUserMedia` — pass a chosen `deviceId` into its constraints and the stream switches automatically.',
+			'Enumeration can reject inside a cross-origin iframe without the right permissions policy; that surfaces as an empty list rather than a throw.',
+			'SSR safe: `isSupported()` is `false` and every list is empty.'
+		]
+	},
 	// ------------------------------------------------- Browser – Appearance
 	'use-color-mode': {
 		slug: 'use-color-mode',

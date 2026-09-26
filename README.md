@@ -234,6 +234,14 @@ bun add @ariefsn/svelte-use
 | `useStyleTag`  | Inject a `<style>` element, deduplicated by id          |
 | `useScriptTag` | Load an external script, deduplicated across call sites |
 
+### Browser – Media
+
+| Composable        | Description                                                        |
+| ----------------- | ------------------------------------------------------------------ |
+| `useUserMedia`    | Camera and microphone capture, device switching, preview mirroring |
+| `useDisplayMedia` | Screen capture that notices the browser's "Stop sharing"           |
+| `useDevicesList`  | Media devices grouped by kind, refreshed on `devicechange`         |
+
 ### Browser – Navigation
 
 | Composable           | Description                                                   |

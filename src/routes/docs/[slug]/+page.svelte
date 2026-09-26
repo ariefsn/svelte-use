@@ -17,6 +17,9 @@
 	import DemoUseStyleTag from './demos/use-style-tag.svelte';
 	import DemoUseTitle from './demos/use-title.svelte';
 	import DemoUseUrlSearchParams from './demos/use-url-search-params.svelte';
+	import DemoUseUserMedia from './demos/use-user-media.svelte';
+	import DemoUseDisplayMedia from './demos/use-display-media.svelte';
+	import DemoUseDevicesList from './demos/use-devices-list.svelte';
 	import DemoUseAnimate from './demos/use-animate.svelte';
 	import DemoUseElementBounding from './demos/use-element-bounding.svelte';
 	import DemoUseInfiniteScroll from './demos/use-infinite-scroll.svelte';
@@ -127,6 +130,9 @@
 		'use-style-tag': DemoUseStyleTag,
 		'use-title': DemoUseTitle,
 		'use-url-search-params': DemoUseUrlSearchParams,
+		'use-user-media': DemoUseUserMedia,
+		'use-display-media': DemoUseDisplayMedia,
+		'use-devices-list': DemoUseDevicesList,
 		'use-animate': DemoUseAnimate,
 		'use-element-bounding': DemoUseElementBounding,
 		'use-infinite-scroll': DemoUseInfiniteScroll,
