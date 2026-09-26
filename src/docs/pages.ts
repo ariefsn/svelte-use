@@ -4056,20 +4056,38 @@ const { confirm, cancel } = useNavigationGuard({
 		],
 		example: `<script lang="ts">
   import { useNavigationGuard } from '@ariefsn/svelte-use';
-  let hasChanges = $state(false);
+
+  let draft = $state('');
+  let saved = $state('');
   let showDialog = $state(false);
+
+  const hasUnsavedChanges = $derived(draft !== saved);
+
   const { confirm, cancel } = useNavigationGuard({
-    shouldBlock: () => hasChanges,
-    onBlock: () => showDialog = true
+    shouldBlock: () => hasUnsavedChanges,
+    onBlock: () => (showDialog = true)
   });
 </script>
-<textarea oninput={() => hasChanges = true}></textarea>
+
+<textarea bind:value={draft}></textarea>
+<button onclick={() => (saved = draft)} disabled={!hasUnsavedChanges}>Save</button>
+
 {#if showDialog}
-  <div>Unsaved changes! <button onclick={confirm}>Leave</button> <button onclick={cancel}>Stay</button></div>
+  <div role="alertdialog">
+    <p>Leave without saving?</p>
+    <!-- confirm() bypasses the guard for this one navigation, so there is no
+         need to clear hasUnsavedChanges first -->
+    <button onclick={() => { showDialog = false; confirm(); }}>Leave anyway</button>
+    <button onclick={() => { showDialog = false; cancel(); }}>Stay here</button>
+  </div>
 {/if}`,
 		notes: [
-			'Requires SvelteKit (`$app/navigation`).',
-			'Handles popstate, link, and goto navigation types.'
+			'**Requires SvelteKit.** This is the only composable in the library that is not plain-Svelte — it imports `beforeNavigate` and `goto` from `$app/navigation`, a SvelteKit-only module. Every other util works in any Svelte 5 app.',
+			'`@sveltejs/kit` is not declared as a peer dependency, so a non-SvelteKit project importing this util will fail to resolve `$app/navigation` at build time.',
+			'Handles popstate, link, and goto navigation types. Form submissions are not guarded.',
+			'`confirm()` and `cancel()` are actions you call to resolve a pending navigation — not callbacks you supply. Use the `onBlock` option to react to the guard firing.',
+			'`confirm()` lets exactly one navigation through, so you do **not** need to clear your own `shouldBlock` flag before calling it. The bypass is single-use: the next navigation is guarded again.',
+			'`confirm()` is a no-op unless a navigation was actually blocked, since it replays the URL the guard captured.'
 		]
 	},
 

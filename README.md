@@ -206,9 +206,14 @@ bun add @ariefsn/svelte-use
 
 ### Browser – Navigation
 
-| Composable           | Description                                    |
-| -------------------- | ---------------------------------------------- |
-| `useNavigationGuard` | SvelteKit navigation guard with confirm/cancel |
+| Composable           | Description                                                   |
+| -------------------- | ------------------------------------------------------------- |
+| `useNavigationGuard` | Navigation guard with confirm/cancel — **requires SvelteKit** |
+
+> **Note:** `useNavigationGuard` is the only composable here that is not
+> plain-Svelte. It imports `beforeNavigate` and `goto` from `$app/navigation`,
+> so it works in SvelteKit apps only; `@sveltejs/kit` is not a declared peer
+> dependency. Every other composable in this library runs in any Svelte 5 app.
 
 ---
 

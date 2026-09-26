@@ -38,7 +38,18 @@ export interface UseNavigationGuardReturn {
 export function useNavigationGuard(options: UseNavigationGuardOptions): UseNavigationGuardReturn {
 	let pendingUrl: string | null = null;
 
+	// Set by confirm() so the guard lets exactly one navigation through.
+	// Without it confirm() is a no-op: its goto() re-enters this handler while
+	// shouldBlock() is still true, so the navigation is cancelled again and
+	// onBlock fires a second time.
+	let bypassOnce = false;
+
 	beforeNavigate((nav) => {
+		if (bypassOnce) {
+			bypassOnce = false;
+			return;
+		}
+
 		if (!options.shouldBlock()) return;
 
 		if (nav.type === 'popstate' || nav.type === 'link' || nav.type === 'goto') {
@@ -52,8 +63,13 @@ export function useNavigationGuard(options: UseNavigationGuardOptions): UseNavig
 		if (!pendingUrl) return;
 		const url = pendingUrl;
 		pendingUrl = null;
+		bypassOnce = true;
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- `url` is the pending navigation target captured from beforeNavigate, already a resolved href
-		goto(url);
+		goto(url).finally(() => {
+			// Safety net for the case where the handler never ran (navigation
+			// rejected upstream), so a stale flag can't leak into a later one.
+			bypassOnce = false;
+		});
 	}
 
 	function cancel() {
