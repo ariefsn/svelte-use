@@ -3,7 +3,7 @@
 
   <h1>@ariefsn/svelte-use</h1>
 
-  <p>A collection of <strong>90+</strong> Svelte 5 runes-first utility composables.<br/>No stores. No external dependencies. SSR-safe. Fully typed.</p>
+  <p>A collection of <strong>100+</strong> Svelte 5 runes-first utility composables.<br/>No stores. No external dependencies. SSR-safe. Fully typed.</p>
 
   <p>
     <a href="https://github.com/ariefsn/svelte-use">
@@ -214,11 +214,32 @@ bun add @ariefsn/svelte-use
 | `useTextDirection`     | Track/set text directionality       |
 | `useTextSelection`     | Track text selection                |
 
+### Browser – Appearance
+
+| Composable                  | Description                                              |
+| --------------------------- | -------------------------------------------------------- |
+| `useColorMode`              | Colour mode with `auto` resolution, persistence and sync |
+| `usePreferredDark`          | Whether the OS requests a dark colour scheme             |
+| `usePreferredColorScheme`   | OS colour scheme as `dark` / `light` / `no-preference`   |
+| `usePreferredReducedMotion` | Whether the OS requests reduced motion                   |
+| `usePreferredContrast`      | OS contrast preference, including forced colours         |
+| `useCssVar`                 | Read and write a CSS custom property                     |
+
+### Browser – Document
+
+| Composable     | Description                                             |
+| -------------- | ------------------------------------------------------- |
+| `useTitle`     | Read and write `document.title`, restored on destroy    |
+| `useFavicon`   | Read and write the favicon, adopting an existing link   |
+| `useStyleTag`  | Inject a `<style>` element, deduplicated by id          |
+| `useScriptTag` | Load an external script, deduplicated across call sites |
+
 ### Browser – Navigation
 
 | Composable           | Description                                                   |
 | -------------------- | ------------------------------------------------------------- |
 | `useNavigationGuard` | Navigation guard with confirm/cancel — **requires SvelteKit** |
+| `useUrlSearchParams` | Reactive URL query parameters, with history and hash modes    |
 
 > **Note:** `useNavigationGuard` is the only composable here that is not
 > plain-Svelte. It imports `beforeNavigate` and `goto` from `$app/navigation`,

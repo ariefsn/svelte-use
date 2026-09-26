@@ -236,3 +236,50 @@ export type {
 	UseTextareaAutosizeOptions,
 	UseTextareaAutosizeReturn
 } from './browser/input/useTextareaAutosize.svelte.js';
+
+// Browser – Appearance
+export { usePreferredDark, PREFERS_DARK_QUERY } from './browser/sensors/usePreferredDark.svelte.js';
+export { usePreferredColorScheme } from './browser/sensors/usePreferredColorScheme.svelte.js';
+export type { PreferredColorScheme } from './browser/sensors/usePreferredColorScheme.svelte.js';
+export { usePreferredReducedMotion } from './browser/sensors/usePreferredReducedMotion.svelte.js';
+export type { PreferredReducedMotion } from './browser/sensors/usePreferredReducedMotion.svelte.js';
+export { usePreferredContrast } from './browser/sensors/usePreferredContrast.svelte.js';
+export type { PreferredContrast } from './browser/sensors/usePreferredContrast.svelte.js';
+export { useColorMode, colorModeScript } from './browser/document/useColorMode.svelte.js';
+export type {
+	UseColorModeOptions,
+	UseColorModeReturn,
+	ColorModeScriptOptions,
+	ColorModeSelection,
+	ResolvedColorMode,
+	BasicColorMode
+} from './browser/document/useColorMode.svelte.js';
+export { useCssVar } from './browser/document/useCssVar.svelte.js';
+export type { UseCssVarOptions, UseCssVarReturn } from './browser/document/useCssVar.svelte.js';
+
+// Browser – Document
+export { useTitle } from './browser/document/useTitle.svelte.js';
+export type { UseTitleOptions, UseTitleReturn } from './browser/document/useTitle.svelte.js';
+export { useFavicon } from './browser/document/useFavicon.svelte.js';
+export type { UseFaviconOptions, UseFaviconReturn } from './browser/document/useFavicon.svelte.js';
+export { useStyleTag } from './browser/document/useStyleTag.svelte.js';
+export type {
+	UseStyleTagOptions,
+	UseStyleTagReturn
+} from './browser/document/useStyleTag.svelte.js';
+export { useScriptTag } from './browser/document/useScriptTag.svelte.js';
+export type {
+	UseScriptTagOptions,
+	UseScriptTagReturn,
+	ScriptTagStatus
+} from './browser/document/useScriptTag.svelte.js';
+
+// Browser – Navigation
+export { useUrlSearchParams } from './browser/useUrlSearchParams.svelte.js';
+export type {
+	UseUrlSearchParamsOptions,
+	UseUrlSearchParamsReturn,
+	UrlSearchParamsMode,
+	UrlSearchParamsRecord,
+	UrlSearchParamValue
+} from './browser/useUrlSearchParams.svelte.js';

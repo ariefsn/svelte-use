@@ -6,6 +6,17 @@
 	import type { Component } from 'svelte';
 	import type { PageData } from './$types.js';
 	// ── Demo components ──────────────────────────────────────────────────────
+	import DemoUseColorMode from './demos/use-color-mode.svelte';
+	import DemoUseCssVar from './demos/use-css-var.svelte';
+	import DemoUseFavicon from './demos/use-favicon.svelte';
+	import DemoUsePreferredColorScheme from './demos/use-preferred-color-scheme.svelte';
+	import DemoUsePreferredContrast from './demos/use-preferred-contrast.svelte';
+	import DemoUsePreferredDark from './demos/use-preferred-dark.svelte';
+	import DemoUsePreferredReducedMotion from './demos/use-preferred-reduced-motion.svelte';
+	import DemoUseScriptTag from './demos/use-script-tag.svelte';
+	import DemoUseStyleTag from './demos/use-style-tag.svelte';
+	import DemoUseTitle from './demos/use-title.svelte';
+	import DemoUseUrlSearchParams from './demos/use-url-search-params.svelte';
 	import DemoUseAnimate from './demos/use-animate.svelte';
 	import DemoUseElementBounding from './demos/use-element-bounding.svelte';
 	import DemoUseInfiniteScroll from './demos/use-infinite-scroll.svelte';
@@ -105,6 +116,17 @@
 
 	// ── Static slug → component map ──────────────────────────────────────────
 	const demoMap: Record<string, Component> = {
+		'use-color-mode': DemoUseColorMode,
+		'use-css-var': DemoUseCssVar,
+		'use-favicon': DemoUseFavicon,
+		'use-preferred-color-scheme': DemoUsePreferredColorScheme,
+		'use-preferred-contrast': DemoUsePreferredContrast,
+		'use-preferred-dark': DemoUsePreferredDark,
+		'use-preferred-reduced-motion': DemoUsePreferredReducedMotion,
+		'use-script-tag': DemoUseScriptTag,
+		'use-style-tag': DemoUseStyleTag,
+		'use-title': DemoUseTitle,
+		'use-url-search-params': DemoUseUrlSearchParams,
 		'use-animate': DemoUseAnimate,
 		'use-element-bounding': DemoUseElementBounding,
 		'use-infinite-scroll': DemoUseInfiniteScroll,

@@ -18,6 +18,761 @@ export interface DocPage {
 }
 
 export const pages: Record<string, DocPage> = {
+	// --------------------------------------------------- Browser – Document
+	'use-title': {
+		slug: 'use-title',
+		title: 'useTitle',
+		description:
+			'Reads and writes `document.title`. Called with no argument it is read-only and never writes; called with a value it owns the title and restores the previous one on destroy.',
+		usage: `import { useTitle } from '@ariefsn/svelte-use';
+
+const title = useTitle('Dashboard');
+title.set('Dashboard — 3 alerts');`,
+		params: [
+			{
+				name: 'title',
+				type: 'string | (() => string)',
+				default: 'undefined',
+				description: 'Title to apply, or a getter for a reactive one. Omit for read-only use.'
+			},
+			{ name: 'options', type: 'UseTitleOptions', default: '{}', description: 'Configuration' }
+		],
+		options: [
+			{
+				name: 'restoreOnDestroy',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'Restore the title present when the composable initialised, once the scope is destroyed. Ignored in read-only mode.'
+			},
+			{
+				name: 'template',
+				type: '(title: string) => string',
+				default: '(title) => title',
+				description:
+					'Wraps the value before writing. Applied to `set()` calls too, so callers never pre-format.'
+			},
+			{
+				name: 'observe',
+				type: 'boolean',
+				default: 'false',
+				description:
+					'Track external writes to `document.title` with a `MutationObserver`. Only useful in read-only mode.'
+			}
+		],
+		returns: [
+			{ name: 'current', type: '() => string', description: 'The current title' },
+			{
+				name: 'set',
+				type: '(title: string) => void',
+				description: 'Writes a new title, passing it through `template`'
+			}
+		],
+		example: `<script lang="ts">
+  import { useTitle } from '@ariefsn/svelte-use';
+
+  let unread = $state(0);
+
+  // Live counter in the tab, restored when the component unmounts
+  useTitle(() => (unread > 0 ? \`(\${unread}) Inbox\` : 'Inbox'));
+</script>
+
+<button onclick={() => unread++}>Receive a message</button>`,
+		notes: [
+			'Client-side only by nature: it mutates `document.title`, so it does **not** set the server-rendered `<title>` element. Use `<svelte:head>` for metadata that must be in the HTML.',
+			'`useTitle()` with no argument is read-only and never writes, which is what stops a display-only consumer clobbering a title set elsewhere.',
+			'The restore snapshot is taken at initialisation, so a nested instance hands back whatever the enclosing one set rather than the original page title.',
+			'**For SEO, reach for server-rendered metadata instead.** Crawlers and link unfurlers mostly do not execute JavaScript, so a title set here is invisible to them. Use this for a title that changes in response to app state — `(3) Inbox`, a timer, upload progress.'
+		]
+	},
+	'use-favicon': {
+		slug: 'use-favicon',
+		title: 'useFavicon',
+		description:
+			'Reads and writes the document favicon. Adopts an existing `link rel="icon"` rather than appending a second one, because browsers choose unpredictably among duplicates.',
+		usage: `import { useFavicon } from '@ariefsn/svelte-use';
+
+useFavicon('/icons/alert.svg');`,
+		params: [
+			{
+				name: 'href',
+				type: 'string | null | (() => string | null)',
+				default: 'undefined',
+				description: 'Favicon URL, or a getter. Omit for read-only use.'
+			},
+			{ name: 'options', type: 'UseFaviconOptions', default: '{}', description: 'Configuration' }
+		],
+		options: [
+			{
+				name: 'rel',
+				type: 'string',
+				default: "'icon'",
+				description: '`rel` of the managed link, and the selector used to adopt an existing one'
+			},
+			{
+				name: 'inferType',
+				type: 'boolean',
+				default: 'true',
+				description: "Set the link's `type` from the href's file extension"
+			},
+			{
+				name: 'restoreOnDestroy',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'Restore the href present at initialisation on destroy. Applies only to an adopted link — a created one is removed instead.'
+			},
+			{
+				name: 'parent',
+				type: '() => HTMLElement | null | undefined',
+				default: 'document.head',
+				description: 'Container to search and append into'
+			}
+		],
+		returns: [
+			{ name: 'current', type: '() => string | null', description: 'The current favicon href' },
+			{
+				name: 'set',
+				type: '(href: string | null) => void',
+				description: 'Sets the href. `null` restores the original, or removes a created link.'
+			}
+		],
+		example: `<script lang="ts">
+  import { useFavicon } from '@ariefsn/svelte-use';
+
+  let unread = $state(0);
+
+  // Swap the icon while messages are waiting
+  useFavicon(() => (unread > 0 ? '/icons/unread.svg' : '/icons/idle.svg'));
+</script>`,
+		notes: [
+			'SSR safe: no DOM is touched and `current()` still reports the resolved href.',
+			'An **adopted** link is restored rather than removed on destroy — this library did not put it there, so it does not take it away. A link it **created** is removed.',
+			'`inferType` maps `.ico`, `.svg`, `.png`, `.gif`, `.jpg`, `.jpeg`, `.webp` and `.avif`, ignoring any query string or fragment.',
+			'Some browsers cache favicons aggressively; append a version query (`/icon.svg?v=2`) if a change does not appear.'
+		]
+	},
+	'use-style-tag': {
+		slug: 'use-style-tag',
+		title: 'useStyleTag',
+		description:
+			'Injects a `style` element and keeps its contents in sync. Tags are deduplicated by id, so two call sites sharing an id share one element and it survives until both release it.',
+		usage: `import { useStyleTag } from '@ariefsn/svelte-use';
+
+const tag = useStyleTag('.highlight { color: tomato; }');
+tag.isLoaded(); // → true in a browser`,
+		params: [
+			{
+				name: 'css',
+				type: 'string | (() => string)',
+				description: 'CSS text, or a getter for reactive CSS'
+			},
+			{ name: 'options', type: 'UseStyleTagOptions', default: '{}', description: 'Configuration' }
+		],
+		options: [
+			{
+				name: 'id',
+				type: 'string',
+				default: 'generated',
+				description:
+					'Element id, and the dedupe key. Omit for a private tag — an anonymous tag is never shared, so passing an explicit id is how a caller opts into sharing.'
+			},
+			{ name: 'media', type: 'string', default: 'undefined', description: '`media` attribute' },
+			{
+				name: 'immediate',
+				type: 'boolean',
+				default: 'true',
+				description: 'Inject on initialisation. When `false`, nothing is appended until `load()`.'
+			},
+			{
+				name: 'removeOnDestroy',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'Detach the tag once the last consumer is destroyed. Defaults on — the opposite of `useScriptTag`.'
+			},
+			{
+				name: 'parent',
+				type: '() => HTMLElement | null | undefined',
+				default: 'document.head',
+				description: 'Container to append into'
+			}
+		],
+		returns: [
+			{ name: 'id', type: 'string', description: 'The element id in use. Stable, not reactive.' },
+			{ name: 'css', type: '() => string', description: 'The CSS text currently applied' },
+			{
+				name: 'isLoaded',
+				type: '() => boolean',
+				description: 'Whether the tag is in the document'
+			},
+			{
+				name: 'set',
+				type: '(css: string) => void',
+				description: 'Replaces the CSS text. Overwritten again if a reactive source later changes.'
+			},
+			{ name: 'load', type: '() => void', description: 'Appends the tag if absent. Idempotent.' },
+			{
+				name: 'unload',
+				type: '() => void',
+				description: "Drops this consumer's reference. Idempotent."
+			}
+		],
+		example: `<script lang="ts">
+  import { useStyleTag } from '@ariefsn/svelte-use';
+
+  let hue = $state(200);
+  useStyleTag(() => \`.themed { color: hsl(\${hue} 80% 60%); }\`);
+</script>
+
+<input type="range" min="0" max="360" bind:value={hue} />
+<p class="themed">Recoloured as you drag.</p>`,
+		notes: [
+			'SSR safe: nothing is appended and `isLoaded()` stays `false`, while `css()` still reports the resolved text.',
+			'The element is reused as reactive CSS changes rather than recreated.',
+			'A **shared** tag is detached only once every consumer has released it, so one component cannot tear down CSS another still needs.',
+			'A tag found already in the document is adopted and **never** detached — only a tag this library created is removed.',
+			'For component-scoped styling prefer a plain Svelte `<style>` block. This is for CSS whose text is computed at runtime, or that must live outside the component tree.'
+		]
+	},
+	'use-script-tag': {
+		slug: 'use-script-tag',
+		title: 'useScriptTag',
+		description:
+			'Loads an external script, deduplicated across every call site. Two components asking for the same URL share one element **and** one promise, so the second resolves as soon as the first has executed.',
+		usage: `import { useScriptTag } from '@ariefsn/svelte-use';
+
+const script = useScriptTag('https://cdn.example.com/sdk.js');
+await script.load();
+script.isLoaded(); // → true`,
+		params: [
+			{ name: 'src', type: 'string | (() => string)', description: 'Script URL, or a getter' },
+			{ name: 'options', type: 'UseScriptTagOptions', default: '{}', description: 'Configuration' }
+		],
+		options: [
+			{
+				name: 'id',
+				type: 'string',
+				default: 'derived from `src`',
+				description: 'Element id, and the dedupe key'
+			},
+			{ name: 'async', type: 'boolean', default: 'true', description: '`async` attribute' },
+			{ name: 'defer', type: 'boolean', default: 'false', description: '`defer` attribute' },
+			{
+				name: 'type',
+				type: 'string',
+				default: "'text/javascript'",
+				description: '`type` attribute'
+			},
+			{
+				name: 'crossOrigin',
+				type: "'anonymous' | 'use-credentials'",
+				default: 'undefined',
+				description: '`crossorigin` attribute'
+			},
+			{
+				name: 'referrerPolicy',
+				type: 'ReferrerPolicy',
+				default: 'undefined',
+				description: '`referrerpolicy` attribute'
+			},
+			{
+				name: 'integrity',
+				type: 'string',
+				default: 'undefined',
+				description: 'Subresource integrity hash'
+			},
+			{ name: 'noModule', type: 'boolean', default: 'false', description: '`nomodule` attribute' },
+			{
+				name: 'immediate',
+				type: 'boolean',
+				default: 'true',
+				description: 'Append on initialisation. When `false`, nothing is appended until `load()`.'
+			},
+			{
+				name: 'removeOnDestroy',
+				type: 'boolean',
+				default: 'false',
+				description:
+					'Detach the tag once the last consumer is destroyed. Defaults **off** — see the notes.'
+			},
+			{
+				name: 'parent',
+				type: '() => HTMLElement | null | undefined',
+				default: 'document.head',
+				description: 'Container to append into'
+			},
+			{
+				name: 'onLoaded',
+				type: '(element) => void',
+				default: 'undefined',
+				description: 'Called once the script has executed'
+			},
+			{
+				name: 'onError',
+				type: '(event: Event) => void',
+				default: 'undefined',
+				description: 'Called when the script fails to load'
+			}
+		],
+		returns: [
+			{ name: 'id', type: 'string', description: 'The element id in use. Stable, not reactive.' },
+			{
+				name: 'status',
+				type: "() => 'idle' | 'loading' | 'loaded' | 'error'",
+				description: 'Current lifecycle status'
+			},
+			{ name: 'isLoading', type: '() => boolean', description: 'Whether the script is in flight' },
+			{ name: 'isLoaded', type: '() => boolean', description: 'Whether the script has executed' },
+			{ name: 'error', type: '() => Event | null', description: 'The failure event, or `null`' },
+			{
+				name: 'load',
+				type: '() => Promise<HTMLScriptElement>',
+				description:
+					'Appends the tag if absent and resolves once it has executed. Repeat calls return the same promise.'
+			},
+			{
+				name: 'unload',
+				type: '() => void',
+				description: "Drops this consumer's reference. Idempotent."
+			}
+		],
+		example: `<script lang="ts">
+  import { useScriptTag } from '@ariefsn/svelte-use';
+
+  // Defer loading until the user actually needs it
+  const script = useScriptTag('https://cdn.example.com/player.js', {
+    immediate: false
+  });
+
+  async function play() {
+    await script.load();
+    // the SDK's globals are available here
+  }
+</script>
+
+<button onclick={play} disabled={script.isLoading()}>Play</button>`,
+		notes: [
+			'SSR safe: nothing is appended, `status()` stays `idle`, and `load()` returns a promise that never settles — awaiting it on the server would be a bug in the caller either way.',
+			'**`removeOnDestroy` defaults to `false`, unlike `useStyleTag`.** CSS is declarative, so removing the tag reverses it; a script is not — removing it leaves every global it defined, listener it bound and timer it started, while re-adding runs all of that a second time.',
+			'The load promise is shared per element, not per composable. A second consumer attaching its own `load` listener after the event had already fired would wait forever.',
+			'A tag already present in `app.html` is adopted rather than duplicated. One case is unresolvable: a hand-written tag that finished loading before this composable existed and carries no marker — it will be treated as still loading.',
+			'`src` is assigned last when creating the element, since setting it is what starts the fetch.'
+		]
+	},
+	// ------------------------------------------------- Browser – Navigation
+	'use-url-search-params': {
+		slug: 'use-url-search-params',
+		title: 'useUrlSearchParams',
+		description:
+			'Reads and writes URL parameters reactively. Tracks `popstate` and `hashchange`, so back/forward navigation and external URL edits flow back into the parameters.',
+		usage: `import { useUrlSearchParams } from '@ariefsn/svelte-use';
+
+const params = useUrlSearchParams();
+params.set('page', '2');
+params.get('page'); // → '2'`,
+		params: [
+			{
+				name: 'mode',
+				type: "'history' | 'hash' | 'hash-params'",
+				default: "'history'",
+				description: 'Where the parameters live: `?a=1`, `#/route?a=1`, or `#a=1` respectively'
+			},
+			{
+				name: 'options',
+				type: 'UseUrlSearchParamsOptions',
+				default: '{}',
+				description: 'Configuration'
+			}
+		],
+		options: [
+			{
+				name: 'write',
+				type: "'replace' | 'push' | false",
+				default: "'replace'",
+				description:
+					'`replace` overwrites the current history entry, `push` adds one, and `false` keeps parameters in memory only'
+			},
+			{
+				name: 'debounce',
+				type: 'number',
+				default: '0',
+				description:
+					'Milliseconds to coalesce rapid writes. With `push` this controls how many history entries a burst produces.'
+			},
+			{
+				name: 'removeEmptyValues',
+				type: 'boolean',
+				default: 'true',
+				description: 'Drop keys whose value is empty instead of emitting `?key=`'
+			},
+			{
+				name: 'initial',
+				type: 'UrlSearchParamsRecord',
+				default: '{}',
+				description:
+					'Values applied for keys the URL does not already define. Never overrides what is in the URL.'
+			}
+		],
+		returns: [
+			{
+				name: 'params',
+				type: '() => UrlSearchParamsRecord',
+				description:
+					'Snapshot of the current parameters. A fresh object each change, so mutating it does nothing.'
+			},
+			{
+				name: 'get',
+				type: '(key: string) => string | string[] | undefined',
+				description: 'One parameter, or `undefined` when absent'
+			},
+			{
+				name: 'set',
+				type: '(key, value) => void',
+				description: 'Sets one parameter and schedules a URL write'
+			},
+			{ name: 'remove', type: '(key: string) => void', description: 'Removes one parameter' },
+			{
+				name: 'replace',
+				type: '(next) => void',
+				description: 'Replaces every parameter in a single write'
+			},
+			{ name: 'clear', type: '() => void', description: 'Removes every parameter' },
+			{
+				name: 'query',
+				type: '() => string',
+				description: 'The serialised parameter string, without a leading `?` or `#`'
+			}
+		],
+		example: `<script lang="ts">
+  import { useUrlSearchParams } from '@ariefsn/svelte-use';
+
+  // Keep a search box in the URL, one history entry per pause in typing
+  const params = useUrlSearchParams('history', { write: 'push', debounce: 400 });
+  const query = $derived((params.get('q') as string) ?? '');
+</script>
+
+<input value={query} oninput={(e) => params.set('q', e.currentTarget.value)} />`,
+		notes: [
+			'SSR safe: parameters resolve to `initial` and no history call is made.',
+			'A key appearing once is a bare string; a repeated key (`?a=1&a=2`) becomes an array. `?q=hello` should not force every consumer to unwrap a one-element array.',
+			'There is deliberately **no effect that reads the parameters.** An effect writing the URL from them would loop in the hash modes — changing the hash fires `hashchange`, the listener reparses, the effect re-runs. Writes are imperative, reads are event-driven, and an internal record of the last written string lets the listener recognise its own echo.',
+			'With `debounce` set, a write still pending when the scope is destroyed is dropped. In practice the scope is being destroyed during navigation and the URL is about to change anyway.',
+			'`useBrowserLocation` does not observe `pushState`/`replaceState`, because neither fires an event — so a sibling `useBrowserLocation` goes stale after a write here.'
+		]
+	},
+	// ------------------------------------------------- Browser – Appearance
+	'use-color-mode': {
+		slug: 'use-color-mode',
+		title: 'useColorMode',
+		description:
+			'Reactive colour mode with `auto` resolution, persistence and cross-tab sync. `auto` follows the OS preference and keeps following it, because resolution is derived rather than snapshotted.',
+		usage: `import { useColorMode } from '@ariefsn/svelte-use';
+
+const theme = useColorMode();
+theme.toggle();
+theme.isDark(); // → true`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseColorModeOptions',
+				default: '{}',
+				description: 'Configuration'
+			}
+		],
+		options: [
+			{
+				name: 'target',
+				type: '() => HTMLElement | null | undefined',
+				default: 'document.documentElement',
+				description: 'Element receiving the mode'
+			},
+			{
+				name: 'attribute',
+				type: 'string',
+				default: "'class'",
+				description:
+					'Attribute to write. The literal `class` toggles a class instead of calling `setAttribute`.'
+			},
+			{
+				name: 'modes',
+				type: 'Record<ResolvedColorMode, string>',
+				default: "{ light: 'light', dark: 'dark' }",
+				description:
+					'Maps each resolved mode to the attribute value or class name it writes. An empty string removes the attribute, or adds no class.'
+			},
+			{
+				name: 'initialValue',
+				type: 'ColorModeSelection',
+				default: "'auto'",
+				description:
+					'Selection used before storage is consulted. Pass `dark` to hard-default to dark regardless of the OS setting.'
+			},
+			{
+				name: 'storageKey',
+				type: 'string | null',
+				default: "'svelte-use-color-mode'",
+				description: 'Persistence key. `null` disables persistence and keeps the mode in memory.'
+			},
+			{
+				name: 'storageArea',
+				type: "'local' | 'session'",
+				default: "'local'",
+				description: 'Which Web Storage area persists the mode'
+			},
+			{
+				name: 'disableTransition',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'Suppress CSS transitions for one frame while the mode flips, so colours swap instantly instead of cross-fading every transitioned property'
+			},
+			{
+				name: 'onChanged',
+				type: '(resolved, applyDefault) => void',
+				default: 'undefined',
+				description:
+					'Replaces the default DOM write. Receives the resolved mode and the default applier, so it can decorate rather than fully replace.'
+			}
+		],
+		returns: [
+			{
+				name: 'mode',
+				type: '() => ColorModeSelection',
+				description: 'The current selection, which may be `auto`'
+			},
+			{
+				name: 'resolved',
+				type: '() => ResolvedColorMode',
+				description: 'The selection with `auto` resolved against the OS preference'
+			},
+			{ name: 'isDark', type: '() => boolean', description: 'Whether the resolved mode is `dark`' },
+			{
+				name: 'system',
+				type: "() => 'light' | 'dark'",
+				description: 'The OS preference, regardless of the current selection'
+			},
+			{ name: 'set', type: '(mode) => void', description: 'Selects a mode and persists it' },
+			{
+				name: 'toggle',
+				type: '() => void',
+				description:
+					'Flips between light and dark based on what is currently resolved, and therefore leaves `auto`'
+			},
+			{
+				name: 'reset',
+				type: '() => void',
+				description: 'Returns to `initialValue` and clears the persisted selection'
+			}
+		],
+		example: `<script lang="ts">
+  import { useColorMode } from '@ariefsn/svelte-use';
+
+  const theme = useColorMode({ initialValue: 'dark', attribute: 'data-theme' });
+</script>
+
+{#each ['auto', 'light', 'dark'] as const as option}
+  <button class:active={theme.mode() === option} onclick={() => theme.set(option)}>
+    {option}
+  </button>
+{/each}`,
+		notes: [
+			'A separate `useDark` is deliberately absent — it is `useColorMode().isDark`.',
+			'**A composable cannot prevent the first-paint flash.** It runs after hydration, which is after first paint, so a stored mode differing from the server-rendered one always flashes. Paste `colorModeScript()` into `app.html` inside `<head>`, above every stylesheet, to fix it.',
+			'`colorModeScript()` takes the same `storageKey`, `attribute`, `modes` and `initialValue` — pass the same values to both or the script will apply the wrong thing.',
+			'The selection is stored as a bare value (`dark`, not `"dark"`), so the pre-paint script needs no `JSON.parse`.',
+			'Unlike `useTextDirection`, this does **not** run a `MutationObserver`: it owns the attribute rather than sharing it, and two instances both observing and writing would mutually re-trigger. Editing the attribute by hand is therefore not adopted.',
+			'Two instances in the same page stay in sync through an internal channel, because the `storage` event does not fire in the tab that caused the write.'
+		]
+	},
+	'use-preferred-dark': {
+		slug: 'use-preferred-dark',
+		title: 'usePreferredDark',
+		description:
+			'Reactively tracks whether the OS requests a dark colour scheme, via `(prefers-color-scheme: dark)`.',
+		usage: `import { usePreferredDark } from '@ariefsn/svelte-use';
+
+const isDark = usePreferredDark();
+isDark(); // → true when the OS is set to dark`,
+		returns: [
+			{ name: '(return)', type: '() => boolean', description: 'Whether dark mode is preferred' }
+		],
+		example: `<script lang="ts">
+  import { usePreferredDark } from '@ariefsn/svelte-use';
+
+  const prefersDark = usePreferredDark();
+</script>
+
+<img src={prefersDark() ? '/logo-dark.svg' : '/logo-light.svg'} alt="Logo" />`,
+		notes: [
+			'Returns `false` during SSR and until hydration.',
+			'Not the same as `usePreferredColorScheme() === "dark"`: a user agent reporting no preference at all yields `false` here and `no-preference` there. Use this for a binary decision, that one to tell the two apart.',
+			'Exports `PREFERS_DARK_QUERY`, the query literal, so `usePreferredColorScheme` and `useColorMode` share one copy of it.'
+		]
+	},
+	'use-preferred-color-scheme': {
+		slug: 'use-preferred-color-scheme',
+		title: 'usePreferredColorScheme',
+		description:
+			'Reactively tracks the OS colour-scheme preference as `dark`, `light` or `no-preference`.',
+		usage: `import { usePreferredColorScheme } from '@ariefsn/svelte-use';
+
+const scheme = usePreferredColorScheme();
+scheme(); // → 'dark' | 'light' | 'no-preference'`,
+		returns: [
+			{
+				name: '(return)',
+				type: "() => 'dark' | 'light' | 'no-preference'",
+				description: 'The resolved preference'
+			}
+		],
+		example: `<script lang="ts">
+  import { usePreferredColorScheme } from '@ariefsn/svelte-use';
+
+  const scheme = usePreferredColorScheme();
+
+  // Fall back to your own default only when the OS has no opinion
+  const theme = $derived(scheme() === 'no-preference' ? 'dark' : scheme());
+</script>
+
+<p>OS says {scheme()}, using {theme}</p>`,
+		notes: [
+			'Derived from **two** media queries rather than one, so an explicit `light` preference stays distinguishable from a user agent that reports nothing. Older engines and some embedded webviews match neither.',
+			'Returns `no-preference` during SSR.',
+			'A user agent reporting both queries resolves to `dark`, since candidates are checked in order.'
+		]
+	},
+	'use-preferred-reduced-motion': {
+		slug: 'use-preferred-reduced-motion',
+		title: 'usePreferredReducedMotion',
+		description:
+			'Reactively tracks whether the OS requests reduced motion, as `reduce` or `no-preference`.',
+		usage: `import { usePreferredReducedMotion } from '@ariefsn/svelte-use';
+
+const motion = usePreferredReducedMotion();
+motion(); // → 'reduce' when the user asked for less motion`,
+		returns: [
+			{
+				name: '(return)',
+				type: "() => 'reduce' | 'no-preference'",
+				description: 'The resolved preference'
+			}
+		],
+		example: `<script lang="ts">
+  import { usePreferredReducedMotion } from '@ariefsn/svelte-use';
+
+  const motion = usePreferredReducedMotion();
+
+  // Skip the transition entirely rather than shortening it
+  const duration = $derived(motion() === 'reduce' ? 0 : 300);
+</script>`,
+		notes: [
+			'Returns `no-preference` during SSR — the safe default, since animations render normally until the real preference is known.',
+			'Returns the CSS keyword rather than a boolean, matching the rest of the `usePreferred*` family and the value you would write in a `@media` block.',
+			'Prefer removing an animation over merely shortening it; `reduce` is a request to stop moving things, not to move them faster.'
+		]
+	},
+	'use-preferred-contrast': {
+		slug: 'use-preferred-contrast',
+		title: 'usePreferredContrast',
+		description:
+			'Reactively tracks the OS contrast preference as `more`, `less`, `custom` or `no-preference`.',
+		usage: `import { usePreferredContrast } from '@ariefsn/svelte-use';
+
+const contrast = usePreferredContrast();
+contrast(); // → 'more' | 'less' | 'custom' | 'no-preference'`,
+		returns: [
+			{
+				name: '(return)',
+				type: "() => 'more' | 'less' | 'custom' | 'no-preference'",
+				description: 'The resolved preference'
+			}
+		],
+		example: `<script lang="ts">
+  import { usePreferredContrast } from '@ariefsn/svelte-use';
+
+  const contrast = usePreferredContrast();
+  const borderWidth = $derived(contrast() === 'more' ? 2 : 1);
+</script>
+
+<div style="border: {borderWidth}px solid currentColor">Adaptive border</div>`,
+		notes: [
+			'Combines three media queries. Returns `no-preference` during SSR.',
+			'`custom` means the user has set a specific palette — Windows High Contrast, or forced colours — rather than asking for more or less contrast in general.',
+			'**Order is load-bearing:** a forced-colours mode often matches `custom` *and* `more` simultaneously, so `custom` is checked last and the more actionable answer wins.'
+		]
+	},
+	'use-css-var': {
+		slug: 'use-css-var',
+		title: 'useCssVar',
+		description:
+			'Reads and writes a CSS custom property. Writes are instant; reads are deliberately not fully reactive, because custom properties have no change event.',
+		usage: `import { useCssVar } from '@ariefsn/svelte-use';
+
+const accent = useCssVar('--accent');
+accent.set('tomato');
+accent.current(); // → 'tomato'`,
+		params: [
+			{
+				name: 'name',
+				type: 'string | (() => string)',
+				description: 'Custom property name, including the leading `--`'
+			},
+			{
+				name: 'target',
+				type: '() => HTMLElement | null | undefined',
+				default: 'document.documentElement',
+				description: 'Getter for the element to read and write'
+			},
+			{ name: 'options', type: 'UseCssVarOptions', default: '{}', description: 'Configuration' }
+		],
+		options: [
+			{
+				name: 'initialValue',
+				type: 'string',
+				default: "''",
+				description: 'Value reported when the property is unset, unreadable, or during SSR'
+			},
+			{
+				name: 'observe',
+				type: 'boolean',
+				default: 'false',
+				description:
+					"Re-read when the target's `style` or `class` attribute changes. Off by default because each change costs a style recalculation."
+			}
+		],
+		returns: [
+			{ name: 'current', type: '() => string', description: 'The current value, trimmed' },
+			{
+				name: 'set',
+				type: '(value: string) => void',
+				description: 'Writes the property inline and updates the value synchronously'
+			},
+			{
+				name: 'remove',
+				type: '() => void',
+				description: 'Removes the inline property, then re-reads the inherited value'
+			},
+			{ name: 'refresh', type: '() => void', description: 'Forces a `getComputedStyle` re-read' }
+		],
+		example: `<script lang="ts">
+  import { useCssVar, useColorMode } from '@ariefsn/svelte-use';
+
+  useColorMode();
+  // The theme class lands on <html>, which is also the default target,
+  // so observing picks up a theme switch
+  const surface = useCssVar('--color-surface', undefined, { observe: true });
+</script>
+
+<p>Surface is {surface()}</p>`,
+		notes: [
+			'**Writes are authoritative and free.** `set()` updates the element and the reactive value in the same synchronous call, so anything changed through this composable is instantly reactive with no reads.',
+			'**Reads are the compromise.** Custom properties have no change event and `getComputedStyle` forces a style recalculation, so polling is off the table. This reads once at initialisation and then only when asked.',
+			'`observe: true` adds a `MutationObserver` on `style` and `class`, which catches the common case — a theme class flipping on an ancestor. It still misses a swapped stylesheet, a CSSOM write, and an ancestor whose class changed. `refresh()` covers all of those.',
+			'The name must include the leading `--`. Standard properties are not supported: `getPropertyValue("color")` returns a resolved colour rather than failing, which would make a typo look like it worked.',
+			'Values are trimmed, because custom properties preserve leading whitespace and the raw value would not compare equal to what was written.'
+		]
+	},
 	// -------------------------------------------------- Element & viewport
 	'use-window-size': {
 		slug: 'use-window-size',

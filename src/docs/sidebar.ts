@@ -165,8 +165,35 @@ export const sidebar: SidebarGroup[] = [
 		]
 	},
 	{
+		title: 'Browser - Appearance',
+		items: [
+			{ label: 'useColorMode', slug: 'use-color-mode', since: '1.2.0' },
+			{ label: 'usePreferredDark', slug: 'use-preferred-dark', since: '1.2.0' },
+			{ label: 'usePreferredColorScheme', slug: 'use-preferred-color-scheme', since: '1.2.0' },
+			{
+				label: 'usePreferredReducedMotion',
+				slug: 'use-preferred-reduced-motion',
+				since: '1.2.0'
+			},
+			{ label: 'usePreferredContrast', slug: 'use-preferred-contrast', since: '1.2.0' },
+			{ label: 'useCssVar', slug: 'use-css-var', since: '1.2.0' }
+		]
+	},
+	{
+		title: 'Browser - Document',
+		items: [
+			{ label: 'useTitle', slug: 'use-title', since: '1.2.0' },
+			{ label: 'useFavicon', slug: 'use-favicon', since: '1.2.0' },
+			{ label: 'useStyleTag', slug: 'use-style-tag', since: '1.2.0' },
+			{ label: 'useScriptTag', slug: 'use-script-tag', since: '1.2.0' }
+		]
+	},
+	{
 		title: 'Browser - Navigation',
-		items: [{ label: 'useNavigationGuard', slug: 'use-navigation-guard' }]
+		items: [
+			{ label: 'useNavigationGuard', slug: 'use-navigation-guard' },
+			{ label: 'useUrlSearchParams', slug: 'use-url-search-params', since: '1.2.0' }
+		]
 	},
 	{
 		title: 'Performance',
