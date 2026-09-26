@@ -461,6 +461,564 @@ params.get('page'); // → '2'`,
 			'`useBrowserLocation` does not observe `pushState`/`replaceState`, because neither fires an event — so a sibling `useBrowserLocation` goes stale after a write here.'
 		]
 	},
+	// ------------------------------------------------------ Utilities & state
+	'use-state-machine': {
+		slug: 'use-state-machine',
+		title: 'useStateMachine',
+		description:
+			'A finite state machine with typed states and actions, inferred from the config. Expresses what `useToggle` and `useCycleList` cannot: that from `idle`, only `FETCH` is legal, and it leads to `loading`.',
+		usage: `import { useStateMachine } from '@ariefsn/svelte-use';
+
+const machine = useStateMachine({
+  initial: 'idle',
+  states: {
+    idle: { on: { FETCH: 'loading' } },
+    loading: { on: { RESOLVE: 'success', REJECT: 'failure' } },
+    success: { on: { FETCH: 'loading' } },
+    failure: { on: { RETRY: 'loading' } }
+  }
+});
+
+machine.send('FETCH'); // → true, now 'loading'`,
+		params: [
+			{
+				name: 'config',
+				type: 'MachineConfig<S, A>',
+				description: 'The `initial` state and every state with its transitions'
+			},
+			{
+				name: 'options',
+				type: 'UseStateMachineOptions<S, A>',
+				default: '{}',
+				description: 'Transition callback and history limit'
+			}
+		],
+		options: [
+			{
+				name: 'onTransition',
+				type: '(t: StateTransition<S, A>) => void',
+				default: 'undefined',
+				description: 'Called after each successful transition, with `from`, `to` and `action`'
+			},
+			{
+				name: 'historyLimit',
+				type: 'number',
+				default: '100',
+				description: 'How many past states `history()` keeps. `Infinity` for unbounded.'
+			}
+		],
+		returns: [
+			{ name: 'state', type: '() => S', description: 'The current state' },
+			{
+				name: 'send',
+				type: '(action: A) => boolean',
+				description:
+					'Applies an action. Returns `false` — never throws — when illegal or blocked by a guard.'
+			},
+			{
+				name: 'can',
+				type: '(action: A) => boolean',
+				description: 'Whether the action would be accepted right now, guards included'
+			},
+			{ name: 'matches', type: '(state: S) => boolean', description: 'Whether in a given state' },
+			{
+				name: 'history',
+				type: '() => readonly S[]',
+				description: 'States visited, oldest first, including the current one'
+			},
+			{ name: 'reset', type: '() => void', description: 'Returns to `initial` and clears history' }
+		],
+		example: `<script lang="ts">
+  import { useStateMachine } from '@ariefsn/svelte-use';
+
+  // Explicit parameters add exhaustiveness: forgetting a state is an error
+  type State = 'idle' | 'loading' | 'success' | 'failure';
+  type Action = 'FETCH' | 'RESOLVE' | 'REJECT' | 'RETRY';
+
+  const machine = useStateMachine<State, Action>({
+    initial: 'idle',
+    states: {
+      idle: { on: { FETCH: 'loading' } },
+      loading: { on: { RESOLVE: 'success', REJECT: 'failure' } },
+      success: { on: { FETCH: 'loading' } },
+      failure: { on: { RETRY: 'loading' } }
+    }
+  });
+
+  async function load() {
+    if (!machine.can('FETCH')) return;
+    machine.send('FETCH');
+    try {
+      await fetchData();
+      machine.send('RESOLVE');
+    } catch {
+      machine.send('REJECT');
+    }
+  }
+</script>
+
+<button onclick={load} disabled={!machine.can('FETCH')}>Load</button>
+<p>{machine.state()}</p>`,
+		notes: [
+			'**What the types catch:** an action or state name that is not in this machine, a transition target that is not a declared state, and an `initial` that is not one either. All inferred from your config — nothing is hardcoded, and no `as const` is needed at the call site.',
+			'**What they cannot catch** is whether an action is legal *from the state you happen to be in at runtime*. That is data, not type information. `can()` answers it, and an illegal `send()` is a no-op returning `false` so a stray click cannot crash a component.',
+			'Supplying `State` and `Action` explicitly turns `states` into a required record over the full union, so a forgotten state is a compile error. TypeScript has no partial type-argument inference, so supply **both** or neither — `useStateMachine<State>(…)` will not compile.',
+			"A `guard` gates a transition on a runtime condition: `on: { OPEN: { target: 'open', guard: () => isAdmin } }`. A blocked transition returns `false` exactly like an illegal one.",
+			'Deliberately **not** XState. No hierarchy, no parallel regions, no actors, no extended context, and `send` takes bare strings rather than event objects. If you need statecharts, reach for XState rather than stretching this.',
+			'Pure state with no DOM, timers or effects, so it renders on the server and hydrates without a guard.'
+		]
+	},
+	'use-cloned': {
+		slug: 'use-cloned',
+		title: 'useCloned',
+		description:
+			'A deep copy of a reactive value, tracked separately. The usual job is an edit buffer: bind a form to the clone and leave the original untouched until the user saves.',
+		usage: `import { useCloned } from '@ariefsn/svelte-use';
+
+let user = $state({ name: 'Ada' });
+const draft = useCloned(() => user, { manual: true });
+
+draft.cloned().name = 'Grace';
+draft.isModified(); // → true`,
+		params: [
+			{ name: 'source', type: '() => T', description: 'Getter for the value to copy' },
+			{
+				name: 'options',
+				type: 'UseClonedOptions<T>',
+				default: '{}',
+				description: 'Sync behaviour and a custom clone function'
+			}
+		],
+		options: [
+			{
+				name: 'manual',
+				type: 'boolean',
+				default: 'false',
+				description:
+					'Stop re-cloning automatically, leaving `sync()` as the only refresh. Turn this **on** for a draft the user edits.'
+			},
+			{
+				name: 'clone',
+				type: '(source: T) => T',
+				default: 'structuredClone',
+				description: 'How to copy. Supply your own for values `structuredClone` cannot handle.'
+			}
+		],
+		returns: [
+			{ name: 'cloned', type: '() => T', description: 'The cloned value' },
+			{ name: 'set', type: '(value: T) => void', description: 'Replaces the clone' },
+			{
+				name: 'sync',
+				type: '() => void',
+				description: 'Re-clones from the source, discarding local changes'
+			},
+			{
+				name: 'isModified',
+				type: '() => boolean',
+				description: 'Whether the clone differs from the source, compared structurally'
+			}
+		],
+		example: `<script lang="ts">
+  import { useCloned } from '@ariefsn/svelte-use';
+
+  let { user } = $props();
+
+  // \`manual\` so an incoming update does not wipe unsaved edits
+  const draft = useCloned(() => user, { manual: true });
+</script>
+
+<input bind:value={() => draft.cloned().name, (v) => (draft.cloned().name = v)} />
+<button disabled={!draft.isModified()} onclick={() => save(draft.cloned())}>Save</button>
+<button disabled={!draft.isModified()} onclick={draft.sync}>Discard</button>`,
+		notes: [
+			'**`$state.snapshot` runs before the clone, and it is not optional.** `$state` deep-proxies plain objects, and `structuredClone` throws `DataCloneError` on a Proxy — so cloning a reactive object, which is the entire purpose here, would fail without unwrapping it first.',
+			'`structuredClone` preserves `Map`, `Set`, `Date`, `RegExp`, typed arrays and cycles — everything a JSON round-trip silently destroys. It cannot copy functions or class behaviour; pass your own `clone` for those.',
+			'`isModified()` compares **structurally**, not by reference, so a freshly rebuilt but equal object does not read as a change. That is what makes it usable for a Save button.',
+			'Without `manual`, any change to the source re-clones and discards local edits. That is right for a read-only mirror and wrong for a form, which is why the option exists.',
+			'Works on the server: `structuredClone` is available in Node 17+, with a JSON fallback besides.'
+		]
+	},
+	'use-memoize': {
+		slug: 'use-memoize',
+		title: 'useMemoize',
+		description:
+			'Caches a function’s results by its arguments, with optional LRU eviction. Deliberately **not** reactive — `$derived` already memoises reactive computations; this is for plain function calls it does not cover.',
+		usage: `import { useMemoize } from '@ariefsn/svelte-use';
+
+const format = useMemoize((iso: string, locale: string) =>
+  new Intl.DateTimeFormat(locale, { dateStyle: 'long' }).format(new Date(iso))
+);
+
+format('2026-09-26', 'en-GB'); // computed
+format('2026-09-26', 'en-GB'); // from cache`,
+		params: [
+			{ name: 'fn', type: '(...args: TArgs) => TResult', description: 'The function to memoise' },
+			{
+				name: 'options',
+				type: 'UseMemoizeOptions<TArgs>',
+				default: '{}',
+				description: 'Key derivation and cache size'
+			}
+		],
+		options: [
+			{
+				name: 'getKey',
+				type: '(...args: TArgs) => string',
+				default: 'JSON.stringify(args)',
+				description:
+					'Builds the cache key. The default cannot represent a `Map` or a class instance, and treats differently-ordered keys as different — supply your own for anything but plain data.'
+			},
+			{
+				name: 'max',
+				type: 'number',
+				default: 'undefined',
+				description:
+					'Maximum entries, evicting least-recently-used first. Unbounded when omitted, which for a long-lived component is a leak.'
+			}
+		],
+		returns: [
+			{
+				name: '(call it)',
+				type: '(...args: TArgs) => TResult',
+				description: 'Returns a cached result when one exists'
+			},
+			{
+				name: 'load',
+				type: '(...args: TArgs) => TResult',
+				description: 'Calls the function and replaces any cached result'
+			},
+			{
+				name: 'has',
+				type: '(...args: TArgs) => boolean',
+				description: 'Whether a result is cached'
+			},
+			{ name: 'remove', type: '(...args: TArgs) => void', description: 'Removes one entry' },
+			{ name: 'clear', type: '() => void', description: 'Empties the cache' },
+			{ name: 'size', type: '() => number', description: 'How many entries are cached — reactive' }
+		],
+		example: `<script lang="ts">
+  import { useMemoize } from '@ariefsn/svelte-use';
+
+  // Deduplicates in-flight requests: concurrent callers share one promise
+  const fetchUser = useMemoize(
+    async (id: number) => (await fetch(\`/api/users/\${id}\`)).json(),
+    { max: 50 }
+  );
+</script>
+
+<button onclick={() => fetchUser(1)}>Load user 1</button>
+<button onclick={() => fetchUser.load(1)}>Force refresh</button>
+<p>{fetchUser.size()} cached</p>`,
+		notes: [
+			'This caches whatever the function returns, **promises included** — so an async function is cached as its in-flight promise. That deduplicates concurrent requests, which is usually what you want, but it means a rejection is cached too. Use `load()` or `remove()` to retry.',
+			'Eviction is least-recently-**used**, not least-recently-added: a cache hit counts as a use, so a frequently read entry survives.',
+			'Without `max` the cache grows without bound. For a long-lived component that is a leak, so set one unless the argument space is small and fixed.',
+			'The default key is `JSON.stringify(args)`, which treats `{ a: 1, b: 2 }` and `{ b: 2, a: 1 }` as different keys and flattens a `Map` or `Set` to `{}`. Supply `getKey` whenever arguments are not plain data.',
+			'`size()` is reactive so a cache-status display updates; the cached values themselves are ordinary and do not trigger renders.',
+			'Pure computation with no DOM, so it works on the server.'
+		]
+	},
+	'use-offset-pagination': {
+		slug: 'use-offset-pagination',
+		title: 'useOffsetPagination',
+		description:
+			'Offset-based pagination state. The current page is **derived**, never stored clamped, so it corrects itself the moment `total` shrinks underneath it.',
+		usage: `import { useOffsetPagination } from '@ariefsn/svelte-use';
+
+const pagination = useOffsetPagination({ total: () => items.length, pageSize: 20 });
+pagination.offset(); // → index of the first item on this page`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseOffsetPaginationOptions',
+				description: 'Total, page size and starting page'
+			}
+		],
+		options: [
+			{
+				name: 'total',
+				type: 'number | (() => number)',
+				description: 'Total number of items. A getter keeps it reactive.'
+			},
+			{
+				name: 'pageSize',
+				type: 'number | (() => number)',
+				default: '10',
+				description: 'Items per page'
+			},
+			{ name: 'page', type: 'number', default: '1', description: 'Page to start on, 1-based' },
+			{
+				name: 'onPageChange',
+				type: '(state: PaginationState) => void',
+				default: 'undefined',
+				description: 'Called when the resolved page changes — not on the initial render'
+			}
+		],
+		returns: [
+			{
+				name: 'page',
+				type: '() => number',
+				description: 'The current page, 1-based and always within range'
+			},
+			{ name: 'pageSize', type: '() => number', description: 'Items per page' },
+			{
+				name: 'pageCount',
+				type: '() => number',
+				description: 'Total pages, at least 1 even with no items'
+			},
+			{
+				name: 'offset',
+				type: '() => number',
+				description: 'Index of the first item on this page — the `offset` for a query or `slice`'
+			},
+			{ name: 'isFirstPage', type: '() => boolean', description: 'Whether this is the first page' },
+			{ name: 'isLastPage', type: '() => boolean', description: 'Whether this is the last page' },
+			{
+				name: 'go',
+				type: '(page: number) => void',
+				description: 'Goes to a page. Out-of-range values are clamped, not rejected.'
+			},
+			{ name: 'next', type: '() => void', description: 'Next page, if there is one' },
+			{ name: 'prev', type: '() => void', description: 'Previous page, if there is one' },
+			{ name: 'first', type: '() => void', description: 'First page' },
+			{ name: 'last', type: '() => void', description: 'Last page' }
+		],
+		example: `<script lang="ts">
+  import { useOffsetPagination } from '@ariefsn/svelte-use';
+
+  let items = $state<Item[]>([]);
+
+  const pagination = useOffsetPagination({
+    total: () => items.length,
+    pageSize: 20
+  });
+
+  const visible = $derived(
+    items.slice(pagination.offset(), pagination.offset() + pagination.pageSize())
+  );
+</script>
+
+<ul>{#each visible as item (item.id)}<li>{item.name}</li>{/each}</ul>
+
+<button onclick={pagination.prev} disabled={pagination.isFirstPage()}>Previous</button>
+<span>{pagination.page()} / {pagination.pageCount()}</span>
+<button onclick={pagination.next} disabled={pagination.isLastPage()}>Next</button>`,
+		notes: [
+			'**The page is derived, not stored clamped.** Showing page 9 of a list that just dropped to 3 pages resolves to page 3 immediately, with no effect and no intermediate render of an out-of-range page. It also means the original intent survives: if `total` grows back, page 9 returns.',
+			'Clamping inside an `$effect` is the obvious alternative and it is wrong twice over — it reads and writes the same state, and `scripts/check-effects.mjs` would not catch it, because that check only matches `++`, `--` and compound assignment. A plain `page = Math.min(page, pageCount)` passes lint and loops at runtime.',
+			'`pageCount()` is at least 1 even with zero items, so a UI showing "1 / 1" never has to special-case an empty list.',
+			'`onPageChange` deliberately does not fire on the initial render — it reports a change, and mounting is not one.',
+			'Pure state with no DOM or timers, so it renders on the server.'
+		]
+	},
+	'use-confirm-dialog': {
+		slug: 'use-confirm-dialog',
+		title: 'useConfirmDialog',
+		description:
+			'Turns a confirmation dialog into a single `await`. Logic only — you still write the markup; what it removes is the awkward shape of flags and callbacks.',
+		usage: `import { useConfirmDialog } from '@ariefsn/svelte-use';
+
+const dialog = useConfirmDialog<string>();
+
+const { isCanceled } = await dialog.reveal('Delete this file?');
+if (isCanceled) return;`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseConfirmDialogOptions<TReveal, TConfirm, TCancel>',
+				default: '{}',
+				description: 'Lifecycle callbacks'
+			}
+		],
+		options: [
+			{
+				name: 'onReveal',
+				type: '(data: TReveal) => void',
+				default: 'undefined',
+				description: 'Called when the dialog opens, with whatever `reveal()` was given'
+			},
+			{
+				name: 'onConfirm',
+				type: '(data: TConfirm) => void',
+				default: 'undefined',
+				description: 'Called on confirmation'
+			},
+			{
+				name: 'onCancel',
+				type: '(data: TCancel) => void',
+				default: 'undefined',
+				description: 'Called on cancellation, including an unmount while open'
+			}
+		],
+		returns: [
+			{
+				name: 'isRevealed',
+				type: '() => boolean',
+				description: 'Whether the dialog is open. Bind your markup to this.'
+			},
+			{
+				name: 'revealData',
+				type: '() => TReveal | null',
+				description: 'The value passed to `reveal()`, for rendering the prompt'
+			},
+			{
+				name: 'reveal',
+				type: '(data?: TReveal) => Promise<ConfirmDialogOutcome<TConfirm, TCancel>>',
+				description: 'Opens the dialog and resolves once it is confirmed or cancelled'
+			},
+			{ name: 'confirm', type: '(data?: TConfirm) => void', description: 'Confirms and resolves' },
+			{ name: 'cancel', type: '(data?: TCancel) => void', description: 'Cancels and resolves' }
+		],
+		example: `<script lang="ts">
+  import { useConfirmDialog } from '@ariefsn/svelte-use';
+
+  const dialog = useConfirmDialog<string>();
+
+  // The whole flow reads top to bottom
+  async function remove(name: string) {
+    const { isCanceled } = await dialog.reveal(name);
+    if (isCanceled) return;
+    await deleteItem(name);
+  }
+</script>
+
+<button onclick={() => remove('report.pdf')}>Delete</button>
+
+{#if dialog.isRevealed()}
+  <div role="dialog">
+    <p>Delete {dialog.revealData()}?</p>
+    <button onclick={() => dialog.confirm()}>Delete</button>
+    <button onclick={() => dialog.cancel()}>Keep</button>
+  </div>
+{/if}`,
+		notes: [
+			'The return is a **discriminated union**, so `if (isCanceled)` narrows `data` to the type that branch actually carries rather than leaving you to cast.',
+			'**Unmounting while the dialog is open resolves the promise as cancelled.** Without that the caller’s `await reveal()` would hang for the life of the page — a silent deadlock rather than a visible error.',
+			'A second `reveal()` while one is open cancels the first rather than orphaning it, for the same reason.',
+			'`confirm`, `cancel` and `reveal` are **actions you call**, so they carry no `on` prefix; `onReveal`, `onConfirm` and `onCancel` are **callbacks you supply**, so they do. `useNavigationGuard` follows the same split.',
+			'Pure state with no DOM, so it renders on the server. The dialog markup is entirely yours — use a native `<dialog>` if you want focus trapping and Escape handling for free.'
+		]
+	},
+	'use-async-queue': {
+		slug: 'use-async-queue',
+		title: 'useAsyncQueue',
+		description:
+			'Runs a list of async tasks with bounded concurrency, tracking each one. `useAsyncState` covers a single execution; this covers a batch where you need per-task status.',
+		usage: `import { useAsyncQueue } from '@ariefsn/svelte-use';
+
+const queue = useAsyncQueue(
+  files.map((file) => () => upload(file)),
+  { concurrency: 3, abortOnError: false }
+);`,
+		params: [
+			{
+				name: 'tasks',
+				type: 'readonly (() => Promise<T>)[]',
+				description: 'The functions to run, each returning a promise'
+			},
+			{
+				name: 'options',
+				type: 'UseAsyncQueueOptions',
+				default: '{}',
+				description: 'Concurrency and failure behaviour'
+			}
+		],
+		options: [
+			{
+				name: 'concurrency',
+				type: 'number',
+				default: '1',
+				description:
+					'How many tasks may run at once. `1` runs them strictly in series, which is the point when each depends on the one before.'
+			},
+			{
+				name: 'abortOnError',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'Stop the queue when a task rejects, marking the rest `aborted`. Turn it off to run everything and collect failures.'
+			},
+			{
+				name: 'onSuccess',
+				type: '(data: T, index: number) => void',
+				default: 'undefined',
+				description:
+					'Called when a task resolves, with its index in the original array — the hook for updating the row that just finished'
+			},
+			{
+				name: 'onError',
+				type: '(error: Error, index: number) => void',
+				default: 'undefined',
+				description: 'Called when a task rejects, with its index in the original array'
+			},
+			{
+				name: 'onFinished',
+				type: '() => void',
+				default: 'undefined',
+				description:
+					'Called once, after every task has settled. It takes no index because it is not per-task.'
+			}
+		],
+		returns: [
+			{
+				name: 'tasks',
+				type: '() => readonly AsyncQueueTask<T>[]',
+				description: 'Per-task `status`, `data` and `error`, in the order given'
+			},
+			{
+				name: 'isRunning',
+				type: '() => boolean',
+				description: 'Whether anything is still running or pending'
+			},
+			{ name: 'isFinished', type: '() => boolean', description: 'Whether every task has settled' },
+			{
+				name: 'settled',
+				type: '() => number',
+				description: 'How many tasks have settled, for a progress display'
+			},
+			{
+				name: 'abort',
+				type: '() => void',
+				description: 'Marks everything unsettled as aborted and stops starting new work'
+			}
+		],
+		example: `<script lang="ts">
+  import { useAsyncQueue } from '@ariefsn/svelte-use';
+
+  let { files }: { files: File[] } = $props();
+
+  let urls = $state<(string | null)[]>(files.map(() => null));
+
+  const queue = useAsyncQueue(
+    files.map((file) => () => upload(file)),
+    {
+      concurrency: 3,
+      abortOnError: false,
+      // The index is what makes a per-row update possible: tasks finish out
+      // of order, but the index always points at the right file.
+      onSuccess: (url, index) => (urls[index] = url),
+      onError: (error, index) => console.warn(files[index].name, error)
+    }
+  );
+</script>
+
+<progress value={queue.settled()} max={queue.tasks().length}></progress>
+
+<ul>
+  {#each queue.tasks() as task, i (i)}
+    <li>{files[i].name} — {task.status} {urls[i] ?? ''}</li>
+  {/each}
+</ul>
+
+<button onclick={queue.abort} disabled={!queue.isRunning()}>Cancel</button>`,
+		notes: [
+			'**`abort()` cannot stop work already running.** A `Promise` has no cancellation, so it stops *starting* new tasks and marks the unsettled as aborted. Give each task an `AbortSignal` of your own if the work itself must stop.',
+			'Results stay in the order the tasks were given, regardless of the order they finish in — so `tasks()[i]` always lines up with your input array. `onSuccess` and `onError` both carry that same index, which is what lets a per-row UI update as each task lands: with concurrency above 1 they finish out of order, so completion order is not a usable identifier.',
+			'`abortOnError` defaults to `true`, which suits a dependent sequence. For independent work like a batch upload, turn it off so one failure does not discard the rest.',
+			'Tasks start as soon as the composable is created, not on a separate call.',
+			'A non-`Error` rejection is wrapped in one, so `error.message` is always safe to read.'
+		]
+	},
 	// ------------------------------------------------- Web APIs – Device & UI
 	'use-fullscreen': {
 		slug: 'use-fullscreen',

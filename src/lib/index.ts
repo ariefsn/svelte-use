@@ -12,12 +12,35 @@ export { useLastChanged } from './state/useLastChanged.svelte.js';
 export { useTrackHistory } from './state/useTrackHistory.svelte.js';
 export type { HistorySnapshot, UseTrackHistoryReturn } from './state/useTrackHistory.svelte.js';
 export { useHistoryState } from './state/useHistoryState.svelte.js';
+export { useStateMachine } from './state/useStateMachine.svelte.js';
+export type {
+	Transition,
+	StateNode,
+	MachineConfig,
+	StateTransition,
+	UseStateMachineOptions,
+	UseStateMachineReturn
+} from './state/useStateMachine.svelte.js';
+export { useOffsetPagination } from './state/useOffsetPagination.svelte.js';
+export type {
+	PaginationState,
+	UseOffsetPaginationOptions,
+	UseOffsetPaginationReturn
+} from './state/useOffsetPagination.svelte.js';
+export { useConfirmDialog } from './state/useConfirmDialog.svelte.js';
+export type {
+	ConfirmDialogOutcome,
+	UseConfirmDialogOptions,
+	UseConfirmDialogReturn
+} from './state/useConfirmDialog.svelte.js';
 export type { UseHistoryStateReturn } from './state/useHistoryState.svelte.js';
 
 // Reactivity
 export { useDebounce } from './reactivity/useDebounce.svelte.js';
 export { useWatch } from './reactivity/useWatch.svelte.js';
 export { useWhenever } from './reactivity/useWhenever.svelte.js';
+export { useCloned } from './reactivity/useCloned.svelte.js';
+export type { UseClonedOptions, UseClonedReturn } from './reactivity/useCloned.svelte.js';
 export { useAsyncState } from './reactivity/useAsyncState.svelte.js';
 export type {
 	UseAsyncStateOptions,
@@ -131,7 +154,10 @@ export type { UseBatteryReturn } from './browser/useBattery.svelte.js';
 export { useClipboard } from './browser/useClipboard.svelte.js';
 export type { UseClipboardReturn } from './browser/useClipboard.svelte.js';
 export { useSpeechRecognition } from './browser/useSpeechRecognition.svelte.js';
-export type { UseSpeechRecognitionReturn } from './browser/useSpeechRecognition.svelte.js';
+export type {
+	UseSpeechRecognitionOptions,
+	UseSpeechRecognitionReturn
+} from './browser/useSpeechRecognition.svelte.js';
 export { useEyeDropper } from './browser/useEyeDropper.svelte.js';
 export type { UseEyeDropperReturn } from './browser/useEyeDropper.svelte.js';
 export { useFileDialog } from './browser/useFileDialog.svelte.js';
@@ -187,6 +213,8 @@ export { useFps } from './performance/useFps.svelte.js';
 export { useThrottleFn } from './performance/useThrottleFn.svelte.js';
 export { useDebounceFn } from './performance/useDebounceFn.svelte.js';
 export { useIdle } from './performance/useIdle.svelte.js';
+export { useMemoize } from './performance/useMemoize.svelte.js';
+export type { UseMemoizeOptions, UseMemoizeReturn } from './performance/useMemoize.svelte.js';
 export { useWebWorkerFn } from './performance/useWebWorkerFn.svelte.js';
 export type {
 	WebWorkerStatus,
@@ -208,6 +236,13 @@ export type {
 	UseWebSocketOptions,
 	UseWebSocketReturn
 } from './async/useWebSocket.svelte.js';
+export { useAsyncQueue } from './async/useAsyncQueue.svelte.js';
+export type {
+	AsyncQueueTask,
+	AsyncQueueTaskStatus,
+	UseAsyncQueueOptions,
+	UseAsyncQueueReturn
+} from './async/useAsyncQueue.svelte.js';
 export { useEventSource } from './async/useEventSource.svelte.js';
 export type {
 	EventSourceStatus,
@@ -235,6 +270,11 @@ export type { UseTimestampOptions } from './time/useTimestamp.svelte.js';
 
 // Virtual
 export { useVirtualList } from './virtual/useVirtualList.svelte.js';
+export type {
+	VirtualItem,
+	UseVirtualListOptions,
+	UseVirtualListReturn
+} from './virtual/useVirtualList.svelte.js';
 
 // Foundational primitives
 export { useSupported } from './browser/useSupported.svelte.js';
@@ -246,7 +286,7 @@ export type {
 	UseRafFnCallbackArgs
 } from './animation/useRafFn.svelte.js';
 export { useUntil } from './reactivity/useUntil.svelte.js';
-export type { UseUntilOptions, UseUntilChain } from './reactivity/useUntil.svelte.js';
+export type { UseUntilOptions, UseUntilChain, UseUntilItem } from './reactivity/useUntil.svelte.js';
 export { useStorage } from './browser/storage/useStorage.svelte.js';
 export type {
 	UseStorageOptions,
@@ -288,6 +328,7 @@ export type { PreferredReducedMotion } from './browser/sensors/usePreferredReduc
 export { usePreferredContrast } from './browser/sensors/usePreferredContrast.svelte.js';
 export type { PreferredContrast } from './browser/sensors/usePreferredContrast.svelte.js';
 export { useColorMode, colorModeScript } from './browser/document/useColorMode.svelte.js';
+export { DEFAULT_COLOR_MODE_STORAGE_KEY } from './browser/document/colorModeScript.js';
 export type {
 	UseColorModeOptions,
 	UseColorModeReturn,

@@ -69,6 +69,7 @@ bun add @ariefsn/svelte-use
 | `useAsyncState`       | Reactive async/promise state with loading/error      |
 | `useEventSource`      | Server-sent events; the browser handles reconnection |
 | `useBroadcastChannel` | Cross-tab messaging by structured clone              |
+| `useAsyncQueue`       | Run async tasks with bounded concurrency             |
 
 ### Time
 
@@ -84,20 +85,23 @@ bun add @ariefsn/svelte-use
 
 ### State
 
-| Composable          | Description                                   |
-| ------------------- | --------------------------------------------- |
-| `useToggle`         | Reactive boolean toggle                       |
-| `useCounter`        | Reactive counter with inc/dec/reset           |
-| `usePrevious`       | Track previous value of any reactive getter   |
-| `useSorted`         | Reactive sorted copy of an array              |
-| `useCycleList`      | Cycle through a list reactively               |
-| `useCountdown`      | Countdown timer with start/stop/reset         |
-| `useTimeAgo`        | Human-readable relative time string           |
-| `useAutoResetState` | State that auto-resets to default after delay |
-| `useDefaultState`   | State with fallback for null/undefined        |
-| `useLastChanged`    | Timestamp of last reactive value change       |
-| `useTrackHistory`   | Undo/redo history for reactive values         |
-| `useHistoryState`   | State with built-in undo/redo history         |
+| Composable            | Description                                            |
+| --------------------- | ------------------------------------------------------ |
+| `useToggle`           | Reactive boolean toggle                                |
+| `useCounter`          | Reactive counter with inc/dec/reset                    |
+| `usePrevious`         | Track previous value of any reactive getter            |
+| `useSorted`           | Reactive sorted copy of an array                       |
+| `useCycleList`        | Cycle through a list reactively                        |
+| `useCountdown`        | Countdown timer with start/stop/reset                  |
+| `useTimeAgo`          | Human-readable relative time string                    |
+| `useAutoResetState`   | State that auto-resets to default after delay          |
+| `useDefaultState`     | State with fallback for null/undefined                 |
+| `useLastChanged`      | Timestamp of last reactive value change                |
+| `useTrackHistory`     | Undo/redo history for reactive values                  |
+| `useHistoryState`     | State with built-in undo/redo history                  |
+| `useStateMachine`     | Typed finite state machine, inferred from the config   |
+| `useOffsetPagination` | Pagination state that self-corrects when totals shrink |
+| `useConfirmDialog`    | Confirmation flow as a single `await`                  |
 
 ### Reactivity
 
@@ -107,6 +111,7 @@ bun add @ariefsn/svelte-use
 | `useWatch`    | Watch reactive values with current/previous args |
 | `useWhenever` | Watch that fires only when value becomes truthy  |
 | `useUntil`    | Await a reactive value reaching a condition      |
+| `useCloned`   | Deep copy of a reactive value, for edit buffers  |
 
 ### Browser – Keyboard & Scroll
 
@@ -187,12 +192,13 @@ bun add @ariefsn/svelte-use
 
 ### Performance
 
-| Composable       | Description                                       |
-| ---------------- | ------------------------------------------------- |
-| `useFps`         | Reactive frames-per-second counter                |
-| `useThrottleFn`  | Throttle any function                             |
-| `useDebounceFn`  | Debounce any function                             |
-| `useWebWorkerFn` | Run a self-contained function off the main thread |
+| Composable       | Description                                           |
+| ---------------- | ----------------------------------------------------- |
+| `useFps`         | Reactive frames-per-second counter                    |
+| `useThrottleFn`  | Throttle any function                                 |
+| `useDebounceFn`  | Debounce any function                                 |
+| `useWebWorkerFn` | Run a self-contained function off the main thread     |
+| `useMemoize`     | Cache a function's results by its arguments, with LRU |
 
 ### Virtualization
 

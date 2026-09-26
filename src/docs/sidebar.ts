@@ -60,7 +60,8 @@ const groups: SidebarGroup[] = [
 			{ label: 'useWebSocket', slug: 'use-web-socket', since: '1.0.0' },
 			{ label: 'useAsyncState', slug: 'use-async-state', since: '1.1.0' },
 			{ label: 'useEventSource', slug: 'use-event-source', since: '1.2.0' },
-			{ label: 'useBroadcastChannel', slug: 'use-broadcast-channel', since: '1.2.0' }
+			{ label: 'useBroadcastChannel', slug: 'use-broadcast-channel', since: '1.2.0' },
+			{ label: 'useAsyncQueue', slug: 'use-async-queue', since: '1.2.0' }
 		]
 	},
 	{
@@ -89,7 +90,10 @@ const groups: SidebarGroup[] = [
 			{ label: 'useDefaultState', slug: 'use-default-state', since: '1.1.0' },
 			{ label: 'useLastChanged', slug: 'use-last-changed', since: '1.1.0' },
 			{ label: 'useTrackHistory', slug: 'use-track-history', since: '1.1.0' },
-			{ label: 'useHistoryState', slug: 'use-history-state', since: '1.1.0' }
+			{ label: 'useHistoryState', slug: 'use-history-state', since: '1.1.0' },
+			{ label: 'useStateMachine', slug: 'use-state-machine', since: '1.2.0' },
+			{ label: 'useOffsetPagination', slug: 'use-offset-pagination', since: '1.2.0' },
+			{ label: 'useConfirmDialog', slug: 'use-confirm-dialog', since: '1.2.0' }
 		]
 	},
 	{
@@ -98,7 +102,8 @@ const groups: SidebarGroup[] = [
 			{ label: 'useDebounce', slug: 'use-debounce', since: '1.0.0' },
 			{ label: 'useWatch', slug: 'use-watch', since: '1.1.0' },
 			{ label: 'useWhenever', slug: 'use-whenever', since: '1.1.0' },
-			{ label: 'useUntil', slug: 'use-until', since: '1.2.0' }
+			{ label: 'useUntil', slug: 'use-until', since: '1.2.0' },
+			{ label: 'useCloned', slug: 'use-cloned', since: '1.2.0' }
 		]
 	},
 	{
@@ -223,7 +228,8 @@ const groups: SidebarGroup[] = [
 			{ label: 'useFps', slug: 'use-fps', since: '1.0.0' },
 			{ label: 'useThrottleFn', slug: 'use-throttle-fn', since: '1.0.0' },
 			{ label: 'useDebounceFn', slug: 'use-debounce-fn', since: '1.0.0' },
-			{ label: 'useWebWorkerFn', slug: 'use-web-worker-fn', since: '1.2.0' }
+			{ label: 'useWebWorkerFn', slug: 'use-web-worker-fn', since: '1.2.0' },
+			{ label: 'useMemoize', slug: 'use-memoize', since: '1.2.0' }
 		]
 	},
 	{

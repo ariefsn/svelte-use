@@ -18,6 +18,12 @@
 	import DemoUseTitle from './demos/use-title.svelte';
 	import DemoUseUrlSearchParams from './demos/use-url-search-params.svelte';
 	import DemoUseUserMedia from './demos/use-user-media.svelte';
+	import DemoUseStateMachine from './demos/use-state-machine.svelte';
+	import DemoUseCloned from './demos/use-cloned.svelte';
+	import DemoUseMemoize from './demos/use-memoize.svelte';
+	import DemoUseOffsetPagination from './demos/use-offset-pagination.svelte';
+	import DemoUseConfirmDialog from './demos/use-confirm-dialog.svelte';
+	import DemoUseAsyncQueue from './demos/use-async-queue.svelte';
 	import DemoUseFullscreen from './demos/use-fullscreen.svelte';
 	import DemoUseScreenOrientation from './demos/use-screen-orientation.svelte';
 	import DemoUseGamepad from './demos/use-gamepad.svelte';
@@ -140,6 +146,12 @@
 		'use-title': DemoUseTitle,
 		'use-url-search-params': DemoUseUrlSearchParams,
 		'use-user-media': DemoUseUserMedia,
+		'use-state-machine': DemoUseStateMachine,
+		'use-cloned': DemoUseCloned,
+		'use-memoize': DemoUseMemoize,
+		'use-offset-pagination': DemoUseOffsetPagination,
+		'use-confirm-dialog': DemoUseConfirmDialog,
+		'use-async-queue': DemoUseAsyncQueue,
 		'use-fullscreen': DemoUseFullscreen,
 		'use-screen-orientation': DemoUseScreenOrientation,
 		'use-gamepad': DemoUseGamepad,
