@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { page as appPage } from '$app/stores';
 	import { resolve } from '$app/paths';
 	import { findItem, isNew, sidebar } from '../../../docs/sidebar.js';
-	import { formatInline, stripInline } from '../../../docs/format.js';
+	import { formatInline } from '../../../docs/format.js';
 	import type { Component } from 'svelte';
 	import type { PageData } from './$types.js';
 	// ── Demo components ──────────────────────────────────────────────────────
@@ -18,6 +17,8 @@
 	import DemoUseTitle from './demos/use-title.svelte';
 	import DemoUseUrlSearchParams from './demos/use-url-search-params.svelte';
 	import DemoUseUserMedia from './demos/use-user-media.svelte';
+	import DemoUseSeo from './demos/use-seo.svelte';
+	import DemoSeo from './demos/seo.svelte';
 	import DemoUseStateMachine from './demos/use-state-machine.svelte';
 	import DemoUseCloned from './demos/use-cloned.svelte';
 	import DemoUseMemoize from './demos/use-memoize.svelte';
@@ -146,6 +147,8 @@
 		'use-title': DemoUseTitle,
 		'use-url-search-params': DemoUseUrlSearchParams,
 		'use-user-media': DemoUseUserMedia,
+		'use-seo': DemoUseSeo,
+		seo: DemoSeo,
 		'use-state-machine': DemoUseStateMachine,
 		'use-cloned': DemoUseCloned,
 		'use-memoize': DemoUseMemoize,
@@ -279,7 +282,6 @@
 
 	// Meta tags take the marker-free form — markup would leak into search
 	// results and link previews.
-	const metaDescription = $derived(stripInline(page.description));
 
 	// ── Shared class strings ──────────────────────────────────────────────────
 	// Repeated across several sections; named here rather than pasted inline so
@@ -299,21 +301,6 @@
 	const navKicker = 'text-text-faint text-[0.7rem] tracking-wider uppercase';
 	const navName = 'text-text truncate font-mono text-[0.9rem]';
 </script>
-
-<svelte:head>
-	<title>{page.title} — Svelte Use</title>
-	<meta name="description" content={metaDescription} />
-	<meta property="og:title" content="{page.title} — Svelte Use" />
-	<meta property="og:description" content={metaDescription} />
-	<meta property="og:type" content="article" />
-	<meta property="og:url" content={$appPage.url.href} />
-	<meta property="og:image" content="{$appPage.url.origin}/logo.svg" />
-	<meta property="og:site_name" content="Svelte Use" />
-	<meta name="twitter:card" content="summary" />
-	<meta name="twitter:title" content="{page.title} — Svelte Use" />
-	<meta name="twitter:description" content={metaDescription} />
-	<meta name="twitter:image" content="{$appPage.url.origin}/logo.svg" />
-</svelte:head>
 
 <article class="max-w-[780px]">
 	<!-- ─── Title ─── -->
@@ -361,6 +348,42 @@
 		<h2 class={sectionHeading}>Usage</h2>
 		<pre class={codeBlock}><code class={codeText}>{page.usage}</code></pre>
 	</section>
+
+	<!-- ─── API: Props (component pages) ─── -->
+	{#if page.props && page.props.length > 0}
+		<section class="mb-10">
+			<h2 class={sectionHeading}>Props</h2>
+			<div class="overflow-x-auto">
+				<table class="w-full border-collapse text-[0.85rem]">
+					<thead>
+						<tr>
+							<th class={tableHead}>Prop</th>
+							<th class={tableHead}>Type</th>
+							<th class={tableHead}>Default</th>
+							<th class={tableHead}>Description</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each page.props as row (row.name)}
+							<tr>
+								<td class={tableCell}><code class="inline-code">{row.name}</code></td>
+								<td class={tableCell}><code class="inline-code type">{row.type}</code></td>
+								<td class={tableCell}>
+									{#if row.default}
+										<code class="inline-code muted">{row.default}</code>
+									{:else}
+										<span class="text-text-faint">—</span>
+									{/if}
+								</td>
+								<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
+								<td class="{tableCell} {descCell}">{@html formatInline(row.description)}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		</section>
+	{/if}
 
 	<!-- ─── API: Parameters ─── -->
 	{#if page.params && page.params.length > 0}

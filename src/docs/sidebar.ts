@@ -223,6 +223,13 @@ const groups: SidebarGroup[] = [
 		]
 	},
 	{
+		title: 'Head & SEO',
+		items: [
+			{ label: 'useSeo', slug: 'use-seo', since: '1.2.0' },
+			{ label: 'Seo', slug: 'seo', since: '1.2.0' }
+		]
+	},
+	{
 		title: 'Performance',
 		items: [
 			{ label: 'useFps', slug: 'use-fps', since: '1.0.0' },

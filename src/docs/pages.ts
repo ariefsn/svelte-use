@@ -10,6 +10,13 @@ export interface DocPage {
 	title: string;
 	description: string;
 	usage: string;
+	/**
+	 * Component props, rendered as a "Props" table.
+	 *
+	 * Only a component page has these — a component has no params, options or
+	 * returns — so this is purely additive and no existing entry changes.
+	 */
+	props?: ApiRow[];
 	params?: ApiRow[];
 	options?: ApiRow[];
 	returns?: ApiRow[];
@@ -459,6 +466,137 @@ params.get('page'); // → '2'`,
 			'There is deliberately **no effect that reads the parameters.** An effect writing the URL from them would loop in the hash modes — changing the hash fires `hashchange`, the listener reparses, the effect re-runs. Writes are imperative, reads are event-driven, and an internal record of the last written string lets the listener recognise its own echo.',
 			'With `debounce` set, a write still pending when the scope is destroyed is dropped. In practice the scope is being destroyed during navigation and the URL is about to change anyway.',
 			'`useBrowserLocation` does not observe `pushState`/`replaceState`, because neither fires an event — so a sibling `useBrowserLocation` goes stale after a write here.'
+		]
+	},
+	// ------------------------------------------------------------ Head & SEO
+	'use-seo': {
+		slug: 'use-seo',
+		title: 'useSeo',
+		description:
+			'Builds SEO metadata from layered defaults and overrides. A **builder, not a mutator** — it returns tags for you to render inside `<svelte:head>`, so they land in the server-rendered HTML where crawlers can see them.',
+		usage: `import { useSeo } from '@ariefsn/svelte-use';
+
+const seo = useSeo(
+  { titleTemplate: '%s — Acme', og: { siteName: 'Acme' } },
+  () => page.data.seo
+);
+
+seo.title(); // → 'Docs — Acme'
+seo.tags();  // → readonly SeoTag[]`,
+		params: [
+			{
+				name: '...layers',
+				type: 'readonly SeoLayer[]',
+				description:
+					'Ordered layers, later ones overriding earlier. Each may be a `SeoData` object or a getter returning one.'
+			}
+		],
+		returns: [
+			{
+				name: 'data',
+				type: '() => SeoData',
+				description: 'The merged data, for passing to `<Seo />`'
+			},
+			{
+				name: 'title',
+				type: '() => string | undefined',
+				description: 'The resolved title with `titleTemplate` applied'
+			},
+			{
+				name: 'tags',
+				type: '() => readonly SeoTag[]',
+				description: 'The tags to render, each with a stable `key`'
+			}
+		],
+		example: `<!-- src/routes/+layout.svelte — the single render site -->
+<script lang="ts">
+  import { Seo, useSeo, type SeoData } from '@ariefsn/svelte-use';
+  import { page } from '$app/state';
+
+  const defaults: SeoData = {
+    titleTemplate: '%s — Acme',
+    baseUrl: 'https://acme.test',
+    og: { siteName: 'Acme', image: '/og.png', type: 'website' },
+    twitter: { card: 'summary' }
+  };
+
+  const seo = useSeo(
+    defaults,
+    () => page.data.seo,
+    () => ({ canonical: page.url.pathname })
+  );
+</script>
+
+<Seo data={seo.data()} />
+
+<!-- src/routes/docs/[slug]/+page.server.ts — the override -->
+<!--
+export const load = ({ params }) => ({
+  seo: { title: doc.title, description: doc.summary, og: { type: 'article' } }
+    satisfies SeoData
+});
+-->`,
+		notes: [
+			'**Builder, not mutator.** Writing tags into `document.head` from an `$effect` only ever runs client-side, and crawlers and link unfurlers (Slack, Discord, WhatsApp, iMessage) mostly do not execute JavaScript — so those tags would be invisible to exactly the consumers they exist for.',
+			"Layers merge **per key**, recursing one level into `og` and `twitter`. A plain spread would be wrong: a page setting only `og.type` would wipe the layout's `og.siteName` and `og.image`, quietly producing a worse link preview than the defaults alone.",
+			"**`SeoData` must be plain, serialisable data.** An override usually arrives through `page.data.seo` from a server `load`, which crosses devalue serialisation — a function would not survive. That is why `titleTemplate` is a string with `%s` rather than a callback, unlike `useTitle`'s `template`.",
+			'**Set `baseUrl`.** During prerendering SvelteKit reports `page.url.origin` as `http://sveltekit-prerender`, so anything derived from the request leaks that placeholder into the shipped HTML. Open Graph images in particular must be absolute or unfurlers ignore them.',
+			'`titleTemplate` is skipped when there is no `title`, so a layout default never produces a stray `" — Acme"` on a page that sets none.',
+			'There is **no `$effect`** here, so it can be called from a module scope or a `.svelte.ts` file as well as a component.',
+			'Augment `App.PageData` with `seo?: SeoData` in `src/app.d.ts`, or `page.data.seo` is `any` exactly where the typing matters.',
+			'**`og.image` must be a raster format.** Facebook, X, LinkedIn and WhatsApp do not render SVG previews — an `.svg` here means the card silently appears with no image. Use PNG, JPEG or WebP, and keep it under ~1MB (WhatsApp is stricter still, around 300KB).',
+			'**Set `og.imageWidth` and `og.imageHeight`** (usually 1200×630). Without them Facebook and LinkedIn must fetch and measure the image before they can lay the card out, so the *first* share of a URL often previews with no image at all.',
+			"`article:*` tags are emitted **only** when `og.type` is `'article'`, since nothing reads them otherwise. `article.section` is the Open Graph equivalent of a category — there is no `og:category` — and `article.tags` is emitted as one repeated `article:tag` per entry, which is what the spec expects rather than a joined list.",
+			'**`keywords` is near-useless for search.** Google has ignored the keywords meta tag since 2009 and Bing treats it as a spam signal at best. It is supported because it costs nothing, not because it helps — reach for `article.tags` if you want tags a platform actually reads.',
+			'Every major unfurler — Facebook, Messenger, WhatsApp, LinkedIn, Telegram, Slack, Discord — reads Open Graph, so `og.title`, `og.description`, `og.image` and `og.url` are what actually drive a link preview. Twitter/X reads `twitter:*` and falls back to Open Graph, which is why the Twitter values default from the `og` ones here.',
+			'Use this for metadata that must be in the HTML; use `useTitle` for a title that changes in response to app state, like an unread count.'
+		]
+	},
+	seo: {
+		slug: 'seo',
+		title: 'Seo',
+		description:
+			"A component that renders `useSeo`'s output into `<svelte:head>`. Render it **once**, in your root layout — Svelte does not deduplicate meta tags, so a second instance emits duplicates and crawlers take the first.",
+		usage: `<script lang="ts">
+  import { Seo, useSeo } from '@ariefsn/svelte-use';
+  import { page } from '$app/state';
+
+  const seo = useSeo(defaults, () => page.data.seo);
+</script>
+
+<Seo data={seo.data()} />`,
+		props: [
+			{
+				name: 'data',
+				type: 'SeoData',
+				description:
+					'The merged metadata to render. One typed prop rather than a dozen individual ones, so adding to the SEO shape is not a component API change.'
+			}
+		],
+		example: `<!-- src/routes/+layout.svelte -->
+<script lang="ts">
+  import { Seo, useSeo, type SeoData } from '@ariefsn/svelte-use';
+  import { page } from '$app/state';
+
+  const defaults: SeoData = {
+    titleTemplate: '%s — Acme',
+    baseUrl: 'https://acme.test',
+    og: { siteName: 'Acme', image: '/og.png' }
+  };
+
+  const seo = useSeo(defaults, () => page.data.seo);
+</script>
+
+<Seo data={seo.data()} />
+
+{@render children()}`,
+		notes: [
+			'**Render it once.** Svelte concatenates `<svelte:head>` blocks from every component and does **not** deduplicate meta tags. A second `<Seo />` on a page emits two `<meta name="description">`, and crawlers take the *first* — the layout default — which is the exact opposite of overriding. Merge the data with `useSeo`, then render here.',
+			'Remove any static title from `app.html` too. It would come first in the document, and the first title is the one browsers and crawlers use, so every templated page title would be silently ignored.',
+			"The `<title>` it renders is a real element whose text is reactive after hydration, so it updates on client-side navigation without anyone assigning `document.title`. `useTitle` writes `document.title`, which mutates that same element's text — last write wins, and this re-asserts whenever its data changes.",
+			'With no title anywhere, no `<title>` element is rendered at all, so whatever title already exists survives rather than being blanked.',
+			'It takes **one `data` prop**, not a dozen individual ones: the shape lives in the `SeoData` type, so extending it is not a component API change.',
+			"This is the only Svelte component this library ships; everything else is a composable. Import it from the package root — `import { Seo } from '@ariefsn/svelte-use'`."
 		]
 	},
 	// ------------------------------------------------------ Utilities & state

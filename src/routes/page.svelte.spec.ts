@@ -1,22 +1,9 @@
 import { page } from 'vitest/browser';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import { readable } from 'svelte/store';
 
-// `+page.svelte` reads `$page.url` in <svelte:head>. Outside SvelteKit the
-// store is unpopulated, so it has to be stubbed or rendering throws.
-vi.mock('$app/stores', () => ({
-	page: readable({
-		url: new URL('http://localhost/'),
-		params: {},
-		data: {},
-		route: { id: '/' },
-		status: 200,
-		error: null,
-		form: undefined,
-		state: {}
-	})
-}));
+// No `$app/stores` mock is needed any more: the homepage's metadata moved
+// into `+page.ts`, so the component no longer reads the page store at all.
 
 import Page from './+page.svelte';
 

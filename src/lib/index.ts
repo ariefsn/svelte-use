@@ -384,3 +384,9 @@ export type {
 	UseDisplayMediaOptions,
 	UseDisplayMediaReturn
 } from './browser/media/useDisplayMedia.svelte.js';
+
+// Head & SEO
+export { useSeo } from './seo/useSeo.svelte.js';
+export type { SeoLayer, UseSeoReturn } from './seo/useSeo.svelte.js';
+export { default as Seo } from './seo/Seo.svelte';
+export type { SeoData, SeoTag, SeoOpenGraph, SeoTwitter } from './seo/types.js';

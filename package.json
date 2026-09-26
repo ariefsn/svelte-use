@@ -34,6 +34,11 @@
 			"types": "./dist/index.d.ts",
 			"svelte": "./dist/index.js"
 		},
+		"./Seo.svelte": {
+			"types": "./dist/seo/Seo.svelte.d.ts",
+			"svelte": "./dist/seo/Seo.svelte",
+			"default": "./dist/seo/Seo.svelte"
+		},
 		"./*": {
 			"types": "./dist/*.d.ts",
 			"svelte": "./dist/*.js",

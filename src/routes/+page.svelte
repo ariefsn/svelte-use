@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { resolve } from '$app/paths';
 	import { sidebar } from '../docs/sidebar.js';
 
@@ -51,30 +50,6 @@
 	const codeText =
 		"text-accent font-['Fira_Code','Cascadia_Code',monospace] text-[0.82rem] whitespace-pre";
 </script>
-
-<svelte:head>
-	<title>Svelte Use — Svelte 5 Utility Composables</title>
-	<meta
-		name="description"
-		content="A collection of {totalComposables}+ Svelte 5 runes-first utility composables. No stores, no external dependencies, SSR-safe, fully typed."
-	/>
-	<meta property="og:title" content="Svelte Use — Svelte 5 Utility Composables" />
-	<meta
-		property="og:description"
-		content="A collection of {totalComposables}+ Svelte 5 runes-first utility composables. No stores, no external dependencies, SSR-safe, fully typed."
-	/>
-	<meta property="og:type" content="website" />
-	<meta property="og:url" content={$page.url.href} />
-	<meta property="og:image" content="{$page.url.origin}/logo.svg" />
-	<meta property="og:site_name" content="Svelte Use" />
-	<meta name="twitter:card" content="summary" />
-	<meta name="twitter:title" content="Svelte Use — Svelte 5 Utility Composables" />
-	<meta
-		name="twitter:description"
-		content="A collection of {totalComposables}+ Svelte 5 runes-first utility composables. No stores, no external dependencies, SSR-safe, fully typed."
-	/>
-	<meta name="twitter:image" content="{$page.url.origin}/logo.svg" />
-</svelte:head>
 
 <div class="max-w-[900px]">
 	<!-- ─── Hero ─── -->

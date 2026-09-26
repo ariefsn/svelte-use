@@ -13,7 +13,12 @@ const config = {
 			fallback: null
 		}),
 		prerender: {
-			handleMissingId: 'warn'
+			handleMissingId: 'warn',
+			// Without this, `page.url.origin` is `http://sveltekit-prerender`
+			// during the build, and anything derived from it ships that
+			// placeholder — which is how every og:url and og:image on the live
+			// site ended up pointing at a hostname that does not exist.
+			origin: 'https://svelte-use.ariefsn.dev'
 		}
 	}
 };

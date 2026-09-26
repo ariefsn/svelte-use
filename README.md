@@ -257,6 +257,13 @@ bun add @ariefsn/svelte-use
 | `useDisplayMedia` | Screen capture that notices the browser's "Stop sharing"           |
 | `useDevicesList`  | Media devices grouped by kind, refreshed on `devicechange`         |
 
+### Head & SEO
+
+| Composable | Description                                                      |
+| ---------- | ---------------------------------------------------------------- |
+| `useSeo`   | Layered SEO metadata as a builder, rendered into `<svelte:head>` |
+| `Seo`      | Component that renders `useSeo` output — the only component here |
+
 ### Browser – Navigation
 
 | Composable           | Description                                                   |

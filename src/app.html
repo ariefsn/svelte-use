@@ -4,7 +4,17 @@
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/logo.svg" type="image/svg+xml" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Svelte Use</title>
+		<!--
+			The page title is deliberately not set here. The Seo component
+			renders it into the SvelteKit head placeholder below, and a static
+			one above would come first in the document — which is the one
+			browsers and crawlers use, so every templated page title would be
+			silently ignored.
+
+			Written without the literal placeholder or tag names: prepaint.test.ts
+			and coverage.test.ts locate both by searching this file as text, and a
+			mention in a comment would match ahead of the real thing.
+		-->
 		<!--
 			Applies the stored colour mode before first paint.
 

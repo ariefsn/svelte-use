@@ -125,7 +125,13 @@ describe('docs coverage', () => {
 		// `+page.svelte` imports each demo and maps it by slug. A missing entry
 		// renders the page with no Live Demo section and is caught only by a
 		// full `bun run build`, which is the slowest gate we have.
-		const missing = allSlugs.filter((slug) => !PAGE_SVELTE.includes(`'${slug}':`));
+		//
+		// Both quotings are accepted because prettier drops the quotes from a
+		// key that is a valid identifier: `'use-seo':` keeps them, `seo:` does
+		// not.
+		const missing = allSlugs.filter(
+			(slug) => !PAGE_SVELTE.includes(`'${slug}':`) && !PAGE_SVELTE.includes(`\n\t\t${slug}:`)
+		);
 		expect(missing).toEqual([]);
 	});
 

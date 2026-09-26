@@ -1,11 +1,48 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { useColorMode } from '$lib';
+	import { Seo, useColorMode, useSeo, type SeoData } from '$lib';
 	import { NEW_IN_VERSION, groupHasNew, isNew, sidebar } from '../docs/sidebar.js';
 	import '../app.css';
 
 	let { children } = $props();
+
+	/*
+	 * Site-wide SEO defaults. `baseUrl` is not optional here: during
+	 * prerendering `page.url.origin` is `http://sveltekit-prerender`, so
+	 * deriving absolute URLs from the request would ship that placeholder.
+	 *
+	 * Deliberately not module-scoped — module-level mutable state is shared
+	 * across concurrent requests on the server, so one visitor's metadata
+	 * could leak into another's response.
+	 */
+	const seoDefaults: SeoData = {
+		titleTemplate: '%s — Svelte Use',
+		baseUrl: 'https://svelte-use.ariefsn.dev',
+		description:
+			'Svelte 5 runes-first utility composables. No stores, no external dependencies, SSR-safe and fully typed.',
+		og: {
+			siteName: 'Svelte Use',
+			image: '/logo.svg',
+			imageWidth: 1200,
+			imageHeight: 630,
+			imageType: 'image/svg+xml',
+			type: 'website'
+		},
+		twitter: { card: 'summary' }
+	};
+
+	/*
+	 * The single render site for metadata. Svelte concatenates <svelte:head>
+	 * blocks and does not deduplicate meta tags, so a second <Seo /> on a page
+	 * would emit two descriptions and crawlers would take the first — the
+	 * layout default. Merge here, render once.
+	 */
+	const seo = useSeo(
+		seoDefaults,
+		() => page.data.seo,
+		() => ({ canonical: page.url.pathname })
+	);
 
 	/*
 	 * Drives the `class` on <html>, which is what the token overrides in
@@ -34,7 +71,7 @@
 
 	// Auto-open group containing the active slug
 	$effect(() => {
-		const slug = $page.params.slug;
+		const slug = page.params.slug;
 		if (slug) {
 			for (const group of sidebar) {
 				if (group.items.some((i) => i.slug === slug)) {
@@ -48,7 +85,7 @@
 	$effect(() => {
 		// Read the pathname so this effect re-runs on navigation. Assigned
 		// rather than left as a bare expression so the intent is explicit.
-		const _pathname = $page.url.pathname;
+		const _pathname = page.url.pathname;
 		mobileMenuOpen = false;
 	});
 
@@ -65,6 +102,8 @@
 	const navItemIdle = 'text-text-muted hover:bg-surface hover:text-text';
 	const navItemActive = 'bg-accent-bg text-accent';
 </script>
+
+<Seo data={seo.data()} />
 
 <div class="flex min-h-screen">
 	<!-- Mobile top bar -->
@@ -139,7 +178,7 @@
 		<div class="px-3 pb-2">
 			<a
 				href={resolve('/')}
-				class="block rounded-md px-[0.6rem] py-[0.35rem] text-[0.85rem] no-underline transition-colors {$page
+				class="block rounded-md px-[0.6rem] py-[0.35rem] text-[0.85rem] no-underline transition-colors {page
 					.url.pathname === '/'
 					? 'bg-accent-bg text-accent'
 					: 'text-text-muted hover:bg-surface hover:text-text'}">Home</a
@@ -217,7 +256,7 @@
 					{#each filteredItems as item (item.slug)}
 						<a
 							href={resolve('/docs/[slug]', { slug: item.slug })}
-							class="{navItemBase} justify-between {$page.params.slug === item.slug
+							class="{navItemBase} justify-between {page.params.slug === item.slug
 								? navItemActive
 								: navItemIdle}"
 							onclick={() => (searchQuery = '')}
@@ -297,7 +336,7 @@
 								<li>
 									<a
 										href={resolve('/docs/[slug]', { slug: item.slug })}
-										class="{navItemBase} {$page.params.slug === item.slug
+										class="{navItemBase} {page.params.slug === item.slug
 											? navItemActive
 											: navItemIdle}"
 									>
