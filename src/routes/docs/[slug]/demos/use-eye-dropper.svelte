@@ -11,7 +11,8 @@
 		</div>
 		{#if current()}
 			<div
-				style="width:60px;height:60px;border-radius:8px;background:{current()};border:1px solid #333"
+				class="border-border-strong h-[60px] w-[60px] rounded-lg border"
+				style="background:{current()}"
 			></div>
 		{/if}
 		<div class="actions">

@@ -12,7 +12,7 @@
 		<span class="label">selection rects</span>
 		<span class="value accent">{rects().length}</span>
 	</div>
-	<p style="color:#888;line-height:1.6">
+	<p class="text-text-muted leading-relaxed">
 		Select some of this text to see the selection tracked in real-time. Try selecting across
 		multiple lines to see multiple rects.
 	</p>

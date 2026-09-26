@@ -19,7 +19,7 @@
 	</div>
 	<div
 		bind:this={el}
-		style="height:120px;background:#111;border:1px solid #333;border-radius:8px;display:flex;align-items:center;justify-content:center;touch-action:none;color:#888"
+		class="bg-bg border-border-strong text-text-muted flex h-[120px] touch-none items-center justify-center rounded-lg border"
 	>
 		Swipe here (touch)
 	</div>

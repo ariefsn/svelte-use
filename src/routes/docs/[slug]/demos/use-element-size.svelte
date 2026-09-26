@@ -8,32 +8,12 @@
 <div class="demo-wrap">
 	<p class="hint">Resize the box using the handle at the bottom-right corner.</p>
 
-	<div class="resize-box" bind:this={box}>
-		<span class="size-label">{size.width()} × {size.height()}</span>
+	<div
+		class="bg-accent-bg border-accent/40 flex h-[120px] max-w-full min-h-[60px] min-w-[80px] w-[240px] resize items-center justify-center overflow-auto rounded-lg border"
+		bind:this={box}
+	>
+		<span class="text-accent pointer-events-none font-mono text-[1.1rem] font-semibold"
+			>{size.width()} × {size.height()}</span
+		>
 	</div>
 </div>
-
-<style>
-	.resize-box {
-		width: 240px;
-		height: 120px;
-		min-width: 80px;
-		min-height: 60px;
-		max-width: 100%;
-		resize: both;
-		overflow: auto;
-		background: #1a1630;
-		border: 1px solid #a78bfa55;
-		border-radius: 8px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-	.size-label {
-		font-family: monospace;
-		font-size: 1.1rem;
-		font-weight: 600;
-		color: #a78bfa;
-		pointer-events: none;
-	}
-</style>

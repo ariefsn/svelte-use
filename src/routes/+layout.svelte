@@ -1,9 +1,22 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { resolve } from '$app/paths';
+	import { useColorMode } from '$lib';
 	import { NEW_IN_VERSION, groupHasNew, isNew, sidebar } from '../docs/sidebar.js';
+	import '../app.css';
 
 	let { children } = $props();
+
+	/*
+	 * Drives the `class` on <html>, which is what the token overrides in
+	 * app.css key off. `initialValue: 'dark'` is a hard default: a first-time
+	 * visitor on a light-mode OS still sees the site as it has always looked.
+	 *
+	 * The matching pre-paint script lives in app.html — this runs after
+	 * hydration, so it cannot prevent the first-paint flash on its own.
+	 */
+	const theme = useColorMode({ initialValue: 'dark' });
+	const themeOptions = ['auto', 'light', 'dark'] as const;
 
 	let openGroups = $state<Record<string, boolean>>({});
 	let mobileMenuOpen = $state(false);
@@ -46,58 +59,116 @@
 	function toggleMobileMenu() {
 		mobileMenuOpen = !mobileMenuOpen;
 	}
+
+	const navItemBase =
+		'flex items-center gap-1.5 rounded-[5px] py-[0.3rem] pr-[0.6rem] pl-4 font-mono text-[0.85rem] no-underline transition-colors';
+	const navItemIdle = 'text-text-muted hover:bg-surface hover:text-text';
+	const navItemActive = 'bg-accent-bg text-accent';
 </script>
 
-<div class="layout">
+<div class="flex min-h-screen">
 	<!-- Mobile top bar -->
-	<div class="mobile-topbar">
-		<a href={resolve('/')} class="logo">
-			<img src="/logo.svg" alt="svelte-use logo" class="logo-img" width="28" height="28" />
-			<span class="logo-text">Svelte Use</span>
+	<div
+		class="bg-bg-sunken border-border fixed top-0 right-0 left-0 z-100 flex items-center justify-between border-b px-4 py-3 md:hidden"
+	>
+		<a href={resolve('/')} class="flex items-center gap-2 no-underline">
+			<img src="/logo.svg" alt="svelte-use logo" class="h-7 w-7 shrink-0" width="28" height="28" />
+			<span class="text-accent font-mono text-[0.95rem] font-bold tracking-tight">Svelte Use</span>
 		</a>
-		<button
-			class="hamburger"
-			onclick={toggleMobileMenu}
-			aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-			aria-expanded={mobileMenuOpen}
-		>
-			{#if mobileMenuOpen}
-				<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-					<path
-						d="M4 4L16 16M16 4L4 16"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-					/>
-				</svg>
-			{:else}
-				<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-					<path
-						d="M3 5h14M3 10h14M3 15h14"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-					/>
-				</svg>
-			{/if}
-		</button>
+
+		<div class="flex items-center gap-1">
+			<div class="border-border flex items-center gap-0.5 rounded-md border p-0.5">
+				{#each themeOptions as option (option)}
+					<button
+						class="cursor-pointer rounded px-1.5 py-0.5 text-[0.65rem] transition-colors {theme.mode() ===
+						option
+							? 'bg-accent-bg text-accent'
+							: 'text-text-faint hover:text-text'}"
+						onclick={() => theme.set(option)}
+						aria-pressed={theme.mode() === option}
+					>
+						{option}
+					</button>
+				{/each}
+			</div>
+
+			<button
+				class="text-text-muted hover:bg-surface hover:text-text flex cursor-pointer items-center justify-center rounded-md p-1 transition-colors"
+				onclick={toggleMobileMenu}
+				aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+				aria-expanded={mobileMenuOpen}
+			>
+				{#if mobileMenuOpen}
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+						<path
+							d="M4 4L16 16M16 4L4 16"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+						/>
+					</svg>
+				{:else}
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+						<path
+							d="M3 5h14M3 10h14M3 15h14"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+						/>
+					</svg>
+				{/if}
+			</button>
+		</div>
 	</div>
 
 	<!-- Sidebar / mobile drawer -->
-	<nav class="sidebar" class:mobile-open={mobileMenuOpen} aria-label="Documentation navigation">
-		<a href={resolve('/')} class="logo desktop-logo">
-			<img src="/logo.svg" alt="svelte-use logo" class="logo-img" width="28" height="28" />
-			<span class="logo-text">Svelte Use</span>
+	<nav
+		class="bg-bg-sunken border-border sticky top-0 z-200 flex h-screen w-[240px] shrink-0 flex-col overflow-y-auto border-r py-5 max-md:fixed max-md:w-[260px] max-md:transition-[left] max-md:duration-250 {mobileMenuOpen
+			? 'max-md:left-0 max-md:shadow-[4px_0_24px_var(--color-overlay)]'
+			: 'max-md:-left-[260px]'}"
+		aria-label="Documentation navigation"
+	>
+		<a
+			href={resolve('/')}
+			class="border-border mb-3 flex items-center gap-2 border-b px-5 pb-5 no-underline max-md:hidden"
+		>
+			<img src="/logo.svg" alt="svelte-use logo" class="h-7 w-7 shrink-0" width="28" height="28" />
+			<span class="text-accent font-mono text-[0.95rem] font-bold tracking-tight">Svelte Use</span>
 		</a>
 
-		<div class="nav-section">
-			<a href={resolve('/')} class="nav-home" class:active={$page.url.pathname === '/'}>Home</a>
+		<div class="px-3 pb-2">
+			<a
+				href={resolve('/')}
+				class="block rounded-md px-[0.6rem] py-[0.35rem] text-[0.85rem] no-underline transition-colors {$page
+					.url.pathname === '/'
+					? 'bg-accent-bg text-accent'
+					: 'text-text-muted hover:bg-surface hover:text-text'}">Home</a
+			>
 		</div>
 
-		<div class="search-section">
-			<div class="search-wrapper">
+		<!-- Theme -->
+		<div class="px-3 pb-2 max-md:hidden">
+			<div class="border-border flex items-center gap-0.5 rounded-md border p-0.5">
+				{#each themeOptions as option (option)}
+					<button
+						class="flex-1 cursor-pointer rounded px-2 py-1 text-[0.7rem] capitalize transition-colors {theme.mode() ===
+						option
+							? 'bg-accent-bg text-accent'
+							: 'text-text-faint hover:text-text'}"
+						onclick={() => theme.set(option)}
+						aria-pressed={theme.mode() === option}
+						title={option === 'auto' ? `Follow the system (${theme.system()})` : `Always ${option}`}
+					>
+						{option}
+					</button>
+				{/each}
+			</div>
+		</div>
+
+		<div class="px-3 pb-2">
+			<div class="relative flex items-center">
 				<svg
-					class="search-icon"
+					class="text-text-faint pointer-events-none absolute left-[0.55rem] shrink-0"
 					width="13"
 					height="13"
 					viewBox="0 0 13 13"
@@ -114,13 +185,17 @@
 				</svg>
 				<input
 					type="text"
-					class="search-input"
+					class="bg-bg border-border text-text placeholder:text-text-faint focus:border-accent-border w-full rounded-md border py-[0.35rem] pr-7 pl-[1.85rem] text-[0.82rem] transition-colors outline-none"
 					placeholder="Search..."
 					bind:value={searchQuery}
 					aria-label="Search composables"
 				/>
 				{#if searchQuery}
-					<button class="search-clear" onclick={() => (searchQuery = '')} aria-label="Clear search">
+					<button
+						class="text-text-faint hover:text-text absolute right-[0.45rem] flex cursor-pointer items-center justify-center rounded p-[0.2rem] transition-colors"
+						onclick={() => (searchQuery = '')}
+						aria-label="Clear search"
+					>
 						<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
 							<path
 								d="M1 1L9 9M9 1L1 9"
@@ -135,49 +210,63 @@
 		</div>
 
 		{#if searchQuery.trim()}
-			<div class="search-results">
+			<div class="flex flex-col gap-px px-3">
 				{#if filteredItems.length === 0}
-					<p class="no-results">No results</p>
+					<p class="text-text-faint m-0 px-[0.6rem] py-[0.35rem] text-[0.82rem]">No results</p>
 				{:else}
 					{#each filteredItems as item (item.slug)}
 						<a
 							href={resolve('/docs/[slug]', { slug: item.slug })}
-							class="nav-item search-result-item"
-							class:active={$page.params.slug === item.slug}
+							class="{navItemBase} justify-between {$page.params.slug === item.slug
+								? navItemActive
+								: navItemIdle}"
 							onclick={() => (searchQuery = '')}
 						>
-							<span class="result-main">
-								<span class="nav-label">{item.label}</span>
+							<span class="flex min-w-0 items-center gap-1.5">
+								<span class="min-w-0 truncate">{item.label}</span>
 								{#if isNew(item)}
-									<span class="new-badge" title="Added in v{NEW_IN_VERSION}">new</span>
+									<span
+										class="text-accent-strong bg-accent-border/40 border-accent-dim shrink-0 rounded border px-[0.3rem] py-[0.15rem] font-sans text-[0.6rem] leading-none font-semibold tracking-wide uppercase"
+										title="Added in v{NEW_IN_VERSION}">new</span
+									>
 								{/if}
 							</span>
-							<span class="result-group">{item.group}</span>
+							<span class="text-text-faint shrink-0 font-sans text-[0.7rem] whitespace-nowrap"
+								>{item.group}</span
+							>
 						</a>
 					{/each}
 				{/if}
 			</div>
 		{:else}
 			{#each sidebar as group (group.title)}
-				<div class="nav-group">
+				<div class="mb-1 px-3">
 					<button
-						class="group-title"
-						class:open={openGroups[group.title]}
+						class="hover:bg-bg-elev flex w-full cursor-pointer items-center justify-between rounded-md px-[0.6rem] py-[0.35rem] text-left text-[0.75rem] font-semibold tracking-[0.06em] uppercase transition-colors {openGroups[
+							group.title
+						]
+							? 'text-text-muted'
+							: 'text-text-faint hover:text-text-muted'}"
 						onclick={() => toggleGroup(group.title)}
 					>
-						<span class="group-label">
+						<span class="inline-flex min-w-0 items-center gap-1.5">
 							{group.title}
 							{#if groupHasNew(group) && !openGroups[group.title]}
+								<!--
+									Only while collapsed: once open, each new child carries its
+									own badge and the dot would be redundant noise.
+								-->
 								<span
-									class="new-dot"
+									class="bg-accent ring-accent-border h-1.5 w-1.5 shrink-0 rounded-full ring-2"
 									title="Contains utils added in v{NEW_IN_VERSION}"
 									aria-label="Contains new utils"
 								></span>
 							{/if}
 						</span>
 						<svg
-							class="chevron"
-							class:rotated={openGroups[group.title]}
+							class="opacity-50 transition-transform duration-200 {openGroups[group.title]
+								? 'rotate-180'
+								: ''}"
 							width="12"
 							height="12"
 							viewBox="0 0 12 12"
@@ -195,17 +284,21 @@
 					</button>
 
 					{#if openGroups[group.title]}
-						<ul class="group-items">
+						<ul class="mt-1 mb-2 flex list-none flex-col gap-px p-0">
 							{#each group.items as item (item.slug)}
 								<li>
 									<a
 										href={resolve('/docs/[slug]', { slug: item.slug })}
-										class="nav-item"
-										class:active={$page.params.slug === item.slug}
+										class="{navItemBase} {$page.params.slug === item.slug
+											? navItemActive
+											: navItemIdle}"
 									>
-										<span class="nav-label">{item.label}</span>
+										<span class="min-w-0 truncate">{item.label}</span>
 										{#if isNew(item)}
-											<span class="new-badge" title="Added in v{NEW_IN_VERSION}">new</span>
+											<span
+												class="text-accent-strong bg-accent-border/40 border-accent-dim shrink-0 rounded border px-[0.3rem] py-[0.15rem] font-sans text-[0.6rem] leading-none font-semibold tracking-wide uppercase"
+												title="Added in v{NEW_IN_VERSION}">new</span
+											>
 										{/if}
 									</a>
 								</li>
@@ -220,7 +313,7 @@
 	<!-- Overlay for mobile -->
 	{#if mobileMenuOpen}
 		<div
-			class="overlay"
+			class="bg-overlay fixed inset-0 z-150 hidden cursor-pointer max-md:block"
 			onclick={toggleMobileMenu}
 			role="button"
 			tabindex="-1"
@@ -229,435 +322,9 @@
 		></div>
 	{/if}
 
-	<main class="content">
+	<main
+		class="min-w-0 max-w-[860px] flex-1 px-10 py-12 max-md:max-w-full max-md:px-5 max-md:pt-20 max-md:pb-8"
+	>
 		{@render children()}
 	</main>
 </div>
-
-<style>
-	:global(body) {
-		font-family: system-ui, sans-serif;
-		background: #0f0f0f;
-		color: #e8e8e8;
-		margin: 0;
-		padding: 0;
-	}
-
-	:global(*) {
-		box-sizing: border-box;
-	}
-
-	.layout {
-		display: flex;
-		min-height: 100vh;
-	}
-
-	/* ─── Mobile top bar ─── */
-	.mobile-topbar {
-		display: none;
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		z-index: 100;
-		background: #0a0a0a;
-		border-bottom: 1px solid #1e1e1e;
-		padding: 0.75rem 1rem;
-		align-items: center;
-		justify-content: space-between;
-	}
-
-	.hamburger {
-		background: none;
-		border: none;
-		color: #888;
-		cursor: pointer;
-		padding: 0.25rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 6px;
-		transition:
-			color 0.15s,
-			background 0.15s;
-	}
-
-	.hamburger:hover {
-		color: #e8e8e8;
-		background: #1e1e1e;
-	}
-
-	/* ─── Sidebar ─── */
-	.sidebar {
-		width: 240px;
-		flex-shrink: 0;
-		background: #0a0a0a;
-		border-right: 1px solid #1e1e1e;
-		padding: 1.25rem 0;
-		position: sticky;
-		top: 0;
-		height: 100vh;
-		overflow-y: auto;
-		display: flex;
-		flex-direction: column;
-		gap: 0;
-	}
-
-	.logo {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0 1.25rem 1.25rem;
-		text-decoration: none;
-		border-bottom: 1px solid #1e1e1e;
-		margin-bottom: 0.75rem;
-	}
-
-	.logo-img {
-		width: 28px;
-		height: 28px;
-		flex-shrink: 0;
-	}
-
-	.logo-text {
-		font-size: 0.95rem;
-		font-weight: 700;
-		color: #a78bfa;
-		font-family: monospace;
-		letter-spacing: -0.02em;
-	}
-
-	.desktop-logo {
-		display: flex;
-	}
-
-	.nav-section {
-		padding: 0 0.75rem 0.5rem;
-	}
-
-	.nav-home {
-		display: block;
-		padding: 0.35rem 0.6rem;
-		border-radius: 6px;
-		text-decoration: none;
-		color: #888;
-		font-size: 0.85rem;
-		transition:
-			color 0.15s,
-			background 0.15s;
-	}
-
-	.nav-home:hover {
-		color: #e8e8e8;
-		background: #1e1e1e;
-	}
-
-	.nav-home.active {
-		color: #a78bfa;
-		background: #1a1630;
-	}
-
-	/* ─── Search ─── */
-	.search-section {
-		padding: 0 0.75rem 0.5rem;
-	}
-
-	.search-wrapper {
-		position: relative;
-		display: flex;
-		align-items: center;
-	}
-
-	.search-icon {
-		position: absolute;
-		left: 0.55rem;
-		color: #555;
-		pointer-events: none;
-		flex-shrink: 0;
-	}
-
-	.search-input {
-		width: 100%;
-		background: #111;
-		border: 1px solid #2a2a2a;
-		border-radius: 6px;
-		padding: 0.35rem 1.8rem 0.35rem 1.85rem;
-		color: #e8e8e8;
-		font-size: 0.82rem;
-		outline: none;
-		transition:
-			border-color 0.15s,
-			background 0.15s;
-	}
-
-	.search-input::placeholder {
-		color: #444;
-	}
-
-	.search-input:focus {
-		border-color: #3d3060;
-		background: #131313;
-	}
-
-	.search-clear {
-		position: absolute;
-		right: 0.45rem;
-		background: none;
-		border: none;
-		color: #555;
-		cursor: pointer;
-		padding: 0.2rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 4px;
-		transition: color 0.15s;
-	}
-
-	.search-clear:hover {
-		color: #e8e8e8;
-	}
-
-	.search-results {
-		padding: 0 0.75rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1px;
-	}
-
-	.search-result-item {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.5rem;
-	}
-
-	.result-main {
-		display: flex;
-		align-items: center;
-		gap: 0.4rem;
-		min-width: 0;
-	}
-
-	.result-group {
-		font-size: 0.7rem;
-		color: #444;
-		font-family: system-ui, sans-serif;
-		white-space: nowrap;
-		flex-shrink: 0;
-	}
-
-	.no-results {
-		font-size: 0.82rem;
-		color: #555;
-		padding: 0.35rem 0.6rem;
-		margin: 0;
-	}
-
-	/* ─── Groups ─── */
-	.nav-group {
-		padding: 0 0.75rem;
-		margin-bottom: 0.25rem;
-	}
-
-	.group-title {
-		width: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		background: none;
-		border: none;
-		padding: 0.35rem 0.6rem;
-		border-radius: 6px;
-		color: #555;
-		font-size: 0.75rem;
-		font-weight: 600;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		cursor: pointer;
-		transition:
-			color 0.15s,
-			background 0.15s;
-		text-align: left;
-	}
-
-	.group-title:hover {
-		color: #888;
-		background: #161616;
-	}
-
-	.group-title.open {
-		color: #888;
-	}
-
-	.chevron {
-		transition: transform 0.2s;
-		opacity: 0.5;
-	}
-
-	.chevron.rotated {
-		transform: rotate(180deg);
-	}
-
-	.group-items {
-		list-style: none;
-		margin: 0.25rem 0 0.5rem;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 1px;
-	}
-
-	.nav-item {
-		display: flex;
-		align-items: center;
-		gap: 0.4rem;
-		padding: 0.3rem 0.6rem 0.3rem 1rem;
-		border-radius: 5px;
-		text-decoration: none;
-		color: #777;
-		font-size: 0.85rem;
-		font-family: monospace;
-		transition:
-			color 0.15s,
-			background 0.15s;
-	}
-
-	.nav-label {
-		min-width: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.group-label {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
-		min-width: 0;
-	}
-
-	/*
-	 * Only shown while the group is collapsed. Once it is open each new child
-	 * carries its own badge, so the dot would be redundant noise.
-	 */
-	.new-dot {
-		flex-shrink: 0;
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: #a78bfa;
-		box-shadow: 0 0 0 2px #2e2547;
-	}
-
-	.new-badge {
-		flex-shrink: 0;
-		font-family: system-ui, sans-serif;
-		font-size: 0.6rem;
-		font-weight: 600;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-		line-height: 1;
-		padding: 0.15rem 0.3rem;
-		border-radius: 4px;
-		color: #c4b5fd;
-		background: #2e2547;
-		border: 1px solid #4c3f80;
-	}
-
-	/* The badge is decorative; the accessible name comes from the label. */
-	@media (prefers-reduced-motion: no-preference) {
-		.group-label {
-			display: inline-flex;
-			align-items: center;
-			gap: 0.4rem;
-			min-width: 0;
-		}
-
-		/*
-	 * Only shown while the group is collapsed. Once it is open each new child
-	 * carries its own badge, so the dot would be redundant noise.
-	 */
-		.new-dot {
-			flex-shrink: 0;
-			width: 6px;
-			height: 6px;
-			border-radius: 50%;
-			background: #a78bfa;
-			box-shadow: 0 0 0 2px #2e2547;
-		}
-
-		.new-badge {
-			transition: background 0.15s;
-		}
-	}
-
-	.nav-item:hover {
-		color: #e8e8e8;
-		background: #1e1e1e;
-	}
-
-	.nav-item.active {
-		color: #a78bfa;
-		background: #1a1630;
-	}
-
-	/* ─── Content ─── */
-	.content {
-		flex: 1;
-		min-width: 0;
-		padding: 3rem 2.5rem;
-		max-width: 860px;
-	}
-
-	/* ─── Overlay ─── */
-	.overlay {
-		display: none;
-	}
-
-	/* ─── Mobile ─── */
-	@media (max-width: 768px) {
-		.mobile-topbar {
-			display: flex;
-		}
-
-		.desktop-logo {
-			display: none;
-		}
-
-		.sidebar {
-			position: fixed;
-			top: 0;
-			left: -260px;
-			width: 260px;
-			height: 100vh;
-			z-index: 200;
-			transition: left 0.25s ease;
-			padding-top: 1.25rem;
-			box-shadow: none;
-		}
-
-		.sidebar.mobile-open {
-			left: 0;
-			box-shadow: 4px 0 24px rgba(0, 0, 0, 0.6);
-		}
-
-		.sidebar .logo {
-			display: flex;
-		}
-
-		.overlay {
-			display: block;
-			position: fixed;
-			inset: 0;
-			background: rgba(0, 0, 0, 0.6);
-			z-index: 150;
-			cursor: pointer;
-		}
-
-		.content {
-			padding: 5rem 1.25rem 2rem;
-			max-width: 100%;
-		}
-	}
-</style>

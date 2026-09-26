@@ -6,16 +6,24 @@
 </script>
 
 <div class="demo-wrap">
-	<div bind:this={el} class="stage" class:outside={m.isOutside()}>
+	<div
+		bind:this={el}
+		class="bg-bg-sunken relative flex h-[130px] items-center justify-center overflow-hidden rounded-[10px] border transition-colors duration-200 {m.isOutside()
+			? 'border-surface'
+			: 'border-border-strong'}"
+	>
 		{#if !m.isOutside()}
-			<div class="spotlight" style="left: {m.elementX()}px; top: {m.elementY()}px"></div>
+			<div
+				class="pointer-events-none absolute -mt-[65px] -ml-[65px] h-[130px] w-[130px] rounded-full bg-[radial-gradient(circle,var(--color-accent)_0%,transparent_68%)] opacity-40"
+				style="left: {m.elementX()}px; top: {m.elementY()}px"
+			></div>
 		{/if}
-		<span class="stage-text">
+		<span class="text-text-muted relative text-[0.85rem]">
 			{m.isOutside() ? 'pointer is outside' : 'move around'}
 		</span>
 	</div>
 
-	<div class="grid">
+	<div class="grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-x-4 gap-y-1">
 		<div class="row">
 			<span class="label">elementX / Y</span><span class="value accent"
 				>{m.elementX().toFixed(0)}, {m.elementY().toFixed(0)}</span
@@ -40,40 +48,3 @@
 		<code>isOutside()</code> rather than the numbers.
 	</p>
 </div>
-
-<style>
-	.stage {
-		position: relative;
-		overflow: hidden;
-		height: 130px;
-		border-radius: 10px;
-		border: 1px solid #262626;
-		background: #0d0d0d;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: border-color 0.2s;
-	}
-	.stage.outside {
-		border-color: #1e1e1e;
-	}
-	.spotlight {
-		position: absolute;
-		width: 130px;
-		height: 130px;
-		margin: -65px 0 0 -65px;
-		border-radius: 50%;
-		pointer-events: none;
-		background: radial-gradient(circle, rgba(167, 139, 250, 0.4), transparent 68%);
-	}
-	.stage-text {
-		position: relative;
-		font-size: 0.85rem;
-		color: #777;
-	}
-	.grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-		gap: 0.2rem 1rem;
-	}
-</style>

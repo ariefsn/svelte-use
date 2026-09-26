@@ -14,63 +14,22 @@
 	<p class="hint">Click any snippet to copy it to your clipboard.</p>
 
 	{#each snippets as snippet (snippet)}
-		<button class="snippet-btn" onclick={() => clipboard.copy(snippet)}>
+		<button
+			class="group bg-bg border-border hover:border-accent/40 hover:bg-accent-bg flex w-full cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-left transition-colors"
+			onclick={() => clipboard.copy(snippet)}
+		>
 			<code>{snippet}</code>
-			<span class="copy-icon">{clipboard.text() === snippet && clipboard.copied() ? '✓' : '⎘'}</span
+			<span class="text-text-faint group-hover:text-accent shrink-0 text-[0.9rem]"
+				>{clipboard.text() === snippet && clipboard.copied() ? '✓' : '⎘'}</span
 			>
 		</button>
 	{/each}
 
 	{#if clipboard.copied()}
-		<div class="toast">Copied to clipboard!</div>
+		<div
+			class="bg-success-bg border-success-border text-success rounded-md border px-3 py-2 text-center text-[0.85rem]"
+		>
+			Copied to clipboard!
+		</div>
 	{/if}
 </div>
-
-<style>
-	.snippet-btn {
-		width: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.5rem;
-		padding: 0.5rem 0.75rem;
-		background: #111;
-		border: 1px solid #222;
-		border-radius: 6px;
-		text-align: left;
-		cursor: pointer;
-		transition:
-			border-color 0.15s,
-			background 0.15s;
-	}
-	.snippet-btn:hover {
-		border-color: #a78bfa55;
-		background: #1a1630;
-	}
-	.snippet-btn code {
-		font-family: monospace;
-		font-size: 0.78rem;
-		color: #888;
-		flex: 1;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-	.copy-icon {
-		font-size: 0.9rem;
-		color: #444;
-		flex-shrink: 0;
-	}
-	.snippet-btn:hover .copy-icon {
-		color: #a78bfa;
-	}
-	.toast {
-		padding: 0.5rem 0.75rem;
-		background: #1a3a1a;
-		border: 1px solid #166534;
-		border-radius: 6px;
-		font-size: 0.85rem;
-		color: #4ade80;
-		text-align: center;
-	}
-</style>

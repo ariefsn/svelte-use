@@ -3,21 +3,35 @@
 
 	const battery = useBattery();
 	const pct = $derived(Math.round(battery.level() * 100));
-	const color = $derived(pct > 50 ? '#4ade80' : pct > 20 ? '#facc15' : '#f87171');
+	// Token references, so the thresholds read correctly in both themes.
+	const color = $derived(
+		pct > 50 ? 'var(--color-success)' : pct > 20 ? 'var(--color-warning)' : 'var(--color-danger)'
+	);
 </script>
 
 <div class="demo-wrap">
 	<p class="hint">Shows live battery status from the Battery Status API.</p>
 
-	<div class="battery-card">
-		<div class="battery-shell">
-			<div class="battery-fill" style="width:{pct}%; background:{color}"></div>
-			<div class="battery-nub"></div>
+	<div class="bg-bg border-border flex items-center gap-4 rounded-lg border p-4">
+		<div
+			class="border-text-faint relative flex h-9 w-20 items-center overflow-visible rounded border-2"
+		>
+			<div
+				class="h-full rounded-[2px] transition-[width,background] duration-500"
+				style="width:{pct}%; background:{color}"
+			></div>
+			<div
+				class="bg-text-faint absolute top-1/2 -right-1.5 h-3.5 w-1 -translate-y-1/2 rounded-r-[2px]"
+			></div>
 		</div>
 
-		<div class="battery-info">
-			<span class="pct" style="color:{color}">{pct}%</span>
-			<span class="status">{battery.charging() ? '⚡ Charging' : '🔋 On battery'}</span>
+		<div class="flex flex-col gap-[0.15rem]">
+			<span class="text-[1.4rem] font-bold transition-colors duration-500" style="color:{color}"
+				>{pct}%</span
+			>
+			<span class="text-text-faint text-[0.8rem]"
+				>{battery.charging() ? '⚡ Charging' : '🔋 On battery'}</span
+			>
 		</div>
 	</div>
 
@@ -30,56 +44,3 @@
 		<span class="value accent">{battery.charging()}</span>
 	</div>
 </div>
-
-<style>
-	.battery-card {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		padding: 1rem;
-		background: #111;
-		border: 1px solid #222;
-		border-radius: 8px;
-	}
-	.battery-shell {
-		position: relative;
-		width: 80px;
-		height: 36px;
-		border: 2px solid #444;
-		border-radius: 4px;
-		display: flex;
-		align-items: center;
-		overflow: visible;
-	}
-	.battery-fill {
-		height: 100%;
-		border-radius: 2px;
-		transition:
-			width 0.5s,
-			background 0.5s;
-	}
-	.battery-nub {
-		position: absolute;
-		right: -6px;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 4px;
-		height: 14px;
-		background: #444;
-		border-radius: 0 2px 2px 0;
-	}
-	.battery-info {
-		display: flex;
-		flex-direction: column;
-		gap: 0.15rem;
-	}
-	.pct {
-		font-size: 1.4rem;
-		font-weight: 700;
-		transition: color 0.5s;
-	}
-	.status {
-		font-size: 0.8rem;
-		color: #555;
-	}
-</style>

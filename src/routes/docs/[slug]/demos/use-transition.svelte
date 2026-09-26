@@ -9,11 +9,13 @@
 </script>
 
 <div class="demo-wrap">
-	<div class="meter-wrap">
-		<div class="meter-bar">
-			<div class="meter-fill" style:width="{displayed()}%"></div>
+	<div class="flex items-center gap-3">
+		<div class="bg-surface h-3 flex-1 overflow-hidden rounded-full">
+			<div class="bg-accent h-full rounded-full" style:width="{displayed()}%"></div>
 		</div>
-		<span class="meter-val">{displayed().toFixed(1)}%</span>
+		<span class="text-accent min-w-[48px] text-right font-mono text-[0.85rem]"
+			>{displayed().toFixed(1)}%</span
+		>
 	</div>
 
 	<div class="row">
@@ -29,34 +31,3 @@
 
 	<p class="hint">Animates from the previous value to the new target over 600ms using cubicInOut</p>
 </div>
-
-<style>
-	.meter-wrap {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	.meter-bar {
-		flex: 1;
-		height: 12px;
-		background: #1e1e1e;
-		border-radius: 999px;
-		overflow: hidden;
-	}
-
-	.meter-fill {
-		height: 100%;
-		background: #a78bfa;
-		border-radius: 999px;
-		transition: none;
-	}
-
-	.meter-val {
-		font-family: monospace;
-		font-size: 0.85rem;
-		color: #a78bfa;
-		min-width: 48px;
-		text-align: right;
-	}
-</style>

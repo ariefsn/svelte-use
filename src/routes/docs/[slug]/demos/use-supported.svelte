@@ -16,19 +16,10 @@
 	{#each features as f (f.name)}
 		<div class="row">
 			<span class="label">{f.name}</span>
-			<span class="value" class:yes={f.check()} class:no={!f.check()}>
+			<span class="value {f.check() ? 'text-success' : 'text-text-muted'}">
 				{f.check() ? 'supported' : 'unavailable'}
 			</span>
 		</div>
 	{/each}
 	<p class="hint">Evaluated once at initialisation, and always <code>false</code> during SSR.</p>
 </div>
-
-<style>
-	.value.yes {
-		color: #4ade80;
-	}
-	.value.no {
-		color: #666;
-	}
-</style>

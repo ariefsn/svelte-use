@@ -34,52 +34,24 @@
 		<button onclick={removeItem}>Remove item</button>
 	</div>
 
-	<div class="target-box" bind:this={container}>
-		{#each items as item, i (i)}<div class="item">{item}</div>{/each}
+	<div
+		class="bg-bg border-border flex min-h-12 flex-wrap gap-1.5 rounded-lg border p-2"
+		bind:this={container}
+	>
+		{#each items as item, i (i)}<div
+				class="bg-accent-bg border-accent-border text-accent rounded-[5px] border px-2.5 py-1 text-[0.8rem]"
+			>
+				{item}
+			</div>{/each}
 	</div>
 
-	<div class="log-box">
+	<div
+		class="bg-bg-sunken border-surface text-text-faint max-h-[100px] min-h-10 overflow-y-auto rounded-lg border px-3 py-2 font-mono text-[0.75rem]"
+	>
 		{#if log.length === 0}
 			<span class="muted">No mutations yet…</span>
 		{:else}
-			{#each log as entry, i (i)}<div class="log-entry">{entry}</div>{/each}
+			{#each log as entry, i (i)}<div class="text-text-muted py-[0.1rem]">{entry}</div>{/each}
 		{/if}
 	</div>
 </div>
-
-<style>
-	.target-box {
-		background: #111;
-		border: 1px solid #2a2a2a;
-		border-radius: 8px;
-		padding: 0.5rem;
-		min-height: 48px;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.35rem;
-	}
-	.item {
-		background: #1a1630;
-		border: 1px solid #3b2d6e;
-		color: #a78bfa;
-		padding: 0.2rem 0.6rem;
-		border-radius: 5px;
-		font-size: 0.8rem;
-	}
-	.log-box {
-		background: #0a0a0a;
-		border: 1px solid #1a1a1a;
-		border-radius: 8px;
-		padding: 0.5rem 0.75rem;
-		font-family: monospace;
-		font-size: 0.75rem;
-		color: #555;
-		min-height: 40px;
-		max-height: 100px;
-		overflow-y: auto;
-	}
-	.log-entry {
-		color: #777;
-		padding: 0.1rem 0;
-	}
-</style>

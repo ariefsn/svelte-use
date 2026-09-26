@@ -19,7 +19,16 @@
 </script>
 
 <div class="demo-wrap">
-	<div class="status-badge status-{status}">{status}</div>
+	<div
+		class="inline-block self-start rounded-lg px-4 py-1.5 font-mono text-[1.4rem] font-bold {status ===
+		'waiting'
+			? 'bg-accent-bg text-accent'
+			: status === 'done'
+				? 'bg-success-bg text-success'
+				: 'bg-surface text-text-faint'}"
+	>
+		{status}
+	</div>
 
 	<div class="row">
 		<span class="label">pending</span>
@@ -33,28 +42,3 @@
 
 	<p class="hint">Does not start automatically · call start() to arm · fires after 2s</p>
 </div>
-
-<style>
-	.status-badge {
-		font-size: 1.4rem;
-		font-weight: 700;
-		font-family: monospace;
-		padding: 0.4rem 1rem;
-		border-radius: 8px;
-		display: inline-block;
-		align-self: flex-start;
-	}
-
-	.status-idle {
-		background: #1e1e1e;
-		color: #555;
-	}
-	.status-waiting {
-		background: #1a1630;
-		color: #a78bfa;
-	}
-	.status-done {
-		background: #142a14;
-		color: #86efac;
-	}
-</style>

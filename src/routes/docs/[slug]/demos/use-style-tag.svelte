@@ -14,14 +14,14 @@
 </script>
 
 <div class="demo-wrap">
-	<div class="row">
+	<div class="row gap-3">
 		<span class="label">hue</span>
-		<input type="range" min="0" max="360" bind:value={hue} />
+		<input type="range" min="0" max="360" bind:value={hue} class="flex-1" />
 		<span class="value accent">{hue}</span>
 	</div>
-	<div class="row">
+	<div class="row gap-3">
 		<span class="label">size</span>
-		<input type="range" min="0.8" max="2" step="0.1" bind:value={size} />
+		<input type="range" min="0.8" max="2" step="0.1" bind:value={size} class="flex-1" />
 		<span class="value accent">{size}rem</span>
 	</div>
 	<div class="row">
@@ -42,13 +42,3 @@
 		tear down CSS another still needs.
 	</p>
 </div>
-
-<style>
-	input[type='range'] {
-		flex: 1;
-		accent-color: #a78bfa;
-	}
-	.row {
-		gap: 0.75rem;
-	}
-</style>

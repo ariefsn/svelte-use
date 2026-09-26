@@ -33,7 +33,7 @@
 
 	<div class="row">
 		<span class="label">delay</span>
-		<input type="range" min="500" max="5000" step="500" bind:value={delay} style="flex:1" />
+		<input type="range" min="500" max="5000" step="500" bind:value={delay} class="flex-1" />
 		<span class="value accent">{delay}ms</span>
 	</div>
 
@@ -44,9 +44,3 @@
 
 	<p class="hint">Fires once after the delay · changing delay while pending reschedules it</p>
 </div>
-
-<style>
-	input[type='range'] {
-		accent-color: #a78bfa;
-	}
-</style>

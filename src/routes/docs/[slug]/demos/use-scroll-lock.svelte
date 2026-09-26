@@ -26,11 +26,16 @@
 	<div class="divider"></div>
 
 	<!-- Scrollable target element -->
-	<div class="scroll-box" bind:this={scrollEl}>
+	<div
+		class="bg-bg-sunken border-border h-40 overflow-y-auto rounded-lg border"
+		bind:this={scrollEl}
+	>
 		{#each { length: 20 } as _, i (i)}
-			<div class="scroll-row">
-				<span class="scroll-index">#{i + 1}</span>
-				<span class="scroll-text">Scroll row {i + 1} of 20</span>
+			<div
+				class="border-border/60 flex items-center gap-3 border-b px-3 py-[0.45rem] text-[0.82rem] last:border-b-0"
+			>
+				<span class="text-text-faint min-w-[30px] shrink-0 font-mono text-[0.75rem]">#{i + 1}</span>
+				<span class="text-text-muted">Scroll row {i + 1} of 20</span>
 			</div>
 		{/each}
 	</div>
@@ -40,43 +45,3 @@
 		<code>hidden</code>.
 	</p>
 </div>
-
-<style>
-	.scroll-box {
-		height: 160px;
-		overflow-y: auto;
-		border: 1px solid #2a2a2a;
-		border-radius: 8px;
-		background: #0d0d0d;
-	}
-
-	.scroll-row {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.45rem 0.75rem;
-		border-bottom: 1px solid #141414;
-		font-size: 0.82rem;
-	}
-
-	.scroll-row:last-child {
-		border-bottom: none;
-	}
-
-	.scroll-index {
-		font-family: monospace;
-		font-size: 0.75rem;
-		color: #444;
-		min-width: 30px;
-		flex-shrink: 0;
-	}
-
-	.scroll-text {
-		color: #666;
-	}
-
-	button:disabled {
-		opacity: 0.4;
-		cursor: not-allowed;
-	}
-</style>

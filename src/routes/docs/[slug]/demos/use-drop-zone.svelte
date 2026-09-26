@@ -12,8 +12,13 @@
 	);
 </script>
 
-<div class="demo-root">
-	<div bind:this={zone} class="zone" class:over={isOver()}>
+<div class="demo-wrap">
+	<div
+		bind:this={zone}
+		class="cursor-default rounded-[10px] border-2 border-dashed px-4 py-8 text-center text-[0.9rem] transition-colors duration-150 select-none {isOver()
+			? 'border-accent text-accent bg-accent-bg'
+			: 'border-text-faint text-text-muted'}"
+	>
 		{#if isOver()}
 			Release to drop
 		{:else}
@@ -22,64 +27,11 @@
 	</div>
 
 	{#if dropped.length > 0}
-		<ul class="file-list">
+		<ul class="m-0 flex list-none flex-col gap-1 p-0">
 			{#each dropped as name, i (i)}
-				<li>{name}</li>
+				<li class="text-text-dim font-mono text-[0.85rem]">{name}</li>
 			{/each}
 		</ul>
 		<button onclick={() => (dropped = [])}>Clear</button>
 	{/if}
 </div>
-
-<style>
-	.demo-root {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-	.zone {
-		padding: 2rem 1rem;
-		border: 2px dashed #444;
-		border-radius: 10px;
-		text-align: center;
-		font-size: 0.9rem;
-		color: #666;
-		transition:
-			border-color 0.15s,
-			color 0.15s,
-			background 0.15s;
-		cursor: default;
-		user-select: none;
-	}
-	.zone.over {
-		border-color: #a78bfa;
-		color: #a78bfa;
-		background: #1a1630;
-	}
-	.file-list {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-	.file-list li {
-		font-size: 0.85rem;
-		font-family: monospace;
-		color: #aaa;
-	}
-	button {
-		background: #2a2a2a;
-		color: #e8e8e8;
-		border: 1px solid #3a3a3a;
-		border-radius: 6px;
-		padding: 0.3rem 0.65rem;
-		font-size: 0.82rem;
-		cursor: pointer;
-		width: fit-content;
-	}
-	button:hover {
-		background: #3a3a3a;
-	}
-</style>

@@ -29,14 +29,23 @@
 
 <div class="demo-wrap">
 	{#if spacer}
-		<div class="spacer">a sibling above just appeared — the box moved down</div>
+		<div
+			class="border-border-strong text-text-muted flex h-14 items-center justify-center rounded-lg border border-dashed text-[0.8rem] italic"
+		>
+			a sibling above just appeared — the box moved down
+		</div>
 	{/if}
 
-	<div bind:this={el} class="target" class:wide>
+	<div
+		bind:this={el}
+		class="from-accent to-accent-dim flex h-[70px] items-center justify-center rounded-lg bg-gradient-to-br text-[0.85rem] text-white transition-[width] duration-250 {wide
+			? 'w-full'
+			: 'w-3/5'}"
+	>
 		<span>resize or move me</span>
 	</div>
 
-	<div class="grid">
+	<div class="grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-x-4 gap-y-1">
 		<div class="row">
 			<span class="label">x / y</span>
 			<span class="value accent">{box.x().toFixed(0)}, {box.y().toFixed(0)}</span>
@@ -47,7 +56,11 @@
 		</div>
 		<div class="row">
 			<span class="label">top / bottom</span>
-			<span class="value accent" class:stale={isStale}>
+			<span
+				class="value accent {isStale
+					? 'text-warning decoration-warning-border underline decoration-wavy'
+					: ''}"
+			>
 				{box.top().toFixed(0)} / {box.bottom().toFixed(0)}
 			</span>
 		</div>
@@ -58,7 +71,9 @@
 	</div>
 
 	{#if isStale}
-		<p class="warn">
+		<p
+			class="bg-warning-bg border-warning-border text-warning m-0 rounded-lg border px-3 py-2.5 text-[0.82rem] leading-relaxed"
+		>
 			Stale — the box really is at <strong>top: {actualTop.toFixed(0)}</strong>. Moving an element
 			resizes nothing, so <code>ResizeObserver</code> stays quiet and no scroll or resize event
 			fires. Press <code>update()</code>.
@@ -85,58 +100,3 @@
 		nothing observes, so the values need <code>update()</code>.
 	</p>
 </div>
-
-<style>
-	.spacer {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 56px;
-		border-radius: 8px;
-		border: 1px dashed #3a3a3a;
-		color: #666;
-		font-size: 0.8rem;
-		font-style: italic;
-	}
-	.target {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 70px;
-		width: 60%;
-		border-radius: 8px;
-		background: linear-gradient(135deg, #a78bfa, #7c3aed);
-		color: #fff;
-		font-size: 0.85rem;
-		transition: width 0.25s;
-	}
-	.target.wide {
-		width: 100%;
-	}
-	.grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-		gap: 0.2rem 1rem;
-	}
-	.value.stale {
-		color: #fbbf24;
-		text-decoration: underline wavy #92400e;
-	}
-	.warn {
-		margin: 0;
-		padding: 0.55rem 0.75rem;
-		border-radius: 8px;
-		background: #2a1e0f;
-		border: 1px solid #92400e;
-		color: #fbbf24;
-		font-size: 0.82rem;
-		line-height: 1.6;
-	}
-	.warn strong {
-		font-family: monospace;
-	}
-	button.primary {
-		border-color: #a78bfa;
-		color: #c4b5fd;
-	}
-</style>

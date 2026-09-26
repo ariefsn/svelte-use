@@ -23,9 +23,9 @@
 		onpointerdown={() => (pressing = true)}
 		onpointerup={() => (pressing = false)}
 		onpointercancel={() => (pressing = false)}
-		style="padding:2rem;background:{pressing
-			? '#2a1f4e'
-			: '#111'};border:1px solid #333;border-radius:8px;text-align:center;cursor:pointer;user-select:none;transition:background 0.2s;color:#888"
+		class="border-border-strong text-text-muted cursor-pointer rounded-lg border p-8 text-center transition-colors duration-200 select-none {pressing
+			? 'bg-accent-bg'
+			: 'bg-bg'}"
 	>
 		{pressing ? 'Hold…' : 'Press and hold (800ms)'}
 	</div>

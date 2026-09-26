@@ -3,66 +3,35 @@
 
 	const fps = useFps();
 
-	const color = $derived(fps() >= 55 ? '#4ade80' : fps() >= 30 ? '#facc15' : '#f87171');
+	// Token references, so the thresholds stay legible in both themes.
+	const color = $derived(
+		fps() >= 55
+			? 'var(--color-success)'
+			: fps() >= 30
+				? 'var(--color-warning)'
+				: 'var(--color-danger)'
+	);
 </script>
 
 <div class="demo-wrap">
 	<p class="hint">Current frame rate of the browser rendering loop.</p>
 
-	<div class="fps-display">
-		<span class="fps-num" style="color:{color}">{fps()}</span>
-		<span class="fps-unit">fps</span>
+	<div class="my-2 flex items-baseline gap-1.5">
+		<span
+			class="text-[3.5rem] leading-none font-extrabold tabular-nums transition-colors duration-500"
+			style="color:{color}">{fps()}</span
+		>
+		<span class="text-text-faint text-base">fps</span>
 	</div>
 
-	<div class="fps-bar">
+	<div class="bg-surface h-1.5 w-full overflow-hidden rounded-full">
 		<div
-			class="fps-fill"
+			class="h-full rounded-full transition-[width,background] duration-300"
 			style="width:{(Math.min(fps(), 60) / 60) * 100}%; background:{color}"
 		></div>
 	</div>
 
-	<div class="fps-labels">
+	<div class="text-text-faint mt-1 flex justify-between text-[0.7rem]">
 		<span>0</span><span>30</span><span>60</span>
 	</div>
 </div>
-
-<style>
-	.fps-display {
-		display: flex;
-		align-items: baseline;
-		gap: 0.4rem;
-		margin: 0.5rem 0;
-	}
-	.fps-num {
-		font-size: 3.5rem;
-		font-weight: 800;
-		font-variant-numeric: tabular-nums;
-		line-height: 1;
-		transition: color 0.5s;
-	}
-	.fps-unit {
-		font-size: 1rem;
-		color: #555;
-	}
-	.fps-bar {
-		width: 100%;
-		height: 6px;
-		background: #1a1a1a;
-		border-radius: 999px;
-		overflow: hidden;
-	}
-	.fps-fill {
-		height: 100%;
-		border-radius: 999px;
-		transition:
-			width 0.3s,
-			background 0.5s;
-	}
-	.fps-labels {
-		display: flex;
-		justify-content: space-between;
-		font-size: 0.7rem;
-		color: #444;
-		margin-top: 0.25rem;
-	}
-</style>

@@ -23,11 +23,11 @@
 		<span class="value accent">{reducedMotion()}</span>
 	</div>
 
-	<hr />
+	<hr class="border-border my-1.5 border-0 border-t" />
 
-	<div class="row">
+	<div class="row gap-3">
 		<span class="label">reactive query</span>
-		<input type="range" min="320" max="2000" step="20" bind:value={width} />
+		<input type="range" min="320" max="2000" step="20" bind:value={width} class="flex-1" />
 		<span class="value accent">{custom()}</span>
 	</div>
 	<p class="hint">
@@ -35,18 +35,3 @@
 		window to watch the fixed queries flip.
 	</p>
 </div>
-
-<style>
-	hr {
-		border: none;
-		border-top: 1px solid #1e1e1e;
-		margin: 0.35rem 0;
-	}
-	input[type='range'] {
-		flex: 1;
-		accent-color: #a78bfa;
-	}
-	.row {
-		gap: 0.75rem;
-	}
-</style>

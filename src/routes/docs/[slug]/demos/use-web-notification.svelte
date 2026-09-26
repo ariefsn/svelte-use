@@ -31,9 +31,15 @@
 
 	{#if shown}
 		{#if error()}
-			<p class="diag err">Failed: {error()?.message}</p>
+			<p
+				class="text-warning bg-warning-bg border-warning-border m-0 rounded-md border px-2.5 py-2 text-[0.82rem] leading-normal"
+			>
+				Failed: {error()?.message}
+			</p>
 		{:else if notification()}
-			<p class="diag ok">
+			<p
+				class="text-success bg-success-bg border-success-border m-0 rounded-md border px-2.5 py-2 text-[0.82rem] leading-normal"
+			>
 				Notification created successfully. If no banner appeared, your OS suppressed it — check
 				Focus/Do&nbsp;Not&nbsp;Disturb and that your browser is enabled in the system notification
 				settings.
@@ -43,23 +49,3 @@
 
 	<p class="hint">Sends a desktop notification. Permission will be requested on first click.</p>
 </div>
-
-<style>
-	.diag {
-		margin: 0;
-		font-size: 0.82rem;
-		line-height: 1.5;
-		padding: 0.5rem 0.7rem;
-		border-radius: 6px;
-	}
-	.diag.ok {
-		color: #4ade80;
-		background: #0f2e1f;
-		border: 1px solid #166534;
-	}
-	.diag.err {
-		color: #fbbf24;
-		background: #2a1e0f;
-		border: 1px solid #92400e;
-	}
-</style>

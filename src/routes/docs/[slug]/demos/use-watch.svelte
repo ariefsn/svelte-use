@@ -20,9 +20,7 @@
 		<button onclick={() => count++}>Increment</button>
 		<button onclick={() => count--}>Decrement</button>
 	</div>
-	<div
-		style="background:#111;padding:0.5rem;border-radius:4px;font-family:monospace;font-size:0.85rem;color:#888"
-	>
+	<div class="bg-bg text-text-muted rounded p-2 font-mono text-[0.85rem]">
 		{#each log as entry, i (i)}
 			<div>{entry}</div>
 		{:else}

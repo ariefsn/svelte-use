@@ -90,12 +90,14 @@
 		</button>
 	</div>
 
-	<div class="log">
+	<div
+		class="bg-bg-sunken border-surface text-text-dim min-h-[70px] rounded-lg border px-3 py-2.5 font-mono text-[0.82rem] leading-[1.7]"
+	>
 		{#if log.length === 0}
-			<span class="empty">Start a wait, then increment the count.</span>
+			<span class="text-text-faint italic">Start a wait, then increment the count.</span>
 		{:else}
 			{#each log as line, i (i)}
-				<div class="log-line">{line}</div>
+				<div class="text-accent">{line}</div>
 			{/each}
 		{/if}
 	</div>
@@ -104,24 +106,3 @@
 		async code.
 	</p>
 </div>
-
-<style>
-	.log {
-		background: #0d0d0d;
-		border: 1px solid #1e1e1e;
-		border-radius: 8px;
-		padding: 0.6rem 0.75rem;
-		font-family: monospace;
-		font-size: 0.82rem;
-		line-height: 1.7;
-		min-height: 70px;
-		color: #aaa;
-	}
-	.empty {
-		color: #555;
-		font-style: italic;
-	}
-	.log-line {
-		color: #a78bfa;
-	}
-</style>

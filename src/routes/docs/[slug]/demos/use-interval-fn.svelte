@@ -7,7 +7,7 @@
 </script>
 
 <div class="demo-wrap">
-	<div class="big-num">{count}</div>
+	<div class="text-accent mb-2 text-[3.5rem] leading-none font-extrabold tabular-nums">{count}</div>
 
 	<div class="row">
 		<span class="label">active</span>
@@ -25,14 +25,3 @@
 
 	<p class="hint">Does not start automatically — call resume() · interval: 500ms</p>
 </div>
-
-<style>
-	.big-num {
-		font-size: 3.5rem;
-		font-weight: 800;
-		font-variant-numeric: tabular-nums;
-		color: #a78bfa;
-		line-height: 1;
-		margin-bottom: 0.5rem;
-	}
-</style>

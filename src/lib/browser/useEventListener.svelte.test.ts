@@ -55,4 +55,37 @@ describe('useEventListener', () => {
 		expect(handler).not.toHaveBeenCalled();
 		cleanup();
 	});
+
+	test('accepts a getter for window, for SSR safety', () => {
+		// A bare `window` is evaluated at component init and throws during SSR.
+		// The getter form defers that to the effect, which never runs on the
+		// server — this is what the docs demos use.
+		const handler = vi.fn();
+
+		const cleanup = $effect.root(() => {
+			useEventListener(() => window, 'click', handler);
+			flushSync();
+		});
+
+		window.dispatchEvent(new Event('click'));
+		expect(handler).toHaveBeenCalledOnce();
+
+		cleanup();
+		window.dispatchEvent(new Event('click'));
+		expect(handler).toHaveBeenCalledOnce();
+	});
+
+	test('accepts a getter for document', () => {
+		const handler = vi.fn();
+
+		const cleanup = $effect.root(() => {
+			useEventListener(() => document, 'mousedown', handler);
+			flushSync();
+		});
+
+		document.dispatchEvent(new Event('mousedown'));
+		expect(handler).toHaveBeenCalledOnce();
+
+		cleanup();
+	});
 });

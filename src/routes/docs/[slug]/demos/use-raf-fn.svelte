@@ -12,8 +12,11 @@
 </script>
 
 <div class="demo-wrap">
-	<div class="stage">
-		<div class="box" style="transform: rotate({angle}deg)"></div>
+	<div class="flex justify-center py-3">
+		<div
+			class="from-accent to-accent-dim h-14 w-14 rounded-[10px] bg-gradient-to-br"
+			style="transform: rotate({angle}deg)"
+		></div>
 	</div>
 
 	<div class="row">
@@ -42,17 +45,3 @@
 		refresh rate.
 	</p>
 </div>
-
-<style>
-	.stage {
-		display: flex;
-		justify-content: center;
-		padding: 0.75rem 0;
-	}
-	.box {
-		width: 56px;
-		height: 56px;
-		border-radius: 10px;
-		background: linear-gradient(135deg, #a78bfa, #7c3aed);
-	}
-</style>

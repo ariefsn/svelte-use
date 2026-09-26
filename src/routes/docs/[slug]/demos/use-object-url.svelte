@@ -15,7 +15,7 @@
 		Pick a file to generate a blob URL. The URL is automatically revoked when the file changes.
 	</p>
 
-	<input type="file" {onchange} />
+	<input type="file" class="text-text-dim text-[0.83rem]" {onchange} />
 
 	<div class="row">
 		<span class="label">file</span>
@@ -25,24 +25,17 @@
 		<span class="label">blob URL</span>
 		<span class="value accent">
 			{#if objectUrl()}
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- blob: URL from createObjectURL, not an app route -->
-				<a href={objectUrl()} target="_blank" rel="noreferrer">{objectUrl()}</a>
+				<!-- eslint-disable svelte/no-navigation-without-resolve -- blob: URL from createObjectURL, not an app route -->
+				<a
+					href={objectUrl()}
+					target="_blank"
+					rel="noreferrer"
+					class="text-accent text-[0.78rem] break-all">{objectUrl()}</a
+				>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{:else}
 				—
 			{/if}
 		</span>
 	</div>
 </div>
-
-<style>
-	input[type='file'] {
-		color: #999;
-		font-size: 0.83rem;
-	}
-
-	a {
-		color: #a78bfa;
-		word-break: break-all;
-		font-size: 0.78rem;
-	}
-</style>

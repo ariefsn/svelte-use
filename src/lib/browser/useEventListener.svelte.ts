@@ -6,7 +6,12 @@
 /**
  * Registers an event listener with automatic cleanup on component destroy.
  *
- * @param target - The event target (window, document, or element)
+ * @param target - The event target, or a getter returning one
+ *
+ * Prefer the getter form for `window` and `document` in code that renders on
+ * the server: a bare `window` is evaluated during SSR and throws a
+ * `ReferenceError`, while a getter is only called inside the effect, which
+ * never runs there.
  * @param event - Event name or array of event names
  * @param handler - Event handler function
  * @param options - Standard addEventListener options
@@ -17,6 +22,9 @@
  * // Single event
  * useEventListener(window, 'resize', (e) => console.log(e));
  *
+ * // SSR-safe: the getter is only called once the effect runs
+ * useEventListener(() => window, 'resize', (e) => console.log(e));
+ *
  * // Multiple events
  * useEventListener(document, ['mousedown', 'touchstart'], (e) => {
  *   console.log('interaction', e);
@@ -24,13 +32,13 @@
  * ```
  */
 export function useEventListener<K extends keyof WindowEventMap>(
-	target: Window,
+	target: Window | (() => Window | null | undefined),
 	event: K | K[],
 	handler: (ev: WindowEventMap[K]) => void,
 	options?: boolean | AddEventListenerOptions
 ): () => void;
 export function useEventListener<K extends keyof DocumentEventMap>(
-	target: Document,
+	target: Document | (() => Document | null | undefined),
 	event: K | K[],
 	handler: (ev: DocumentEventMap[K]) => void,
 	options?: boolean | AddEventListenerOptions

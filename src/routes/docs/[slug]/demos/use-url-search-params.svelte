@@ -12,6 +12,7 @@
 		<span class="label">q</span>
 		<input
 			type="text"
+			class="flex-1"
 			value={query}
 			placeholder="type to update the URL"
 			oninput={(event) => params.set('q', event.currentTarget.value)}
@@ -45,9 +46,3 @@
 		reactive value updates immediately regardless.
 	</p>
 </div>
-
-<style>
-	.row input[type='text'] {
-		flex: 1;
-	}
-</style>

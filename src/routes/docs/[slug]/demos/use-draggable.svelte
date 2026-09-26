@@ -11,71 +11,28 @@
 </script>
 
 <div class="demo-wrap" style="gap:0">
-	<div class="drag-arena" bind:this={containerEl}>
+	<div
+		class="bg-bg border-border relative h-[180px] overflow-hidden rounded-lg border"
+		bind:this={containerEl}
+	>
 		<div
 			bind:this={el}
-			class="drag-handle"
-			class:dragging={drag.isDragging()}
+			class="bg-accent-bg text-accent flex h-9 w-[90px] items-center justify-center rounded-lg border text-[0.8rem] whitespace-nowrap transition-[box-shadow,border-color] duration-100 select-none {drag.isDragging()
+				? 'border-accent shadow-[0_0_12px_var(--color-accent)] cursor-grabbing'
+				: 'border-accent/40 cursor-grab'}"
 			style="position:absolute; {drag.style()}"
 		>
 			{drag.isDragging() ? '✦' : '⊹'} drag me
 		</div>
 	</div>
 
-	<div class="coords">
-		<span>x: <strong>{Math.round(drag.x())}</strong></span>
-		<span>y: <strong>{Math.round(drag.y())}</strong></span>
-		<span class:live={drag.isDragging()}>{drag.isDragging() ? 'dragging' : 'idle'}</span>
+	<div
+		class="bg-bg-sunken border-surface text-text-muted flex gap-4 rounded-b-lg border border-t-0 px-3 py-2.5 text-[0.82rem]"
+	>
+		<span>x: <strong class="text-accent">{Math.round(drag.x())}</strong></span>
+		<span>y: <strong class="text-accent">{Math.round(drag.y())}</strong></span>
+		<span class={drag.isDragging() ? 'text-accent' : ''}
+			>{drag.isDragging() ? 'dragging' : 'idle'}</span
+		>
 	</div>
 </div>
-
-<style>
-	.drag-arena {
-		position: relative;
-		height: 180px;
-		background: #111;
-		border: 1px solid #2a2a2a;
-		border-radius: 8px;
-		overflow: hidden;
-	}
-	.drag-handle {
-		width: 90px;
-		height: 36px;
-		background: #1a1630;
-		border: 1px solid #a78bfa66;
-		border-radius: 8px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 0.8rem;
-		color: #a78bfa;
-		cursor: grab;
-		user-select: none;
-		transition:
-			box-shadow 0.1s,
-			border-color 0.1s;
-		white-space: nowrap;
-	}
-	.drag-handle.dragging {
-		cursor: grabbing;
-		border-color: #a78bfa;
-		box-shadow: 0 0 12px #a78bfa44;
-	}
-	.coords {
-		display: flex;
-		gap: 1rem;
-		padding: 0.6rem 0.75rem;
-		font-size: 0.82rem;
-		color: #666;
-		background: #0d0d0d;
-		border: 1px solid #1a1a1a;
-		border-top: none;
-		border-radius: 0 0 8px 8px;
-	}
-	.coords strong {
-		color: #a78bfa;
-	}
-	.live {
-		color: #a78bfa;
-	}
-</style>

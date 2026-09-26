@@ -12,7 +12,12 @@
 </script>
 
 <div class="demo-wrap">
-	<textarea bind:this={el} bind:value={text} rows="1"></textarea>
+	<textarea
+		bind:this={el}
+		bind:value={text}
+		rows="1"
+		class="bg-bg-sunken border-border-strong text-text focus:border-accent w-full resize-none rounded-lg border px-2.5 py-2.5 font-[inherit] text-[0.9rem] leading-relaxed outline-none"
+	></textarea>
 
 	<div class="row">
 		<span class="label">applied height</span>
@@ -32,22 +37,3 @@
 		programmatically, which fires no <code>input</code> event.
 	</p>
 </div>
-
-<style>
-	textarea {
-		width: 100%;
-		padding: 0.6rem 0.7rem;
-		background: #0d0d0d;
-		border: 1px solid #262626;
-		border-radius: 8px;
-		color: #ddd;
-		font-size: 0.9rem;
-		font-family: inherit;
-		line-height: 1.55;
-		resize: none;
-	}
-	textarea:focus {
-		outline: none;
-		border-color: #a78bfa;
-	}
-</style>

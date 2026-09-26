@@ -22,7 +22,7 @@
 	{#if error()}
 		<div class="row">
 			<span class="label">error</span>
-			<span class="value" style="color:#f87171">{error()}</span>
+			<span class="value text-danger">{error()}</span>
 		</div>
 	{/if}
 	<div class="actions">

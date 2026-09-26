@@ -29,7 +29,13 @@
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">status</span>
-		<span class="badge badge-{status().toLowerCase()}">{status()}</span>
+		<span
+			class="rounded-full px-2 py-[0.1rem] font-mono text-[0.75rem] {status() === 'OPEN'
+				? 'bg-success-bg text-success'
+				: status() === 'CONNECTING'
+					? 'bg-surface text-warning'
+					: 'bg-surface text-text-faint'}">{status()}</span
+		>
 	</div>
 
 	<div class="actions">
@@ -45,83 +51,25 @@
 		{/if}
 	</div>
 
-	<div class="send-row">
+	<div class="flex gap-1.5">
 		<input type="text" bind:value={input} placeholder="Message…" />
 		<button onclick={sendMessage} disabled={status() !== 'OPEN'}>Send</button>
 	</div>
 
 	{#if log.length > 0}
 		<div class="divider"></div>
-		<div class="log">
+		<div class="flex flex-col gap-1">
 			{#each log as entry, i (i)}
-				<div class="log-entry {entry.startsWith('→') ? 'sent' : 'recv'}">{entry}</div>
+				<div
+					class="rounded px-2 py-1 font-mono text-[0.8rem] {entry.startsWith('→')
+						? 'text-accent bg-accent-bg'
+						: 'text-success bg-success-bg'}"
+				>
+					{entry}
+				</div>
 			{/each}
 		</div>
 	{/if}
 
 	<p class="hint">Uses wss://echo.websocket.events — messages are echoed back</p>
 </div>
-
-<style>
-	.badge {
-		font-size: 0.75rem;
-		padding: 0.1rem 0.5rem;
-		border-radius: 999px;
-		font-family: monospace;
-	}
-
-	.badge-connecting {
-		background: #1e1e1e;
-		color: #facc15;
-	}
-	.badge-open {
-		background: #142a14;
-		color: #86efac;
-	}
-	.badge-closed {
-		background: #1e1e1e;
-		color: #555;
-	}
-
-	.send-row {
-		display: flex;
-		gap: 0.4rem;
-	}
-
-	.send-row input {
-		flex: 1;
-		background: #1e1e1e;
-		border: 1px solid #2e2e2e;
-		border-radius: 6px;
-		padding: 0.35rem 0.65rem;
-		color: #e8e8e8;
-		font-size: 0.85rem;
-		outline: none;
-	}
-
-	.send-row input:focus {
-		border-color: #a78bfa;
-	}
-
-	.log {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.log-entry {
-		font-family: monospace;
-		font-size: 0.8rem;
-		padding: 0.2rem 0.5rem;
-		border-radius: 4px;
-	}
-
-	.log-entry.sent {
-		color: #a78bfa;
-		background: #1a1630;
-	}
-	.log-entry.recv {
-		color: #86efac;
-		background: #142a14;
-	}
-</style>

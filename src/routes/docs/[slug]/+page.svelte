@@ -237,6 +237,24 @@
 	// Meta tags take the marker-free form — markup would leak into search
 	// results and link previews.
 	const metaDescription = $derived(stripInline(page.description));
+
+	// ── Shared class strings ──────────────────────────────────────────────────
+	// Repeated across several sections; named here rather than pasted inline so
+	// a change lands in one place.
+	const sectionHeading =
+		'text-text-dim border-border m-0 mb-3.5 border-b pb-1.5 text-[1.05rem] font-semibold tracking-tight';
+	const codeBlock = 'bg-bg-sunken border-border m-0 overflow-x-auto rounded-lg border px-5 py-4.5';
+	const codeText =
+		"text-accent font-['Fira_Code','Cascadia_Code',monospace] text-[0.82rem] whitespace-pre";
+	const tableHead =
+		'text-text-faint border-border border-b px-3 py-1.5 text-left text-[0.75rem] font-semibold tracking-wider uppercase';
+	const tableCell = 'border-border/60 text-text-dim border-b px-3 py-2.5 align-top';
+	const descCell = 'text-text-muted leading-normal';
+	const navBtn =
+		'bg-bg-elev border-border hover:border-accent hover:bg-accent-bg flex max-w-[48%] min-w-0 items-center gap-3 rounded-lg border px-4 py-3 no-underline transition-colors';
+	const navArrow = 'text-text-faint shrink-0 text-base transition-colors';
+	const navKicker = 'text-text-faint text-[0.7rem] tracking-wider uppercase';
+	const navName = 'text-text truncate font-mono text-[0.9rem]';
 </script>
 
 <svelte:head>
@@ -254,58 +272,62 @@
 	<meta name="twitter:image" content="{$appPage.url.origin}/logo.svg" />
 </svelte:head>
 
-<article class="doc">
+<article class="max-w-[780px]">
 	<!-- ─── Title ─── -->
-	<header class="doc-header">
-		<h1 class="doc-title">{page.title}</h1>
-		<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags, and the source is repo-authored doc copy, not user input -->
-		<p class="doc-desc">{@html formatInline(page.description)}</p>
+	<header class="border-border mb-8 border-b pb-8">
+		<h1 class="text-accent m-0 mb-2.5 font-mono text-[2.25rem] font-extrabold tracking-[-0.04em]">
+			{page.title}
+		</h1>
+		<p class="doc-prose text-text-muted m-0 text-base leading-relaxed">
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags, and the source is repo-authored doc copy, not user input -->
+			{@html formatInline(page.description)}
+		</p>
 	</header>
 
 	<!-- ─── Live Demo ─── -->
 	{#if Demo}
-		<section class="doc-section">
-			<h2>Live Demo</h2>
-			<div class="demo-panel">
+		<section class="mb-10">
+			<h2 class={sectionHeading}>Live Demo</h2>
+			<div class="bg-bg-elev border-border rounded-[10px] border p-5">
 				<Demo />
 			</div>
 		</section>
 	{/if}
 
 	<!-- ─── Usage ─── -->
-	<section class="doc-section">
-		<h2>Usage</h2>
-		<pre class="code-block"><code>{page.usage}</code></pre>
+	<section class="mb-10">
+		<h2 class={sectionHeading}>Usage</h2>
+		<pre class={codeBlock}><code class={codeText}>{page.usage}</code></pre>
 	</section>
 
 	<!-- ─── API: Parameters ─── -->
 	{#if page.params && page.params.length > 0}
-		<section class="doc-section">
-			<h2>Parameters</h2>
-			<div class="table-wrap">
-				<table>
+		<section class="mb-10">
+			<h2 class={sectionHeading}>Parameters</h2>
+			<div class="overflow-x-auto">
+				<table class="w-full border-collapse text-[0.85rem]">
 					<thead>
 						<tr>
-							<th>Name</th>
-							<th>Type</th>
-							<th>Default</th>
-							<th>Description</th>
+							<th class={tableHead}>Name</th>
+							<th class={tableHead}>Type</th>
+							<th class={tableHead}>Default</th>
+							<th class={tableHead}>Description</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each page.params as row (row.name)}
 							<tr>
-								<td><code class="inline-code">{row.name}</code></td>
-								<td><code class="inline-code type">{row.type}</code></td>
-								<td>
+								<td class={tableCell}><code class="inline-code">{row.name}</code></td>
+								<td class={tableCell}><code class="inline-code type">{row.type}</code></td>
+								<td class={tableCell}>
 									{#if row.default}
 										<code class="inline-code muted">{row.default}</code>
 									{:else}
-										<span class="muted">—</span>
+										<span class="text-text-faint">—</span>
 									{/if}
 								</td>
 								<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
-								<td class="desc-cell">{@html formatInline(row.description)}</td>
+								<td class="{tableCell} {descCell}">{@html formatInline(row.description)}</td>
 							</tr>
 						{/each}
 					</tbody>
@@ -316,32 +338,32 @@
 
 	<!-- ─── API: Options ─── -->
 	{#if page.options && page.options.length > 0}
-		<section class="doc-section">
-			<h2>Options</h2>
-			<div class="table-wrap">
-				<table>
+		<section class="mb-10">
+			<h2 class={sectionHeading}>Options</h2>
+			<div class="overflow-x-auto">
+				<table class="w-full border-collapse text-[0.85rem]">
 					<thead>
 						<tr>
-							<th>Option</th>
-							<th>Type</th>
-							<th>Default</th>
-							<th>Description</th>
+							<th class={tableHead}>Option</th>
+							<th class={tableHead}>Type</th>
+							<th class={tableHead}>Default</th>
+							<th class={tableHead}>Description</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each page.options as row (row.name)}
 							<tr>
-								<td><code class="inline-code">{row.name}</code></td>
-								<td><code class="inline-code type">{row.type}</code></td>
-								<td>
+								<td class={tableCell}><code class="inline-code">{row.name}</code></td>
+								<td class={tableCell}><code class="inline-code type">{row.type}</code></td>
+								<td class={tableCell}>
 									{#if row.default}
 										<code class="inline-code muted">{row.default}</code>
 									{:else}
-										<span class="muted">—</span>
+										<span class="text-text-faint">—</span>
 									{/if}
 								</td>
 								<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
-								<td class="desc-cell">{@html formatInline(row.description)}</td>
+								<td class="{tableCell} {descCell}">{@html formatInline(row.description)}</td>
 							</tr>
 						{/each}
 					</tbody>
@@ -352,24 +374,24 @@
 
 	<!-- ─── API: Returns ─── -->
 	{#if page.returns && page.returns.length > 0}
-		<section class="doc-section">
-			<h2>Returns</h2>
-			<div class="table-wrap">
-				<table>
+		<section class="mb-10">
+			<h2 class={sectionHeading}>Returns</h2>
+			<div class="overflow-x-auto">
+				<table class="w-full border-collapse text-[0.85rem]">
 					<thead>
 						<tr>
-							<th>Property</th>
-							<th>Type</th>
-							<th>Description</th>
+							<th class={tableHead}>Property</th>
+							<th class={tableHead}>Type</th>
+							<th class={tableHead}>Description</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each page.returns as row (row.name)}
 							<tr>
-								<td><code class="inline-code">{row.name}</code></td>
-								<td><code class="inline-code type">{row.type}</code></td>
+								<td class={tableCell}><code class="inline-code">{row.name}</code></td>
+								<td class={tableCell}><code class="inline-code type">{row.type}</code></td>
 								<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
-								<td class="desc-cell">{@html formatInline(row.description)}</td>
+								<td class="{tableCell} {descCell}">{@html formatInline(row.description)}</td>
 							</tr>
 						{/each}
 					</tbody>
@@ -379,32 +401,34 @@
 	{/if}
 
 	<!-- ─── Example ─── -->
-	<section class="doc-section">
-		<h2>Example</h2>
-		<pre class="code-block"><code>{page.example}</code></pre>
+	<section class="mb-10">
+		<h2 class={sectionHeading}>Example</h2>
+		<pre class={codeBlock}><code class={codeText}>{page.example}</code></pre>
 	</section>
 
 	<!-- ─── Notes ─── -->
 	{#if page.notes && page.notes.length > 0}
-		<section class="doc-section">
-			<h2>Notes</h2>
-			<ul class="notes-list">
+		<section class="mb-10">
+			<h2 class={sectionHeading}>Notes</h2>
+			<ul class="m-0 flex list-disc flex-col gap-2 py-0 pr-0 pl-5">
 				{#each page.notes as note (note)}
-					<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
-					<li>{@html formatInline(note)}</li>
+					<li class="doc-prose text-text-muted text-[0.9rem] leading-relaxed">
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -- formatInline() escapes HTML before emitting tags -->
+						{@html formatInline(note)}
+					</li>
 				{/each}
 			</ul>
 		</section>
 	{/if}
 
 	<!-- ─── Prev / Next ─── -->
-	<nav class="page-nav">
+	<nav class="border-border mt-14 flex justify-between gap-4 border-t pt-8">
 		{#if prev}
-			<a href={resolve('/docs/[slug]', { slug: prev.slug })} class="page-nav-btn prev">
-				<span class="nav-arrow">←</span>
-				<span class="nav-info">
-					<span class="nav-label">Previous</span>
-					<span class="nav-name">{prev.label}</span>
+			<a href={resolve('/docs/[slug]', { slug: prev.slug })} class="group {navBtn}">
+				<span class="{navArrow} group-hover:text-accent">←</span>
+				<span class="flex min-w-0 flex-col gap-[0.1rem]">
+					<span class={navKicker}>Previous</span>
+					<span class={navName}>{prev.label}</span>
 				</span>
 			</a>
 		{:else}
@@ -412,325 +436,15 @@
 		{/if}
 
 		{#if next}
-			<a href={resolve('/docs/[slug]', { slug: next.slug })} class="page-nav-btn next">
-				<span class="nav-info" style="text-align:right">
-					<span class="nav-label">Next</span>
-					<span class="nav-name">{next.label}</span>
+			<a href={resolve('/docs/[slug]', { slug: next.slug })} class="group {navBtn}">
+				<span class="flex min-w-0 flex-col gap-[0.1rem] text-right">
+					<span class={navKicker}>Next</span>
+					<span class={navName}>{next.label}</span>
 				</span>
-				<span class="nav-arrow">→</span>
+				<span class="{navArrow} group-hover:text-accent">→</span>
 			</a>
 		{:else}
 			<div></div>
 		{/if}
 	</nav>
 </article>
-
-<style>
-	.doc {
-		max-width: 780px;
-	}
-
-	/* ─── Header ─── */
-	.doc-header {
-		padding-bottom: 2rem;
-		border-bottom: 1px solid #1e1e1e;
-		margin-bottom: 2rem;
-	}
-
-	.doc-title {
-		font-size: 2.25rem;
-		font-weight: 800;
-		margin: 0 0 0.6rem;
-		letter-spacing: -0.04em;
-		font-family: monospace;
-		color: #a78bfa;
-	}
-
-	.doc-desc {
-		color: #888;
-		font-size: 1rem;
-		line-height: 1.65;
-		margin: 0;
-	}
-
-	/* ─── Sections ─── */
-	.doc-section {
-		margin-bottom: 2.5rem;
-	}
-
-	.doc-section h2 {
-		font-size: 1.05rem;
-		font-weight: 600;
-		color: #ccc;
-		margin: 0 0 0.9rem;
-		padding-bottom: 0.4rem;
-		border-bottom: 1px solid #1e1e1e;
-		letter-spacing: -0.01em;
-	}
-
-	/* ─── Live Demo Panel ─── */
-	.demo-panel {
-		background: #141414;
-		border: 1px solid #2a2a2a;
-		border-radius: 10px;
-		padding: 1.25rem;
-		/* shared demo sub-styles (passed down to demo components) */
-	}
-
-	/* Styles shared by all demo components via global cascade */
-	:global(.demo-wrap) {
-		display: flex;
-		flex-direction: column;
-		gap: 0.6rem;
-	}
-
-	:global(.demo-wrap .hint) {
-		font-size: 0.82rem;
-		color: #555;
-		margin: 0;
-		font-style: italic;
-	}
-
-	:global(.demo-wrap .row) {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		font-size: 0.875rem;
-	}
-
-	:global(.demo-wrap .label) {
-		font-family: monospace;
-		font-size: 0.78rem;
-		color: #555;
-		min-width: 72px;
-		flex-shrink: 0;
-	}
-
-	:global(.demo-wrap .value) {
-		font-family: monospace;
-		color: #999;
-	}
-
-	:global(.demo-wrap .value.accent) {
-		color: #a78bfa;
-	}
-
-	:global(.demo-wrap .muted) {
-		color: #444;
-		font-size: 0.8rem;
-	}
-
-	:global(.demo-wrap .divider) {
-		height: 1px;
-		background: #222;
-		margin: 0.25rem 0;
-	}
-
-	:global(.demo-wrap .actions) {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-	}
-
-	:global(.demo-wrap button) {
-		background: #2a2a2a;
-		color: #e8e8e8;
-		border: 1px solid #3a3a3a;
-		border-radius: 6px;
-		padding: 0.3rem 0.7rem;
-		font-size: 0.83rem;
-		cursor: pointer;
-		transition: background 0.15s;
-	}
-
-	:global(.demo-wrap button:hover) {
-		background: #3a3a3a;
-	}
-
-	:global(.demo-wrap button.active) {
-		background: #1a1630;
-		border-color: #a78bfa;
-		color: #a78bfa;
-	}
-
-	:global(.demo-wrap input[type='text']) {
-		width: 100%;
-		background: #1e1e1e;
-		border: 1px solid #2e2e2e;
-		border-radius: 6px;
-		padding: 0.35rem 0.65rem;
-		color: #e8e8e8;
-		font-size: 0.85rem;
-		outline: none;
-		box-sizing: border-box;
-	}
-
-	:global(.demo-wrap input[type='text']:focus) {
-		border-color: #a78bfa;
-	}
-
-	/* ─── Code ─── */
-	.code-block {
-		background: #0d0d0d;
-		border: 1px solid #222;
-		border-radius: 8px;
-		padding: 1.1rem 1.25rem;
-		overflow-x: auto;
-		margin: 0;
-	}
-
-	.code-block code {
-		font-family: 'Fira Code', 'Cascadia Code', monospace;
-		font-size: 0.82rem;
-		color: #a78bfa;
-		white-space: pre;
-	}
-
-	.inline-code {
-		font-family: 'Fira Code', 'Cascadia Code', monospace;
-		font-size: 0.8rem;
-		background: #1e1e1e;
-		padding: 0.15rem 0.4rem;
-		border-radius: 4px;
-		color: #c4b5fd;
-	}
-
-	.inline-code.type {
-		color: #7dd3fc;
-	}
-
-	.inline-code.muted {
-		color: #666;
-	}
-
-	/* ─── Tables ─── */
-	.table-wrap {
-		overflow-x: auto;
-	}
-
-	table {
-		width: 100%;
-		border-collapse: collapse;
-		font-size: 0.85rem;
-	}
-
-	th {
-		text-align: left;
-		color: #555;
-		font-weight: 600;
-		font-size: 0.75rem;
-		letter-spacing: 0.05em;
-		text-transform: uppercase;
-		padding: 0.4rem 0.75rem;
-		border-bottom: 1px solid #1e1e1e;
-	}
-
-	td {
-		padding: 0.55rem 0.75rem;
-		border-bottom: 1px solid #161616;
-		vertical-align: top;
-		color: #bbb;
-	}
-
-	tr:last-child td {
-		border-bottom: none;
-	}
-
-	.muted {
-		color: #444;
-	}
-
-	.desc-cell {
-		color: #999;
-		line-height: 1.5;
-	}
-
-	/* ─── Notes ─── */
-	.notes-list {
-		margin: 0;
-		padding: 0 0 0 1.25rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.notes-list li {
-		color: #888;
-		font-size: 0.9rem;
-		line-height: 1.55;
-	}
-
-	:global(.notes-list li code) {
-		font-family: 'Fira Code', 'Cascadia Code', monospace;
-		font-size: 0.8rem;
-		background: #1e1e1e;
-		padding: 0.1rem 0.35rem;
-		border-radius: 4px;
-		color: #c4b5fd;
-	}
-
-	/* ─── Prev / Next nav ─── */
-	.page-nav {
-		display: flex;
-		justify-content: space-between;
-		gap: 1rem;
-		margin-top: 3.5rem;
-		padding-top: 2rem;
-		border-top: 1px solid #1e1e1e;
-	}
-
-	.page-nav-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.75rem 1rem;
-		border-radius: 8px;
-		border: 1px solid #222;
-		background: #141414;
-		text-decoration: none;
-		transition:
-			border-color 0.15s,
-			background 0.15s;
-		min-width: 0;
-		max-width: 48%;
-	}
-
-	.page-nav-btn:hover {
-		border-color: #a78bfa;
-		background: #1a1630;
-	}
-
-	.nav-arrow {
-		color: #555;
-		font-size: 1rem;
-		flex-shrink: 0;
-		transition: color 0.15s;
-	}
-
-	.page-nav-btn:hover .nav-arrow {
-		color: #a78bfa;
-	}
-
-	.nav-info {
-		display: flex;
-		flex-direction: column;
-		gap: 0.1rem;
-		min-width: 0;
-	}
-
-	.nav-label {
-		font-size: 0.7rem;
-		color: #555;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
-	.nav-name {
-		font-family: monospace;
-		font-size: 0.9rem;
-		color: #ccc;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-</style>

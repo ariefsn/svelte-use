@@ -16,7 +16,7 @@
 	<input
 		bind:this={input}
 		placeholder="Auto-focused on typing…"
-		style="background:#111;border:1px solid #333;padding:0.5rem;border-radius:4px;color:#eee;width:100%"
+		class="bg-bg border-border-strong text-text w-full rounded border px-2 py-2"
 	/>
 	<p class="hint">
 		Start typing anywhere on the page (not in an input) and this input will auto-focus.

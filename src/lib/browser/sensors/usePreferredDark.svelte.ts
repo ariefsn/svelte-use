@@ -1,12 +1,15 @@
+import { PREFERS_DARK_QUERY } from '../../internal/mediaQueries.js';
 import { useMediaQuery } from './useMediaQuery.svelte.js';
 
 /**
  * The media query for the OS dark-mode preference.
  *
- * Exported so `usePreferredColorScheme` and `useColorMode` reference one
- * literal rather than three copies of a string a typo would silently break.
+ * Re-exported here so `usePreferredColorScheme` and `useColorMode` reference
+ * one literal rather than three copies of a string a typo would silently
+ * break. It lives in a plain module so `colorModeScript` can embed it without
+ * importing anything rune-compiled.
  */
-export const PREFERS_DARK_QUERY = '(prefers-color-scheme: dark)';
+export { PREFERS_DARK_QUERY };
 
 /**
  * Reactively tracks whether the OS requests a dark colour scheme.

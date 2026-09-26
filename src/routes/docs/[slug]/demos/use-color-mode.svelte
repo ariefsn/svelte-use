@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { useColorMode } from '$lib';
 
-	let preview = $state<HTMLDivElement | null>(null);
-
-	// Scoped to the preview box rather than <html>, so this demo themes only
-	// itself. Omit `target` to drive the whole document.
-	const theme = useColorMode({
-		target: () => preview,
-		attribute: 'data-theme',
-		storageKey: 'svelte-use-demo-color-mode'
-	});
+	/*
+	 * Deliberately the site's own colour mode — same default storage key, same
+	 * target — rather than a sandboxed copy. Changing it here moves the whole
+	 * page, and the toggle in the sidebar follows instantly, which is the
+	 * same-page sync channel doing its job: the `storage` event does not fire
+	 * in the tab that caused the write, so two instances would otherwise
+	 * disagree.
+	 */
+	const theme = useColorMode({ initialValue: 'dark' });
 
 	const options = ['auto', 'light', 'dark'] as const;
 </script>
@@ -42,41 +42,18 @@
 		<span class="value">{theme.system()}</span>
 	</div>
 
-	<div class="preview" bind:this={preview}>
-		<strong>Preview</strong>
-		<span>data-theme="{theme.resolved()}"</span>
+	<div
+		class="bg-surface border-border text-text flex items-center justify-between gap-3 rounded-lg border px-3.5 py-3 text-[0.85rem]"
+	>
+		<strong>This whole page follows the selection.</strong>
+		<span class="text-text-muted font-mono">html.{theme.resolved()}</span>
 	</div>
 
 	<p class="hint">
-		The selection persists, so it survives a reload. On <code>auto</code> it keeps following your OS
-		appearance. A flash on first paint needs <code>colorModeScript()</code> in
-		<code>app.html</code> — a composable runs after hydration, which is after first paint.
+		The selection persists, so it survives a reload, and the sidebar toggle stays in step. On
+		<code>auto</code> it keeps following your OS appearance. The flash on first paint is prevented
+		by
+		<code>colorModeScript()</code> in <code>app.html</code> — a composable runs after hydration, which
+		is after first paint.
 	</p>
 </div>
-
-<style>
-	.preview {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.75rem;
-		padding: 0.75rem 0.9rem;
-		border-radius: 8px;
-		border: 1px solid #2a2a2a;
-		background: #111;
-		color: #e8e8e8;
-		font-size: 0.85rem;
-	}
-	.preview span {
-		font-family: monospace;
-		color: #888;
-	}
-	.preview[data-theme='light'] {
-		border-color: #e3e3e6;
-		background: #fff;
-		color: #1a1a1a;
-	}
-	.preview[data-theme='light'] span {
-		color: #666;
-	}
-</style>
