@@ -1,3 +1,4 @@
+import { flushSync } from 'svelte';
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { useTimeAgo } from './useTimeAgo.svelte.js';
 
@@ -93,11 +94,14 @@ describe('useTimeAgo', () => {
 
 	test('updates label after interval elapses', () => {
 		const cleanup = $effect.root(() => {
-			let ts = $state(Date.now() - 30_000);
+			const ts = $state(Date.now() - 30_000);
 			const ago = useTimeAgo(() => ts, { interval: 1000 });
+			flushSync();
 			expect(ago()).toBe('30 seconds ago');
 
 			vi.advanceTimersByTime(1000);
+			// The interval callback writes $state; flush before reading it back.
+			flushSync();
 			expect(ago()).toBe('31 seconds ago');
 		});
 		cleanup();
@@ -108,6 +112,8 @@ describe('useTimeAgo', () => {
 
 		const cleanup = $effect.root(() => {
 			useTimeAgo(() => Date.now() - 5000, { interval: 1000 });
+			// The interval is created by an $effect, which only runs on flush.
+			flushSync();
 		});
 
 		cleanup();
@@ -119,6 +125,9 @@ describe('useTimeAgo', () => {
 		const cleanup = $effect.root(() => {
 			const setIntervalSpy = vi.spyOn(globalThis, 'setInterval');
 			useTimeAgo(() => Date.now() - 5000);
+			// setInterval is called from an $effect, so nothing is recorded
+			// on the spy until the effect runs.
+			flushSync();
 			const call = setIntervalSpy.mock.calls.find((c) => c[1] === 30_000);
 			expect(call).toBeDefined();
 			setIntervalSpy.mockRestore();

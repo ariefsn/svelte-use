@@ -8,14 +8,18 @@
 	});
 </script>
 
-<div class="demo-wrap" style="gap:0.75rem">
-	<div class="scroll-box" bind:this={container}>
-		{#each Array.from({ length: 30 }, (_, i) => i + 1) as n}
-			<div class="scroll-item">Row {n}</div>
+<div class="demo-wrap gap-3">
+	<div class="bg-bg border-border h-40 overflow-y-auto rounded-lg border" bind:this={container}>
+		{#each Array.from({ length: 30 }, (_, i) => i + 1) as n (n)}
+			<div
+				class="text-text-faint border-border/50 border-b px-3 py-1.5 text-[0.85rem] last:border-b-0"
+			>
+				Row {n}
+			</div>
 		{/each}
 	</div>
 
-	<div class="stats">
+	<div class="flex flex-col gap-1">
 		<div class="row">
 			<span class="label">x</span><span class="value accent">{Math.round(scroll.x())}px</span>
 		</div>
@@ -49,27 +53,3 @@
 		</div>
 	</div>
 </div>
-
-<style>
-	.scroll-box {
-		height: 160px;
-		overflow-y: auto;
-		background: #111;
-		border: 1px solid #2a2a2a;
-		border-radius: 8px;
-	}
-	.scroll-item {
-		padding: 0.4rem 0.75rem;
-		font-size: 0.85rem;
-		color: #555;
-		border-bottom: 1px solid #1a1a1a;
-	}
-	.scroll-item:last-child {
-		border-bottom: none;
-	}
-	.stats {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-</style>

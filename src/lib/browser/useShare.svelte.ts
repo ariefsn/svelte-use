@@ -1,3 +1,5 @@
+import { useSupported } from './useSupported.svelte.js';
+
 export interface UseShareData {
 	title?: string;
 	text?: string;
@@ -12,25 +14,12 @@ export interface UseShareReturn {
 	share: (data?: UseShareData) => Promise<boolean>;
 }
 
-/**
- * Reactive wrapper around the Web Share API.
- *
- * The `share` action must be triggered by a user gesture (e.g., button click).
- *
- * @returns Object with `isSupported` and `share`
- *
- * @example
- * ```ts
- * const { isSupported, share } = useShare();
- * await share({ title: 'Check this out', url: location.href });
- * ```
- */
+/** Reactive wrapper around the Web Share API for native sharing. */
 export function useShare(): UseShareReturn {
-	const isBrowser = typeof navigator !== 'undefined';
-	const supported = isBrowser && 'share' in navigator;
+	const isSupported = useSupported(() => 'share' in navigator);
 
 	async function share(data?: UseShareData): Promise<boolean> {
-		if (!supported || !data) return false;
+		if (!isSupported() || !data) return false;
 
 		try {
 			await navigator.share(data);
@@ -41,7 +30,7 @@ export function useShare(): UseShareReturn {
 	}
 
 	return {
-		isSupported: () => supported,
+		isSupported,
 		share
 	};
 }

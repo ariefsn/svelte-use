@@ -24,3 +24,6 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 # Playwright
 test-results
+
+# Coverage
+/coverage

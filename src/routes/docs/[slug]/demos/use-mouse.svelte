@@ -7,57 +7,21 @@
 <div class="demo-wrap">
 	<p class="hint">Move your mouse over the page — position updates in real time.</p>
 
-	<div class="crosshair-area">
-		<div class="stats">
-			<div class="stat"><span class="axis">X</span><span class="val accent">{mouse.x()}</span></div>
-			<div class="stat"><span class="axis">Y</span><span class="val accent">{mouse.y()}</span></div>
+	<div class="bg-bg border-border flex items-center justify-between rounded-lg border p-6">
+		<div class="flex gap-6">
+			<div class="flex flex-col items-center gap-0.5">
+				<span class="text-text-faint text-[0.7rem] tracking-[0.06em] uppercase">X</span>
+				<span class="text-accent text-[1.6rem] font-bold tabular-nums">{mouse.x()}</span>
+			</div>
+			<div class="flex flex-col items-center gap-0.5">
+				<span class="text-text-faint text-[0.7rem] tracking-[0.06em] uppercase">Y</span>
+				<span class="text-accent text-[1.6rem] font-bold tabular-nums">{mouse.y()}</span>
+			</div>
 		</div>
-		<div class="source-badge">{mouse.sourceType() ?? 'none'}</div>
+		<div
+			class="bg-accent-bg text-accent border-accent-border rounded-full border px-2.5 py-1 font-mono text-[0.8rem]"
+		>
+			{mouse.sourceType() ?? 'none'}
+		</div>
 	</div>
 </div>
-
-<style>
-	.crosshair-area {
-		background: #111;
-		border: 1px solid #2a2a2a;
-		border-radius: 8px;
-		padding: 1.5rem;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-	.stats {
-		display: flex;
-		gap: 1.5rem;
-	}
-	.stat {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.2rem;
-	}
-	.axis {
-		font-size: 0.7rem;
-		color: #555;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-	}
-	.val {
-		font-size: 1.6rem;
-		font-weight: 700;
-		font-variant-numeric: tabular-nums;
-		color: #888;
-	}
-	.val.accent {
-		color: #a78bfa;
-	}
-	.source-badge {
-		font-family: monospace;
-		font-size: 0.8rem;
-		background: #1a1630;
-		color: #a78bfa;
-		border: 1px solid #3b2d6e;
-		padding: 0.25rem 0.65rem;
-		border-radius: 999px;
-	}
-</style>

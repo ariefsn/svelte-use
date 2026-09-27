@@ -1,0 +1,279 @@
+@import 'tailwindcss';
+
+/*
+ * Colour tokens.
+ *
+ * Dark is the default, matching the site as it has always looked, so a
+ * first-time visitor on a light-mode OS still sees the dark design and opts
+ * into light deliberately. `useColorMode` writes `class="dark"` or
+ * `class="light"` onto <html>; the token values below are simply redefined
+ * under `.light`, so utilities need no `dark:` variant to follow the theme.
+ *
+ * These replace ~600 hardcoded hex literals that had grown into a 28-step
+ * neutral ramp with seven near-identical near-blacks. Collapsing that ramp is
+ * most of the value here, and it means small, deliberate visual deltas in
+ * dark mode.
+ */
+@theme {
+	/* Neutrals */
+	--color-bg-sunken: #0a0a0a;
+	--color-bg: #0f0f0f;
+	--color-bg-elev: #141414;
+	--color-surface: #1e1e1e;
+	--color-surface-2: #2a2a2a;
+	--color-surface-3: #3a3a3a;
+	--color-border: #2a2a2a;
+	--color-border-strong: #3a3a3a;
+	--color-text: #e8e8e8;
+	--color-text-dim: #aaaaaa;
+	--color-text-muted: #888888;
+	--color-text-faint: #555555;
+
+	/* Accent */
+	--color-accent: #a78bfa;
+	--color-accent-strong: #c4b5fd;
+	--color-accent-dim: #7c3aed;
+	--color-accent-bg: #1a1630;
+	--color-accent-border: #3b2d6e;
+
+	/* Semantic */
+	--color-success: #4ade80;
+	--color-success-bg: #142a14;
+	--color-success-border: #166534;
+	--color-danger: #f87171;
+	--color-danger-bg: #2a1a1a;
+	--color-danger-border: #7f1d1d;
+	--color-warning: #fbbf24;
+	--color-warning-bg: #2a1e0f;
+	--color-warning-border: #92400e;
+	--color-info: #7dd3fc;
+
+	/* Scrims */
+	--color-overlay: oklch(0% 0 0 / 0.6);
+}
+
+/*
+ * Light theme. Plain CSS rather than a second `@theme`, because only a
+ * selector-scoped block participates in the cascade — `@theme` always emits
+ * at `:root`.
+ */
+:root.light {
+	--color-bg-sunken: #f4f4f6;
+	--color-bg: #ffffff;
+	--color-bg-elev: #f8f8fa;
+	--color-surface: #ffffff;
+	--color-surface-2: #f1f1f4;
+	--color-surface-3: #e6e6ea;
+	--color-border: #e3e3e6;
+	--color-border-strong: #cfcfd6;
+	--color-text: #18181b;
+	--color-text-dim: #52525b;
+	--color-text-muted: #6b7280;
+	--color-text-faint: #9ca3af;
+
+	--color-accent: #7c3aed;
+	--color-accent-strong: #6d28d9;
+	--color-accent-dim: #a78bfa;
+	--color-accent-bg: #f5f3ff;
+	--color-accent-border: #ddd6fe;
+
+	--color-success: #15803d;
+	--color-success-bg: #f0fdf4;
+	--color-success-border: #86efac;
+	--color-danger: #b91c1c;
+	--color-danger-bg: #fef2f2;
+	--color-danger-border: #fca5a5;
+	--color-warning: #b45309;
+	--color-warning-bg: #fffbeb;
+	--color-warning-border: #fcd34d;
+	--color-info: #0369a1;
+
+	--color-overlay: oklch(0% 0 0 / 0.4);
+}
+
+/* Lets native form controls, scrollbars and caret colours follow the theme. */
+:root {
+	color-scheme: dark;
+}
+:root.light {
+	color-scheme: light;
+}
+
+/*
+ * A `light:` variant, for the few places where flipping a token is not
+ * enough and a rule genuinely differs between themes.
+ */
+@custom-variant light (&:where(:root.light, :root.light *));
+
+@layer base {
+	html {
+		background: var(--color-bg);
+		color: var(--color-text);
+		/*
+		 * Animates jumps to a `#section` anchor from the "On this page" rail.
+		 * Note this also animates SvelteKit's scroll-to-top on navigation.
+		 */
+		scroll-behavior: smooth;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		html {
+			scroll-behavior: auto;
+		}
+	}
+
+	body {
+		font-family: system-ui, sans-serif;
+		margin: 0;
+		padding: 0;
+	}
+}
+
+/*
+ * Shared demo classes.
+ *
+ * 82 of the 94 demo components inherit these, so they stay component classes
+ * rather than utilities repeated across 82 files. They previously lived as
+ * `:global(...)` rules inside the docs page.
+ */
+@layer components {
+	.demo-wrap {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+	}
+
+	.demo-wrap .hint {
+		font-size: 0.82rem;
+		color: var(--color-text-muted);
+		margin: 0;
+		font-style: italic;
+	}
+
+	.demo-wrap .row {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		font-size: 0.875rem;
+	}
+
+	.demo-wrap .label {
+		font-family: monospace;
+		font-size: 0.78rem;
+		color: var(--color-text-muted);
+		min-width: 72px;
+		flex-shrink: 0;
+	}
+
+	.demo-wrap .value {
+		font-family: monospace;
+		color: var(--color-text-dim);
+	}
+
+	.demo-wrap .value.accent {
+		color: var(--color-accent);
+	}
+
+	.demo-wrap .muted {
+		color: var(--color-text-faint);
+		font-size: 0.8rem;
+	}
+
+	.demo-wrap .divider {
+		height: 1px;
+		background: var(--color-border);
+		margin: 0.25rem 0;
+	}
+
+	.demo-wrap .actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+
+	.demo-wrap button {
+		background: var(--color-surface-2);
+		color: var(--color-text);
+		border: 1px solid var(--color-border-strong);
+		border-radius: 6px;
+		padding: 0.3rem 0.7rem;
+		font-size: 0.83rem;
+		cursor: pointer;
+		transition: background 0.15s;
+	}
+
+	.demo-wrap button:hover:not(:disabled) {
+		background: var(--color-surface-3);
+	}
+
+	.demo-wrap button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.demo-wrap button.active {
+		background: var(--color-accent-bg);
+		border-color: var(--color-accent);
+		color: var(--color-accent);
+	}
+
+	.demo-wrap input[type='text'],
+	.demo-wrap input[type='number'],
+	.demo-wrap input[type='search'] {
+		width: 100%;
+		background: var(--color-bg-elev);
+		border: 1px solid var(--color-border);
+		border-radius: 6px;
+		padding: 0.35rem 0.65rem;
+		color: var(--color-text);
+		font-size: 0.85rem;
+		outline: none;
+		box-sizing: border-box;
+	}
+
+	.demo-wrap input[type='text']:focus,
+	.demo-wrap input[type='number']:focus,
+	.demo-wrap input[type='search']:focus {
+		border-color: var(--color-accent);
+	}
+
+	.demo-wrap input[type='range'] {
+		accent-color: var(--color-accent);
+	}
+}
+
+/*
+ * Classes emitted by `formatInline()` in src/docs/format.ts.
+ *
+ * These land inside `{@html ...}` output, so Svelte's scoped styles never see
+ * them — they have to be global, which is why they live here rather than on
+ * the component that renders them.
+ */
+@layer components {
+	.inline-code {
+		font-family: 'Fira Code', 'Cascadia Code', monospace;
+		font-size: 0.8rem;
+		background: var(--color-surface);
+		padding: 0.15rem 0.4rem;
+		border-radius: 4px;
+		color: var(--color-accent-strong);
+	}
+
+	.inline-code.type {
+		color: var(--color-info);
+	}
+
+	.inline-code.muted {
+		color: var(--color-text-muted);
+	}
+
+	/* Inline code inside a note or description, which carries no class. */
+	.doc-prose code {
+		font-family: 'Fira Code', 'Cascadia Code', monospace;
+		font-size: 0.8rem;
+		background: var(--color-surface);
+		padding: 0.1rem 0.35rem;
+		border-radius: 4px;
+		color: var(--color-accent-strong);
+	}
+}

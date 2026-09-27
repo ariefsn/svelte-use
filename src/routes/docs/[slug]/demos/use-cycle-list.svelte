@@ -23,7 +23,7 @@
 		<span class="value accent">{dirs.state()}</span>
 	</div>
 	<div class="actions">
-		{#each ['North', 'East', 'South', 'West'] as d, i}
+		{#each ['North', 'East', 'South', 'West'] as d, i (d)}
 			<button class:active={dirs.index() === i} onclick={() => dirs.setIndex(i)}>{d}</button>
 		{/each}
 	</div>

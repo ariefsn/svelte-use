@@ -1,30 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any --
+ * `any` appears only in the overload implementation signature; the public overloads infer
+ * `current`/`previous` from the dependency getters, so no caller ever sees `any`.
+ */
 import { untrack } from 'svelte';
 
 /**
- * Watches one or more reactive getters and calls a callback with
- * the current and previous values whenever they change.
- *
- * @param deps - A single getter or array of getter functions to watch
- * @param fn - Callback receiving `(current, previous)` values
- * @param options - Optional config: `runOnMounted` (default: `true`)
- *
- * @example
- * ```ts
- * let count = $state(0);
- * useWatch(() => count, (curr, prev) => {
- *   console.log(`changed from ${prev} to ${curr}`);
- * });
- * ```
- *
- * @example
- * ```ts
- * // Watching multiple values
- * let a = $state(0);
- * let b = $state('');
- * useWatch([() => a, () => b], ([currA, currB], [prevA, prevB]) => {
- *   console.log('values changed');
- * });
- * ```
+ * Watches one or more reactive getters and calls a callback with the current and previous values.
  */
 export function useWatch<T>(
 	deps: () => T,

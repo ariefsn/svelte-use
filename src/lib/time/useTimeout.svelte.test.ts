@@ -124,11 +124,9 @@ describe('useTimeout', () => {
 
 	test('cleanup on destroy cancels pending timeout', () => {
 		const cb = vi.fn();
-		let isPending!: () => boolean;
 
 		const cleanup = $effect.root(() => {
-			const t = useTimeout(cb, () => 500);
-			isPending = t.isPending;
+			useTimeout(cb, () => 500);
 			flushSync();
 		});
 

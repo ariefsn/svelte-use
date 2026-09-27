@@ -1,19 +1,6 @@
 /**
- * Returns a throttled version of the provided function.
- *
- * The returned function will invoke `fn` at most once per `delay` milliseconds,
- * forwarding the original arguments and preserving the return type. Any
- * pending trailing timer is cleared when the reactive scope is destroyed.
- *
- * @param fn - The function to throttle.
- * @param delay - Minimum milliseconds between invocations.
- * @returns A throttled function with the same signature as `fn`.
- *
- * @example
- * ```ts
- * const throttledScroll = useThrottleFn((e: Event) => handleScroll(e), 100);
- * window.addEventListener('scroll', throttledScroll);
- * ```
+ * Returns a throttled version of a function that fires at most once per `delay` milliseconds. Uses
+ * leading-edge invocation with a trailing call for the remainder of the window.
  */
 export function useThrottleFn<T extends (...args: Parameters<T>) => ReturnType<T>>(
 	fn: T,

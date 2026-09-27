@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any --
+ * `(...args: any[])` is a variadic pass-through to the caller's own promise factory;
+ * `unknown[]` would reject ordinary typed factories. The resolved value stays typed as `T`.
+ */
 export interface UseAsyncStateOptions<T> {
 	/** Execute immediately on creation (default: `true`) */
 	immediate?: boolean;
@@ -22,25 +26,7 @@ export interface UseAsyncStateReturn<T> {
 	execute: (...args: any[]) => Promise<T>;
 }
 
-/**
- * Reactive wrapper around async operations, tracking loading and error states.
- *
- * @param promise - A promise or function returning a promise
- * @param initial - The initial value before the promise resolves
- * @param options - Configuration options
- * @returns Object with `isReady`, `isLoading`, `current`, `error`, and `execute`
- *
- * @example
- * ```ts
- * const { current, isLoading, error, execute } = useAsyncState(
- *   () => fetch('/api/data').then(r => r.json()),
- *   null
- * );
- * // current() → null (initially)
- * // isLoading() → true
- * // After resolution: current() → data, isLoading() → false
- * ```
- */
+/** Reactive wrapper around async operations, tracking loading and error states. */
 export function useAsyncState<T>(
 	promise: ((...args: any[]) => Promise<T>) | Promise<T>,
 	initial: T,

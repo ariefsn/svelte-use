@@ -1,6 +1,10 @@
 import { page } from 'vitest/browser';
 import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-svelte';
+
+// No `$app/stores` mock is needed any more: the homepage's metadata moved
+// into `+page.ts`, so the component no longer reads the page store at all.
+
 import Page from './+page.svelte';
 
 describe('/+page.svelte', () => {

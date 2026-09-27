@@ -8,7 +8,9 @@
 </script>
 
 <div class="demo-wrap">
-	<div class="clock">{time}</div>
+	<div class="text-accent mb-2 font-mono text-[2.75rem] leading-none font-extrabold tabular-nums">
+		{time}
+	</div>
 	<div class="row">
 		<span class="label">date</span>
 		<span class="value">{date}</span>
@@ -19,15 +21,3 @@
 	</div>
 	<p class="hint">Updates every 1000ms via setInterval</p>
 </div>
-
-<style>
-	.clock {
-		font-size: 2.75rem;
-		font-weight: 800;
-		font-variant-numeric: tabular-nums;
-		color: #a78bfa;
-		line-height: 1;
-		margin-bottom: 0.5rem;
-		font-family: monospace;
-	}
-</style>

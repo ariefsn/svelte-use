@@ -1,33 +1,15 @@
 export interface UseIndexedDBOptions {
-	/** IndexedDB schema version. Increment to trigger `onupgradeneeded`. @default 1 */
+	/** IndexedDB schema version. Increment to trigger `onupgradeneeded`. Default `1`. */
 	version?: number;
-	/** Key path (field name) used as the primary key. @default 'id' */
+	/** Key path (field name) used as the primary key. Default `'id'`. */
 	keyPath?: string;
-	/** Auto-generate the key on `add`. @default true */
+	/** Auto-generate the key on `add`. Default `true`. */
 	autoIncrement?: boolean;
 }
 
 /**
- * Reactive IndexedDB utility with full CRUD, querying, and filtering.
- *
- * Opens (or creates) an object store on first use. All mutation methods
- * (`add`, `update`, `remove`, `clear`) automatically refresh the reactive
- * `items` array. SSR-safe — all operations are no-ops on the server.
- *
- * @param dbName    - IndexedDB database name
- * @param storeName - Object store name
- * @param options   - Version, keyPath, autoIncrement overrides
- *
- * @example
- * ```ts
- * interface Note { id?: number; text: string; done: boolean }
- * const db = useIndexedDB<Note>('my-app', 'notes');
- * await db.add({ text: 'Buy milk', done: false });
- * db.items;                                // [{ id: 1, text: 'Buy milk', done: false }]
- * await db.update({ id: 1, text: 'Buy milk', done: true });
- * await db.remove(1);
- * const pending = await db.query(n => !n.done);
- * ```
+ * Reactive IndexedDB utility with full CRUD, querying, and filtering. SSR-safe — all operations are
+ * no-ops on the server. Values survive page refreshes and browser restarts.
  */
 export function useIndexedDB<T extends object>(
 	dbName: string,
@@ -80,10 +62,7 @@ export function useIndexedDB<T extends object>(
 		});
 	}
 
-	/**
-	 * Fetch all records and refresh the reactive `items` array.
-	 * @returns All stored records
-	 */
+	/** Fetch all records and refresh the reactive `items` array. */
 	async function getAll(): Promise<T[]> {
 		if (!isBrowser) return [];
 		loading = true;
@@ -99,10 +78,7 @@ export function useIndexedDB<T extends object>(
 		}
 	}
 
-	/**
-	 * Fetch a single record by its primary key.
-	 * @param key - The primary key value
-	 */
+	/** Fetch a single record by its primary key. */
 	async function get(key: IDBValidKey): Promise<T | undefined> {
 		if (!isBrowser) return undefined;
 		loading = true;
@@ -125,10 +101,8 @@ export function useIndexedDB<T extends object>(
 	}
 
 	/**
-	 * Add a new record. The primary key is auto-generated when `autoIncrement`
-	 * is `true` (default). Refreshes `items` on success.
-	 * @param record - Record to insert (omit the keyPath field for auto-increment)
-	 * @returns The generated key, or `undefined` on failure
+	 * Add a new record. The primary key is auto-generated when `autoIncrement` is `true` (default).
+	 * Refreshes `items` on success.
 	 */
 	async function add(record: T): Promise<IDBValidKey | undefined> {
 		if (!isBrowser) return undefined;
@@ -154,9 +128,8 @@ export function useIndexedDB<T extends object>(
 	}
 
 	/**
-	 * Update an existing record (uses `IDBObjectStore.put`). The record must
-	 * include the keyPath field. Refreshes `items` on success.
-	 * @param record - Full record including its primary key
+	 * Update an existing record (uses `IDBObjectStore.put`). The record must include the keyPath
+	 * field. Refreshes `items` on success.
 	 */
 	async function update(record: T): Promise<void> {
 		if (!isBrowser) return;
@@ -179,10 +152,7 @@ export function useIndexedDB<T extends object>(
 		}
 	}
 
-	/**
-	 * Delete a record by its primary key. Refreshes `items` on success.
-	 * @param key - The primary key value
-	 */
+	/** Delete a record by its primary key. Refreshes `items` on success. */
 	async function remove(key: IDBValidKey): Promise<void> {
 		if (!isBrowser) return;
 		loading = true;
@@ -205,10 +175,8 @@ export function useIndexedDB<T extends object>(
 	}
 
 	/**
-	 * Filter records using a predicate. Does not modify `items`.
-	 * For large stores consider using IDB indexes instead.
-	 * @param filter - Predicate function; return `true` to include a record
-	 * @returns Matching records
+	 * Filter records using a predicate. Does not modify `items`. For large stores consider using IDB
+	 * indexes instead.
 	 */
 	async function query(filter: (record: T) => boolean): Promise<T[]> {
 		if (!isBrowser) return [];
@@ -232,9 +200,7 @@ export function useIndexedDB<T extends object>(
 		}
 	}
 
-	/**
-	 * Delete all records from the store. Refreshes `items` on success.
-	 */
+	/** Delete all records from the store. Refreshes `items` on success. */
 	async function clear(): Promise<void> {
 		if (!isBrowser) return;
 		loading = true;

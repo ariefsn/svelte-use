@@ -2,9 +2,7 @@ import { flushSync } from 'svelte';
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { useResizeObserver } from './useResizeObserver.svelte.js';
 
-// ---------------------------------------------------------------------------
 // Mock ResizeObserver
-// ---------------------------------------------------------------------------
 
 type ResizeCallback = (entries: ResizeObserverEntry[]) => void;
 
@@ -36,9 +34,7 @@ class MockResizeObserver {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // Setup / teardown
-// ---------------------------------------------------------------------------
 
 beforeEach(() => {
 	MockResizeObserver.instances = [];
@@ -49,9 +45,7 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('useResizeObserver', () => {
 	test('returns an object with a stop function', () => {
@@ -201,9 +195,8 @@ describe('useResizeObserver', () => {
 
 		result.stop();
 
-		// Calling the underlying mock callback directly after stop should not
-		// call our callback because disconnect was called on the real observer.
-		// We simulate: the observer is disconnected so no more entries come in.
+		// Calling the underlying mock callback directly after stop should not call our callback because
+		// disconnect was called on the real observer.
 		expect(callback).not.toHaveBeenCalled();
 
 		cleanup();

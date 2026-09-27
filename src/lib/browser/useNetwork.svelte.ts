@@ -1,29 +1,10 @@
-/**
- * Return value of {@link useNetwork}.
- */
+/** Return value of {@link useNetwork}. */
 export interface UseNetworkReturn {
 	/** Getter returning `true` when the browser reports an active network connection. */
 	online: () => boolean;
 }
 
-/**
- * Reactive online/offline network status.
- *
- * Listens to the `online` and `offline` events on `window` and reflects the
- * current `navigator.onLine` value. Initial state is read from
- * `navigator.onLine` in the browser and defaults to `true` on the server.
- * Event listeners are removed when the reactive scope is destroyed.
- *
- * Safe to call during SSR.
- *
- * @returns An object with an `online` getter.
- *
- * @example
- * ```ts
- * const { online } = useNetwork();
- * online(); // true | false
- * ```
- */
+/** Reactively tracks online/offline state using the browser `online` and `offline` events. */
 export function useNetwork(): UseNetworkReturn {
 	const isBrowser = typeof window !== 'undefined';
 

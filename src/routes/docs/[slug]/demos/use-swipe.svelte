@@ -3,6 +3,7 @@
 	let el = $state<HTMLDivElement | null>(null);
 	const { isSwiping, direction, lengthX, lengthY, reset } = useSwipe(() => el, { threshold: 30 });
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">swiping</span>
@@ -16,7 +17,10 @@
 		<span class="label">distance</span>
 		<span class="value accent">x: {lengthX().toFixed(0)}, y: {lengthY().toFixed(0)}</span>
 	</div>
-	<div bind:this={el} style="height:120px;background:#111;border:1px solid #333;border-radius:8px;display:flex;align-items:center;justify-content:center;touch-action:none;color:#888">
+	<div
+		bind:this={el}
+		class="bg-bg border-border-strong text-text-muted flex h-[120px] touch-none items-center justify-center rounded-lg border"
+	>
 		Swipe here (touch)
 	</div>
 	<div class="actions">

@@ -18,7 +18,13 @@
 	<div class="row">
 		<span class="label">post id</span>
 		<span class="value accent">#{postId}</span>
-		<span class="status {isFetching() ? 'loading' : error() ? 'error' : 'ok'}">
+		<span
+			class="rounded-full px-2 py-[0.1rem] font-mono text-[0.75rem] {isFetching()
+				? 'bg-accent-bg text-accent'
+				: error()
+					? 'bg-danger-bg text-danger'
+					: 'bg-success-bg text-success'}"
+		>
 			{isFetching() ? 'fetching…' : error() ? 'error' : 'ready'}
 		</span>
 	</div>
@@ -34,46 +40,9 @@
 	{#if isFetching()}
 		<p class="hint">Loading…</p>
 	{:else if error()}
-		<p class="hint" style="color:#f87171">Error: {error()?.message}</p>
+		<p class="hint text-danger">Error: {error()?.message}</p>
 	{:else if data()}
-		<p class="post-title">{data()?.title}</p>
-		<p class="post-body">{data()?.body}</p>
+		<p class="text-text-dim m-0 text-[0.9rem] font-semibold capitalize">{data()?.title}</p>
+		<p class="text-text-muted mt-1 mb-0 text-[0.82rem] leading-normal">{data()?.body}</p>
 	{/if}
 </div>
-
-<style>
-	.status {
-		font-size: 0.75rem;
-		padding: 0.1rem 0.5rem;
-		border-radius: 999px;
-		font-family: monospace;
-	}
-
-	.status.loading {
-		background: #1e1e2e;
-		color: #a78bfa;
-	}
-	.status.error {
-		background: #2a1414;
-		color: #f87171;
-	}
-	.status.ok {
-		background: #142a14;
-		color: #86efac;
-	}
-
-	.post-title {
-		font-size: 0.9rem;
-		font-weight: 600;
-		color: #ccc;
-		margin: 0;
-		text-transform: capitalize;
-	}
-
-	.post-body {
-		font-size: 0.82rem;
-		color: #666;
-		margin: 0.25rem 0 0;
-		line-height: 1.5;
-	}
-</style>

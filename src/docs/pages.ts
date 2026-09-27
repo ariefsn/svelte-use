@@ -10,6 +10,10 @@ export interface DocPage {
 	title: string;
 	description: string;
 	usage: string;
+	/** Slugs to surface in "Related" ahead of the automatic picks. */
+	related?: string[];
+	/** Component props, rendered as a "Props" table. */
+	props?: ApiRow[];
 	params?: ApiRow[];
 	options?: ApiRow[];
 	returns?: ApiRow[];
@@ -18,7 +22,3205 @@ export interface DocPage {
 }
 
 export const pages: Record<string, DocPage> = {
-	// ------------------------------------------------------------------ State
+	// Browser – Document
+	'use-title': {
+		slug: 'use-title',
+		title: 'useTitle',
+		description:
+			'Reads and writes `document.title`. Called with no argument it is read-only and never writes; called with a value it owns the title and restores the previous one on destroy.',
+		usage: `import { useTitle } from '@ariefsn/svelte-use';
+
+const title = useTitle('Dashboard');
+title.set('Dashboard — 3 alerts');`,
+		params: [
+			{
+				name: 'title',
+				type: 'string | (() => string)',
+				default: 'undefined',
+				description: 'Title to apply, or a getter for a reactive one. Omit for read-only use.'
+			},
+			{ name: 'options', type: 'UseTitleOptions', default: '{}', description: 'Configuration' }
+		],
+		options: [
+			{
+				name: 'restoreOnDestroy',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'Restore the title present when the composable initialised, once the scope is destroyed. Ignored in read-only mode.'
+			},
+			{
+				name: 'template',
+				type: '(title: string) => string',
+				default: '(title) => title',
+				description:
+					'Wraps the value before writing. Applied to `set()` calls too, so callers never pre-format.'
+			},
+			{
+				name: 'observe',
+				type: 'boolean',
+				default: 'false',
+				description:
+					'Track external writes to `document.title` with a `MutationObserver`. Only useful in read-only mode.'
+			}
+		],
+		returns: [
+			{ name: 'current', type: '() => string', description: 'The current title' },
+			{
+				name: 'set',
+				type: '(title: string) => void',
+				description: 'Writes a new title, passing it through `template`'
+			}
+		],
+		example: `<script lang="ts">
+  import { useTitle } from '@ariefsn/svelte-use';
+
+  let unread = $state(0);
+
+  // Live counter in the tab, restored when the component unmounts
+  useTitle(() => (unread > 0 ? \`(\${unread}) Inbox\` : 'Inbox'));
+</script>
+
+<button onclick={() => unread++}>Receive a message</button>`,
+		notes: [
+			'Client-side only by nature: it mutates `document.title`, so it does **not** set the server-rendered `<title>` element. Use `<svelte:head>` for metadata that must be in the HTML.',
+			'`useTitle()` with no argument is read-only and never writes, which is what stops a display-only consumer clobbering a title set elsewhere.',
+			'The restore snapshot is taken at initialisation, so a nested instance hands back whatever the enclosing one set rather than the original page title.',
+			'**For SEO, reach for server-rendered metadata instead.** Crawlers and link unfurlers mostly do not execute JavaScript, so a title set here is invisible to them. Use this for a title that changes in response to app state — `(3) Inbox`, a timer, upload progress.'
+		]
+	},
+	'use-favicon': {
+		slug: 'use-favicon',
+		title: 'useFavicon',
+		description:
+			'Reads and writes the document favicon. Adopts an existing `link rel="icon"` rather than appending a second one, because browsers choose unpredictably among duplicates.',
+		usage: `import { useFavicon } from '@ariefsn/svelte-use';
+
+useFavicon('/icons/alert.svg');`,
+		params: [
+			{
+				name: 'href',
+				type: 'string | null | (() => string | null)',
+				default: 'undefined',
+				description: 'Favicon URL, or a getter. Omit for read-only use.'
+			},
+			{ name: 'options', type: 'UseFaviconOptions', default: '{}', description: 'Configuration' }
+		],
+		options: [
+			{
+				name: 'rel',
+				type: 'string',
+				default: "'icon'",
+				description: '`rel` of the managed link, and the selector used to adopt an existing one'
+			},
+			{
+				name: 'inferType',
+				type: 'boolean',
+				default: 'true',
+				description: "Set the link's `type` from the href's file extension"
+			},
+			{
+				name: 'restoreOnDestroy',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'Restore the href present at initialisation on destroy. Applies only to an adopted link — a created one is removed instead.'
+			},
+			{
+				name: 'parent',
+				type: '() => HTMLElement | null | undefined',
+				default: 'document.head',
+				description: 'Container to search and append into'
+			}
+		],
+		returns: [
+			{ name: 'current', type: '() => string | null', description: 'The current favicon href' },
+			{
+				name: 'set',
+				type: '(href: string | null) => void',
+				description: 'Sets the href. `null` restores the original, or removes a created link.'
+			}
+		],
+		example: `<script lang="ts">
+  import { useFavicon } from '@ariefsn/svelte-use';
+
+  let unread = $state(0);
+
+  // Swap the icon while messages are waiting
+  useFavicon(() => (unread > 0 ? '/icons/unread.svg' : '/icons/idle.svg'));
+</script>`,
+		notes: [
+			'SSR safe: no DOM is touched and `current()` still reports the resolved href.',
+			'An **adopted** link is restored rather than removed on destroy — this library did not put it there, so it does not take it away. A link it **created** is removed.',
+			'`inferType` maps `.ico`, `.svg`, `.png`, `.gif`, `.jpg`, `.jpeg`, `.webp` and `.avif`, ignoring any query string or fragment.',
+			'Some browsers cache favicons aggressively; append a version query (`/icon.svg?v=2`) if a change does not appear.'
+		]
+	},
+	'use-style-tag': {
+		slug: 'use-style-tag',
+		title: 'useStyleTag',
+		description:
+			'Injects a `style` element and keeps its contents in sync. Tags are deduplicated by id, so two call sites sharing an id share one element and it survives until both release it.',
+		usage: `import { useStyleTag } from '@ariefsn/svelte-use';
+
+const tag = useStyleTag('.highlight { color: tomato; }');
+tag.isLoaded(); // → true in a browser`,
+		params: [
+			{
+				name: 'css',
+				type: 'string | (() => string)',
+				description: 'CSS text, or a getter for reactive CSS'
+			},
+			{ name: 'options', type: 'UseStyleTagOptions', default: '{}', description: 'Configuration' }
+		],
+		options: [
+			{
+				name: 'id',
+				type: 'string',
+				default: 'generated',
+				description:
+					'Element id, and the dedupe key. Omit for a private tag — an anonymous tag is never shared, so passing an explicit id is how a caller opts into sharing.'
+			},
+			{ name: 'media', type: 'string', default: 'undefined', description: '`media` attribute' },
+			{
+				name: 'immediate',
+				type: 'boolean',
+				default: 'true',
+				description: 'Inject on initialisation. When `false`, nothing is appended until `load()`.'
+			},
+			{
+				name: 'removeOnDestroy',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'Detach the tag once the last consumer is destroyed. Defaults on — the opposite of `useScriptTag`.'
+			},
+			{
+				name: 'parent',
+				type: '() => HTMLElement | null | undefined',
+				default: 'document.head',
+				description: 'Container to append into'
+			}
+		],
+		returns: [
+			{ name: 'id', type: 'string', description: 'The element id in use. Stable, not reactive.' },
+			{ name: 'css', type: '() => string', description: 'The CSS text currently applied' },
+			{
+				name: 'isLoaded',
+				type: '() => boolean',
+				description: 'Whether the tag is in the document'
+			},
+			{
+				name: 'set',
+				type: '(css: string) => void',
+				description: 'Replaces the CSS text. Overwritten again if a reactive source later changes.'
+			},
+			{ name: 'load', type: '() => void', description: 'Appends the tag if absent. Idempotent.' },
+			{
+				name: 'unload',
+				type: '() => void',
+				description: "Drops this consumer's reference. Idempotent."
+			}
+		],
+		example: `<script lang="ts">
+  import { useStyleTag } from '@ariefsn/svelte-use';
+
+  let hue = $state(200);
+  useStyleTag(() => \`.themed { color: hsl(\${hue} 80% 60%); }\`);
+</script>
+
+<input type="range" min="0" max="360" bind:value={hue} />
+<p class="themed">Recoloured as you drag.</p>`,
+		notes: [
+			'SSR safe: nothing is appended and `isLoaded()` stays `false`, while `css()` still reports the resolved text.',
+			'The element is reused as reactive CSS changes rather than recreated.',
+			'A **shared** tag is detached only once every consumer has released it, so one component cannot tear down CSS another still needs.',
+			'A tag found already in the document is adopted and **never** detached — only a tag this library created is removed.',
+			'For component-scoped styling prefer a plain Svelte `<style>` block. This is for CSS whose text is computed at runtime, or that must live outside the component tree.'
+		]
+	},
+	'use-script-tag': {
+		slug: 'use-script-tag',
+		title: 'useScriptTag',
+		description:
+			'Loads an external script, deduplicated across every call site. Two components asking for the same URL share one element **and** one promise, so the second resolves as soon as the first has executed.',
+		usage: `import { useScriptTag } from '@ariefsn/svelte-use';
+
+const script = useScriptTag('https://cdn.example.com/sdk.js');
+await script.load();
+script.isLoaded(); // → true`,
+		params: [
+			{ name: 'src', type: 'string | (() => string)', description: 'Script URL, or a getter' },
+			{ name: 'options', type: 'UseScriptTagOptions', default: '{}', description: 'Configuration' }
+		],
+		options: [
+			{
+				name: 'id',
+				type: 'string',
+				default: 'derived from `src`',
+				description: 'Element id, and the dedupe key'
+			},
+			{ name: 'async', type: 'boolean', default: 'true', description: '`async` attribute' },
+			{ name: 'defer', type: 'boolean', default: 'false', description: '`defer` attribute' },
+			{
+				name: 'type',
+				type: 'string',
+				default: "'text/javascript'",
+				description: '`type` attribute'
+			},
+			{
+				name: 'crossOrigin',
+				type: "'anonymous' | 'use-credentials'",
+				default: 'undefined',
+				description: '`crossorigin` attribute'
+			},
+			{
+				name: 'referrerPolicy',
+				type: 'ReferrerPolicy',
+				default: 'undefined',
+				description: '`referrerpolicy` attribute'
+			},
+			{
+				name: 'integrity',
+				type: 'string',
+				default: 'undefined',
+				description: 'Subresource integrity hash'
+			},
+			{ name: 'noModule', type: 'boolean', default: 'false', description: '`nomodule` attribute' },
+			{
+				name: 'immediate',
+				type: 'boolean',
+				default: 'true',
+				description: 'Append on initialisation. When `false`, nothing is appended until `load()`.'
+			},
+			{
+				name: 'removeOnDestroy',
+				type: 'boolean',
+				default: 'false',
+				description:
+					'Detach the tag once the last consumer is destroyed. Defaults **off** — see the notes.'
+			},
+			{
+				name: 'parent',
+				type: '() => HTMLElement | null | undefined',
+				default: 'document.head',
+				description: 'Container to append into'
+			},
+			{
+				name: 'onLoaded',
+				type: '(element) => void',
+				default: 'undefined',
+				description: 'Called once the script has executed'
+			},
+			{
+				name: 'onError',
+				type: '(event: Event) => void',
+				default: 'undefined',
+				description: 'Called when the script fails to load'
+			}
+		],
+		returns: [
+			{ name: 'id', type: 'string', description: 'The element id in use. Stable, not reactive.' },
+			{
+				name: 'status',
+				type: "() => 'idle' | 'loading' | 'loaded' | 'error'",
+				description: 'Current lifecycle status'
+			},
+			{ name: 'isLoading', type: '() => boolean', description: 'Whether the script is in flight' },
+			{ name: 'isLoaded', type: '() => boolean', description: 'Whether the script has executed' },
+			{ name: 'error', type: '() => Event | null', description: 'The failure event, or `null`' },
+			{
+				name: 'load',
+				type: '() => Promise<HTMLScriptElement>',
+				description:
+					'Appends the tag if absent and resolves once it has executed. Repeat calls return the same promise.'
+			},
+			{
+				name: 'unload',
+				type: '() => void',
+				description: "Drops this consumer's reference. Idempotent."
+			}
+		],
+		example: `<script lang="ts">
+  import { useScriptTag } from '@ariefsn/svelte-use';
+
+  // Defer loading until the user actually needs it
+  const script = useScriptTag('https://cdn.example.com/player.js', {
+    immediate: false
+  });
+
+  async function play() {
+    await script.load();
+    // the SDK's globals are available here
+  }
+</script>
+
+<button onclick={play} disabled={script.isLoading()}>Play</button>`,
+		notes: [
+			'SSR safe: nothing is appended, `status()` stays `idle`, and `load()` returns a promise that never settles — awaiting it on the server would be a bug in the caller either way.',
+			'**`removeOnDestroy` defaults to `false`, unlike `useStyleTag`.** CSS is declarative, so removing the tag reverses it; a script is not — removing it leaves every global it defined, listener it bound and timer it started, while re-adding runs all of that a second time.',
+			'The load promise is shared per element, not per composable. A second consumer attaching its own `load` listener after the event had already fired would wait forever.',
+			'A tag already present in `app.html` is adopted rather than duplicated. One case is unresolvable: a hand-written tag that finished loading before this composable existed and carries no marker — it will be treated as still loading.',
+			'`src` is assigned last when creating the element, since setting it is what starts the fetch.'
+		]
+	},
+	// Browser – Navigation
+	'use-url-search-params': {
+		slug: 'use-url-search-params',
+		title: 'useUrlSearchParams',
+		description:
+			'Reads and writes URL parameters reactively. Tracks `popstate` and `hashchange`, so back/forward navigation and external URL edits flow back into the parameters.',
+		usage: `import { useUrlSearchParams } from '@ariefsn/svelte-use';
+
+const params = useUrlSearchParams();
+params.set('page', '2');
+params.get('page'); // → '2'`,
+		params: [
+			{
+				name: 'mode',
+				type: "'history' | 'hash' | 'hash-params'",
+				default: "'history'",
+				description: 'Where the parameters live: `?a=1`, `#/route?a=1`, or `#a=1` respectively'
+			},
+			{
+				name: 'options',
+				type: 'UseUrlSearchParamsOptions',
+				default: '{}',
+				description: 'Configuration'
+			}
+		],
+		options: [
+			{
+				name: 'write',
+				type: "'replace' | 'push' | false",
+				default: "'replace'",
+				description:
+					'`replace` overwrites the current history entry, `push` adds one, and `false` keeps parameters in memory only'
+			},
+			{
+				name: 'debounce',
+				type: 'number',
+				default: '0',
+				description:
+					'Milliseconds to coalesce rapid writes. With `push` this controls how many history entries a burst produces.'
+			},
+			{
+				name: 'removeEmptyValues',
+				type: 'boolean',
+				default: 'true',
+				description: 'Drop keys whose value is empty instead of emitting `?key=`'
+			},
+			{
+				name: 'initial',
+				type: 'UrlSearchParamsRecord',
+				default: '{}',
+				description:
+					'Values applied for keys the URL does not already define. Never overrides what is in the URL.'
+			}
+		],
+		returns: [
+			{
+				name: 'params',
+				type: '() => UrlSearchParamsRecord',
+				description:
+					'Snapshot of the current parameters. A fresh object each change, so mutating it does nothing.'
+			},
+			{
+				name: 'get',
+				type: '(key: string) => string | string[] | undefined',
+				description: 'One parameter, or `undefined` when absent'
+			},
+			{
+				name: 'set',
+				type: '(key, value) => void',
+				description: 'Sets one parameter and schedules a URL write'
+			},
+			{ name: 'remove', type: '(key: string) => void', description: 'Removes one parameter' },
+			{
+				name: 'replace',
+				type: '(next) => void',
+				description: 'Replaces every parameter in a single write'
+			},
+			{ name: 'clear', type: '() => void', description: 'Removes every parameter' },
+			{
+				name: 'query',
+				type: '() => string',
+				description: 'The serialised parameter string, without a leading `?` or `#`'
+			}
+		],
+		example: `<script lang="ts">
+  import { useUrlSearchParams } from '@ariefsn/svelte-use';
+
+  // Keep a search box in the URL, one history entry per pause in typing
+  const params = useUrlSearchParams('history', { write: 'push', debounce: 400 });
+  const query = $derived((params.get('q') as string) ?? '');
+</script>
+
+<input value={query} oninput={(e) => params.set('q', e.currentTarget.value)} />`,
+		notes: [
+			'SSR safe: parameters resolve to `initial` and no history call is made.',
+			'A key appearing once is a bare string; a repeated key (`?a=1&a=2`) becomes an array. `?q=hello` should not force every consumer to unwrap a one-element array.',
+			'There is deliberately **no effect that reads the parameters.** An effect writing the URL from them would loop in the hash modes — changing the hash fires `hashchange`, the listener reparses, the effect re-runs. Writes are imperative, reads are event-driven, and an internal record of the last written string lets the listener recognise its own echo.',
+			'With `debounce` set, a write still pending when the scope is destroyed is dropped. In practice the scope is being destroyed during navigation and the URL is about to change anyway.',
+			'`useBrowserLocation` does not observe `pushState`/`replaceState`, because neither fires an event — so a sibling `useBrowserLocation` goes stale after a write here.'
+		]
+	},
+	// Head & SEO
+	'use-seo': {
+		slug: 'use-seo',
+		title: 'useSeo',
+		description:
+			'Builds SEO metadata from layered defaults and overrides. A **builder, not a mutator** — it returns tags for you to render inside `<svelte:head>`, so they land in the server-rendered HTML where crawlers can see them.',
+		usage: `import { useSeo } from '@ariefsn/svelte-use';
+
+const seo = useSeo(
+  { titleTemplate: '%s — Acme', og: { siteName: 'Acme' } },
+  () => page.data.seo
+);
+
+seo.title(); // → 'Docs — Acme'
+seo.tags();  // → readonly SeoTag[]`,
+		params: [
+			{
+				name: '...layers',
+				type: 'readonly SeoLayer[]',
+				description:
+					'Ordered layers, later ones overriding earlier. Each may be a `SeoData` object or a getter returning one.'
+			}
+		],
+		returns: [
+			{
+				name: 'data',
+				type: '() => SeoData',
+				description: 'The merged data, for passing to `<Seo />`'
+			},
+			{
+				name: 'title',
+				type: '() => string | undefined',
+				description: 'The resolved title with `titleTemplate` applied'
+			},
+			{
+				name: 'tags',
+				type: '() => readonly SeoTag[]',
+				description: 'The tags to render, each with a stable `key`'
+			}
+		],
+		example: `<!-- src/routes/+layout.svelte — the single render site -->
+<script lang="ts">
+  import { Seo, useSeo, type SeoData } from '@ariefsn/svelte-use';
+  import { page } from '$app/state';
+
+  const defaults: SeoData = {
+    titleTemplate: '%s — Acme',
+    baseUrl: 'https://acme.test',
+    og: { siteName: 'Acme', image: '/og.png', type: 'website' },
+    twitter: { card: 'summary' }
+  };
+
+  const seo = useSeo(
+    defaults,
+    () => page.data.seo,
+    () => ({ canonical: page.url.pathname })
+  );
+</script>
+
+<Seo data={seo.data()} />
+
+<!-- src/routes/docs/[slug]/+page.server.ts — the override -->
+<!--
+export const load = ({ params }) => ({
+  seo: { title: doc.title, description: doc.summary, og: { type: 'article' } }
+    satisfies SeoData
+});
+-->`,
+		notes: [
+			'**Builder, not mutator.** Writing tags into `document.head` from an `$effect` only ever runs client-side, and crawlers and link unfurlers (Slack, Discord, WhatsApp, iMessage) mostly do not execute JavaScript — so those tags would be invisible to exactly the consumers they exist for.',
+			"Layers merge **per key**, recursing one level into `og` and `twitter`. A plain spread would be wrong: a page setting only `og.type` would wipe the layout's `og.siteName` and `og.image`, quietly producing a worse link preview than the defaults alone.",
+			"**`SeoData` must be plain, serialisable data.** An override usually arrives through `page.data.seo` from a server `load`, which crosses devalue serialisation — a function would not survive. That is why `titleTemplate` is a string with `%s` rather than a callback, unlike `useTitle`'s `template`.",
+			'**Set `baseUrl`.** During prerendering SvelteKit reports `page.url.origin` as `http://sveltekit-prerender`, so anything derived from the request leaks that placeholder into the shipped HTML. Open Graph images in particular must be absolute or unfurlers ignore them.',
+			'`titleTemplate` is skipped when there is no `title`, so a layout default never produces a stray `" — Acme"` on a page that sets none.',
+			'There is **no `$effect`** here, so it can be called from a module scope or a `.svelte.ts` file as well as a component.',
+			'Augment `App.PageData` with `seo?: SeoData` in `src/app.d.ts`, or `page.data.seo` is `any` exactly where the typing matters.',
+			'**`og.image` must be a raster format.** Facebook, X, LinkedIn and WhatsApp do not render SVG previews — an `.svg` here means the card silently appears with no image. Use PNG, JPEG or WebP, and keep it under ~1MB (WhatsApp is stricter still, around 300KB).',
+			'**Set `og.imageWidth` and `og.imageHeight`** (usually 1200×630). Without them Facebook and LinkedIn must fetch and measure the image before they can lay the card out, so the *first* share of a URL often previews with no image at all.',
+			"`article:*` tags are emitted **only** when `og.type` is `'article'`, since nothing reads them otherwise. `article.section` is the Open Graph equivalent of a category — there is no `og:category` — and `article.tags` is emitted as one repeated `article:tag` per entry, which is what the spec expects rather than a joined list.",
+			'**`keywords` is near-useless for search.** Google has ignored the keywords meta tag since 2009 and Bing treats it as a spam signal at best. It is supported because it costs nothing, not because it helps — reach for `article.tags` if you want tags a platform actually reads.',
+			'Every major unfurler — Facebook, Messenger, WhatsApp, LinkedIn, Telegram, Slack, Discord — reads Open Graph, so `og.title`, `og.description`, `og.image` and `og.url` are what actually drive a link preview. Twitter/X reads `twitter:*` and falls back to Open Graph, which is why the Twitter values default from the `og` ones here.',
+			'Use this for metadata that must be in the HTML; use `useTitle` for a title that changes in response to app state, like an unread count.'
+		]
+	},
+	seo: {
+		slug: 'seo',
+		title: 'Seo',
+		description:
+			"A component that renders `useSeo`'s output into `<svelte:head>`. Render it **once**, in your root layout — Svelte does not deduplicate meta tags, so a second instance emits duplicates and crawlers take the first.",
+		usage: `<script lang="ts">
+  import { Seo, useSeo } from '@ariefsn/svelte-use';
+  import { page } from '$app/state';
+
+  const seo = useSeo(defaults, () => page.data.seo);
+</script>
+
+<Seo data={seo.data()} />`,
+		props: [
+			{
+				name: 'data',
+				type: 'SeoData',
+				description:
+					'The merged metadata to render. One typed prop rather than a dozen individual ones, so adding to the SEO shape is not a component API change.'
+			}
+		],
+		example: `<!-- src/routes/+layout.svelte -->
+<script lang="ts">
+  import { Seo, useSeo, type SeoData } from '@ariefsn/svelte-use';
+  import { page } from '$app/state';
+
+  const defaults: SeoData = {
+    titleTemplate: '%s — Acme',
+    baseUrl: 'https://acme.test',
+    og: { siteName: 'Acme', image: '/og.png' }
+  };
+
+  const seo = useSeo(defaults, () => page.data.seo);
+</script>
+
+<Seo data={seo.data()} />
+
+{@render children()}`,
+		notes: [
+			'**Render it once.** Svelte concatenates `<svelte:head>` blocks from every component and does **not** deduplicate meta tags. A second `<Seo />` on a page emits two `<meta name="description">`, and crawlers take the *first* — the layout default — which is the exact opposite of overriding. Merge the data with `useSeo`, then render here.',
+			'Remove any static title from `app.html` too. It would come first in the document, and the first title is the one browsers and crawlers use, so every templated page title would be silently ignored.',
+			"The `<title>` it renders is a real element whose text is reactive after hydration, so it updates on client-side navigation without anyone assigning `document.title`. `useTitle` writes `document.title`, which mutates that same element's text — last write wins, and this re-asserts whenever its data changes.",
+			'With no title anywhere, no `<title>` element is rendered at all, so whatever title already exists survives rather than being blanked.',
+			'It takes **one `data` prop**, not a dozen individual ones: the shape lives in the `SeoData` type, so extending it is not a component API change.',
+			"This is the only Svelte component this library ships; everything else is a composable. Import it from the package root — `import { Seo } from '@ariefsn/svelte-use'`."
+		]
+	},
+	// Utilities & state
+	'use-state-machine': {
+		slug: 'use-state-machine',
+		title: 'useStateMachine',
+		description:
+			'A finite state machine with typed states and actions, inferred from the config. Expresses what `useToggle` and `useCycleList` cannot: that from `idle`, only `FETCH` is legal, and it leads to `loading`.',
+		usage: `import { useStateMachine } from '@ariefsn/svelte-use';
+
+const machine = useStateMachine({
+  initial: 'idle',
+  states: {
+    idle: { on: { FETCH: 'loading' } },
+    loading: { on: { RESOLVE: 'success', REJECT: 'failure' } },
+    success: { on: { FETCH: 'loading' } },
+    failure: { on: { RETRY: 'loading' } }
+  }
+});
+
+machine.send('FETCH'); // → true, now 'loading'`,
+		params: [
+			{
+				name: 'config',
+				type: 'MachineConfig<S, A>',
+				description: 'The `initial` state and every state with its transitions'
+			},
+			{
+				name: 'options',
+				type: 'UseStateMachineOptions<S, A>',
+				default: '{}',
+				description: 'Transition callback and history limit'
+			}
+		],
+		options: [
+			{
+				name: 'onTransition',
+				type: '(t: StateTransition<S, A>) => void',
+				default: 'undefined',
+				description: 'Called after each successful transition, with `from`, `to` and `action`'
+			},
+			{
+				name: 'historyLimit',
+				type: 'number',
+				default: '100',
+				description: 'How many past states `history()` keeps. `Infinity` for unbounded.'
+			}
+		],
+		returns: [
+			{ name: 'state', type: '() => S', description: 'The current state' },
+			{
+				name: 'send',
+				type: '(action: A) => boolean',
+				description:
+					'Applies an action. Returns `false` — never throws — when illegal or blocked by a guard.'
+			},
+			{
+				name: 'can',
+				type: '(action: A) => boolean',
+				description: 'Whether the action would be accepted right now, guards included'
+			},
+			{ name: 'matches', type: '(state: S) => boolean', description: 'Whether in a given state' },
+			{
+				name: 'history',
+				type: '() => readonly S[]',
+				description: 'States visited, oldest first, including the current one'
+			},
+			{ name: 'reset', type: '() => void', description: 'Returns to `initial` and clears history' }
+		],
+		example: `<script lang="ts">
+  import { useStateMachine } from '@ariefsn/svelte-use';
+
+  // Explicit parameters add exhaustiveness: forgetting a state is an error
+  type State = 'idle' | 'loading' | 'success' | 'failure';
+  type Action = 'FETCH' | 'RESOLVE' | 'REJECT' | 'RETRY';
+
+  const machine = useStateMachine<State, Action>({
+    initial: 'idle',
+    states: {
+      idle: { on: { FETCH: 'loading' } },
+      loading: { on: { RESOLVE: 'success', REJECT: 'failure' } },
+      success: { on: { FETCH: 'loading' } },
+      failure: { on: { RETRY: 'loading' } }
+    }
+  });
+
+  async function load() {
+    if (!machine.can('FETCH')) return;
+    machine.send('FETCH');
+    try {
+      await fetchData();
+      machine.send('RESOLVE');
+    } catch {
+      machine.send('REJECT');
+    }
+  }
+</script>
+
+<button onclick={load} disabled={!machine.can('FETCH')}>Load</button>
+<p>{machine.state()}</p>`,
+		notes: [
+			'**What the types catch:** an action or state name that is not in this machine, a transition target that is not a declared state, and an `initial` that is not one either. All inferred from your config — nothing is hardcoded, and no `as const` is needed at the call site.',
+			'**What they cannot catch** is whether an action is legal *from the state you happen to be in at runtime*. That is data, not type information. `can()` answers it, and an illegal `send()` is a no-op returning `false` so a stray click cannot crash a component.',
+			'Supplying `State` and `Action` explicitly turns `states` into a required record over the full union, so a forgotten state is a compile error. TypeScript has no partial type-argument inference, so supply **both** or neither — `useStateMachine<State>(…)` will not compile.',
+			"A `guard` gates a transition on a runtime condition: `on: { OPEN: { target: 'open', guard: () => isAdmin } }`. A blocked transition returns `false` exactly like an illegal one.",
+			'Deliberately **not** XState. No hierarchy, no parallel regions, no actors, no extended context, and `send` takes bare strings rather than event objects. If you need statecharts, reach for XState rather than stretching this.',
+			'Pure state with no DOM, timers or effects, so it renders on the server and hydrates without a guard.'
+		]
+	},
+	'use-cloned': {
+		slug: 'use-cloned',
+		title: 'useCloned',
+		description:
+			'A deep copy of a reactive value, tracked separately. The usual job is an edit buffer: bind a form to the clone and leave the original untouched until the user saves.',
+		usage: `import { useCloned } from '@ariefsn/svelte-use';
+
+let user = $state({ name: 'Ada' });
+const draft = useCloned(() => user, { manual: true });
+
+draft.cloned().name = 'Grace';
+draft.isModified(); // → true`,
+		params: [
+			{ name: 'source', type: '() => T', description: 'Getter for the value to copy' },
+			{
+				name: 'options',
+				type: 'UseClonedOptions<T>',
+				default: '{}',
+				description: 'Sync behaviour and a custom clone function'
+			}
+		],
+		options: [
+			{
+				name: 'manual',
+				type: 'boolean',
+				default: 'false',
+				description:
+					'Stop re-cloning automatically, leaving `sync()` as the only refresh. Turn this **on** for a draft the user edits.'
+			},
+			{
+				name: 'clone',
+				type: '(source: T) => T',
+				default: 'structuredClone',
+				description: 'How to copy. Supply your own for values `structuredClone` cannot handle.'
+			}
+		],
+		returns: [
+			{ name: 'cloned', type: '() => T', description: 'The cloned value' },
+			{ name: 'set', type: '(value: T) => void', description: 'Replaces the clone' },
+			{
+				name: 'sync',
+				type: '() => void',
+				description: 'Re-clones from the source, discarding local changes'
+			},
+			{
+				name: 'isModified',
+				type: '() => boolean',
+				description: 'Whether the clone differs from the source, compared structurally'
+			}
+		],
+		example: `<script lang="ts">
+  import { useCloned } from '@ariefsn/svelte-use';
+
+  let { user } = $props();
+
+  // \`manual\` so an incoming update does not wipe unsaved edits
+  const draft = useCloned(() => user, { manual: true });
+</script>
+
+<input bind:value={() => draft.cloned().name, (v) => (draft.cloned().name = v)} />
+<button disabled={!draft.isModified()} onclick={() => save(draft.cloned())}>Save</button>
+<button disabled={!draft.isModified()} onclick={draft.sync}>Discard</button>`,
+		notes: [
+			'**`$state.snapshot` runs before the clone, and it is not optional.** `$state` deep-proxies plain objects, and `structuredClone` throws `DataCloneError` on a Proxy — so cloning a reactive object, which is the entire purpose here, would fail without unwrapping it first.',
+			'`structuredClone` preserves `Map`, `Set`, `Date`, `RegExp`, typed arrays and cycles — everything a JSON round-trip silently destroys. It cannot copy functions or class behaviour; pass your own `clone` for those.',
+			'`isModified()` compares **structurally**, not by reference, so a freshly rebuilt but equal object does not read as a change. That is what makes it usable for a Save button.',
+			'Without `manual`, any change to the source re-clones and discards local edits. That is right for a read-only mirror and wrong for a form, which is why the option exists.',
+			'Works on the server: `structuredClone` is available in Node 17+, with a JSON fallback besides.'
+		]
+	},
+	'use-memoize': {
+		slug: 'use-memoize',
+		title: 'useMemoize',
+		description:
+			'Caches a function’s results by its arguments, with optional LRU eviction. Deliberately **not** reactive — `$derived` already memoises reactive computations; this is for plain function calls it does not cover.',
+		usage: `import { useMemoize } from '@ariefsn/svelte-use';
+
+const format = useMemoize((iso: string, locale: string) =>
+  new Intl.DateTimeFormat(locale, { dateStyle: 'long' }).format(new Date(iso))
+);
+
+format('2026-09-26', 'en-GB'); // computed
+format('2026-09-26', 'en-GB'); // from cache`,
+		params: [
+			{ name: 'fn', type: '(...args: TArgs) => TResult', description: 'The function to memoise' },
+			{
+				name: 'options',
+				type: 'UseMemoizeOptions<TArgs>',
+				default: '{}',
+				description: 'Key derivation and cache size'
+			}
+		],
+		options: [
+			{
+				name: 'getKey',
+				type: '(...args: TArgs) => string',
+				default: 'JSON.stringify(args)',
+				description:
+					'Builds the cache key. The default cannot represent a `Map` or a class instance, and treats differently-ordered keys as different — supply your own for anything but plain data.'
+			},
+			{
+				name: 'max',
+				type: 'number',
+				default: 'undefined',
+				description:
+					'Maximum entries, evicting least-recently-used first. Unbounded when omitted, which for a long-lived component is a leak.'
+			}
+		],
+		returns: [
+			{
+				name: '(call it)',
+				type: '(...args: TArgs) => TResult',
+				description: 'Returns a cached result when one exists'
+			},
+			{
+				name: 'load',
+				type: '(...args: TArgs) => TResult',
+				description: 'Calls the function and replaces any cached result'
+			},
+			{
+				name: 'has',
+				type: '(...args: TArgs) => boolean',
+				description: 'Whether a result is cached'
+			},
+			{ name: 'remove', type: '(...args: TArgs) => void', description: 'Removes one entry' },
+			{ name: 'clear', type: '() => void', description: 'Empties the cache' },
+			{ name: 'size', type: '() => number', description: 'How many entries are cached — reactive' }
+		],
+		example: `<script lang="ts">
+  import { useMemoize } from '@ariefsn/svelte-use';
+
+  // Deduplicates in-flight requests: concurrent callers share one promise
+  const fetchUser = useMemoize(
+    async (id: number) => (await fetch(\`/api/users/\${id}\`)).json(),
+    { max: 50 }
+  );
+</script>
+
+<button onclick={() => fetchUser(1)}>Load user 1</button>
+<button onclick={() => fetchUser.load(1)}>Force refresh</button>
+<p>{fetchUser.size()} cached</p>`,
+		notes: [
+			'This caches whatever the function returns, **promises included** — so an async function is cached as its in-flight promise. That deduplicates concurrent requests, which is usually what you want, but it means a rejection is cached too. Use `load()` or `remove()` to retry.',
+			'Eviction is least-recently-**used**, not least-recently-added: a cache hit counts as a use, so a frequently read entry survives.',
+			'Without `max` the cache grows without bound. For a long-lived component that is a leak, so set one unless the argument space is small and fixed.',
+			'The default key is `JSON.stringify(args)`, which treats `{ a: 1, b: 2 }` and `{ b: 2, a: 1 }` as different keys and flattens a `Map` or `Set` to `{}`. Supply `getKey` whenever arguments are not plain data.',
+			'`size()` is reactive so a cache-status display updates; the cached values themselves are ordinary and do not trigger renders.',
+			'Pure computation with no DOM, so it works on the server.'
+		]
+	},
+	'use-offset-pagination': {
+		slug: 'use-offset-pagination',
+		title: 'useOffsetPagination',
+		description:
+			'Offset-based pagination state. The current page is **derived**, never stored clamped, so it corrects itself the moment `total` shrinks underneath it.',
+		usage: `import { useOffsetPagination } from '@ariefsn/svelte-use';
+
+const pagination = useOffsetPagination({ total: () => items.length, pageSize: 20 });
+pagination.offset(); // → index of the first item on this page`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseOffsetPaginationOptions',
+				description: 'Total, page size and starting page'
+			}
+		],
+		options: [
+			{
+				name: 'total',
+				type: 'number | (() => number)',
+				description: 'Total number of items. A getter keeps it reactive.'
+			},
+			{
+				name: 'pageSize',
+				type: 'number | (() => number)',
+				default: '10',
+				description: 'Items per page'
+			},
+			{ name: 'page', type: 'number', default: '1', description: 'Page to start on, 1-based' },
+			{
+				name: 'onPageChange',
+				type: '(state: PaginationState) => void',
+				default: 'undefined',
+				description: 'Called when the resolved page changes — not on the initial render'
+			}
+		],
+		returns: [
+			{
+				name: 'page',
+				type: '() => number',
+				description: 'The current page, 1-based and always within range'
+			},
+			{ name: 'pageSize', type: '() => number', description: 'Items per page' },
+			{
+				name: 'pageCount',
+				type: '() => number',
+				description: 'Total pages, at least 1 even with no items'
+			},
+			{
+				name: 'offset',
+				type: '() => number',
+				description: 'Index of the first item on this page — the `offset` for a query or `slice`'
+			},
+			{ name: 'isFirstPage', type: '() => boolean', description: 'Whether this is the first page' },
+			{ name: 'isLastPage', type: '() => boolean', description: 'Whether this is the last page' },
+			{
+				name: 'go',
+				type: '(page: number) => void',
+				description: 'Goes to a page. Out-of-range values are clamped, not rejected.'
+			},
+			{ name: 'next', type: '() => void', description: 'Next page, if there is one' },
+			{ name: 'prev', type: '() => void', description: 'Previous page, if there is one' },
+			{ name: 'first', type: '() => void', description: 'First page' },
+			{ name: 'last', type: '() => void', description: 'Last page' }
+		],
+		example: `<script lang="ts">
+  import { useOffsetPagination } from '@ariefsn/svelte-use';
+
+  let items = $state<Item[]>([]);
+
+  const pagination = useOffsetPagination({
+    total: () => items.length,
+    pageSize: 20
+  });
+
+  const visible = $derived(
+    items.slice(pagination.offset(), pagination.offset() + pagination.pageSize())
+  );
+</script>
+
+<ul>{#each visible as item (item.id)}<li>{item.name}</li>{/each}</ul>
+
+<button onclick={pagination.prev} disabled={pagination.isFirstPage()}>Previous</button>
+<span>{pagination.page()} / {pagination.pageCount()}</span>
+<button onclick={pagination.next} disabled={pagination.isLastPage()}>Next</button>`,
+		notes: [
+			'**The page is derived, not stored clamped.** Showing page 9 of a list that just dropped to 3 pages resolves to page 3 immediately, with no effect and no intermediate render of an out-of-range page. It also means the original intent survives: if `total` grows back, page 9 returns.',
+			'Clamping inside an `$effect` is the obvious alternative and it is wrong twice over — it reads and writes the same state, and `scripts/check-effects.mjs` would not catch it, because that check only matches `++`, `--` and compound assignment. A plain `page = Math.min(page, pageCount)` passes lint and loops at runtime.',
+			'`pageCount()` is at least 1 even with zero items, so a UI showing "1 / 1" never has to special-case an empty list.',
+			'`onPageChange` deliberately does not fire on the initial render — it reports a change, and mounting is not one.',
+			'Pure state with no DOM or timers, so it renders on the server.'
+		]
+	},
+	'use-confirm-dialog': {
+		slug: 'use-confirm-dialog',
+		title: 'useConfirmDialog',
+		description:
+			'Turns a confirmation dialog into a single `await`. Logic only — you still write the markup; what it removes is the awkward shape of flags and callbacks.',
+		usage: `import { useConfirmDialog } from '@ariefsn/svelte-use';
+
+const dialog = useConfirmDialog<string>();
+
+const { isCanceled } = await dialog.reveal('Delete this file?');
+if (isCanceled) return;`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseConfirmDialogOptions<TReveal, TConfirm, TCancel>',
+				default: '{}',
+				description: 'Lifecycle callbacks'
+			}
+		],
+		options: [
+			{
+				name: 'onReveal',
+				type: '(data: TReveal) => void',
+				default: 'undefined',
+				description: 'Called when the dialog opens, with whatever `reveal()` was given'
+			},
+			{
+				name: 'onConfirm',
+				type: '(data: TConfirm) => void',
+				default: 'undefined',
+				description: 'Called on confirmation'
+			},
+			{
+				name: 'onCancel',
+				type: '(data: TCancel) => void',
+				default: 'undefined',
+				description: 'Called on cancellation, including an unmount while open'
+			}
+		],
+		returns: [
+			{
+				name: 'isRevealed',
+				type: '() => boolean',
+				description: 'Whether the dialog is open. Bind your markup to this.'
+			},
+			{
+				name: 'revealData',
+				type: '() => TReveal | null',
+				description: 'The value passed to `reveal()`, for rendering the prompt'
+			},
+			{
+				name: 'reveal',
+				type: '(data?: TReveal) => Promise<ConfirmDialogOutcome<TConfirm, TCancel>>',
+				description: 'Opens the dialog and resolves once it is confirmed or cancelled'
+			},
+			{ name: 'confirm', type: '(data?: TConfirm) => void', description: 'Confirms and resolves' },
+			{ name: 'cancel', type: '(data?: TCancel) => void', description: 'Cancels and resolves' }
+		],
+		example: `<script lang="ts">
+  import { useConfirmDialog } from '@ariefsn/svelte-use';
+
+  const dialog = useConfirmDialog<string>();
+
+  // The whole flow reads top to bottom
+  async function remove(name: string) {
+    const { isCanceled } = await dialog.reveal(name);
+    if (isCanceled) return;
+    await deleteItem(name);
+  }
+</script>
+
+<button onclick={() => remove('report.pdf')}>Delete</button>
+
+{#if dialog.isRevealed()}
+  <div role="dialog">
+    <p>Delete {dialog.revealData()}?</p>
+    <button onclick={() => dialog.confirm()}>Delete</button>
+    <button onclick={() => dialog.cancel()}>Keep</button>
+  </div>
+{/if}`,
+		notes: [
+			'The return is a **discriminated union**, so `if (isCanceled)` narrows `data` to the type that branch actually carries rather than leaving you to cast.',
+			'**Unmounting while the dialog is open resolves the promise as cancelled.** Without that the caller’s `await reveal()` would hang for the life of the page — a silent deadlock rather than a visible error.',
+			'A second `reveal()` while one is open cancels the first rather than orphaning it, for the same reason.',
+			'`confirm`, `cancel` and `reveal` are **actions you call**, so they carry no `on` prefix; `onReveal`, `onConfirm` and `onCancel` are **callbacks you supply**, so they do. `useNavigationGuard` follows the same split.',
+			'Pure state with no DOM, so it renders on the server. The dialog markup is entirely yours — use a native `<dialog>` if you want focus trapping and Escape handling for free.'
+		]
+	},
+	'use-async-queue': {
+		slug: 'use-async-queue',
+		title: 'useAsyncQueue',
+		description:
+			'Runs a list of async tasks with bounded concurrency, tracking each one. `useAsyncState` covers a single execution; this covers a batch where you need per-task status.',
+		usage: `import { useAsyncQueue } from '@ariefsn/svelte-use';
+
+const queue = useAsyncQueue(
+  files.map((file) => () => upload(file)),
+  { concurrency: 3, abortOnError: false }
+);`,
+		params: [
+			{
+				name: 'tasks',
+				type: 'readonly (() => Promise<T>)[]',
+				description: 'The functions to run, each returning a promise'
+			},
+			{
+				name: 'options',
+				type: 'UseAsyncQueueOptions',
+				default: '{}',
+				description: 'Concurrency and failure behaviour'
+			}
+		],
+		options: [
+			{
+				name: 'concurrency',
+				type: 'number',
+				default: '1',
+				description:
+					'How many tasks may run at once. `1` runs them strictly in series, which is the point when each depends on the one before.'
+			},
+			{
+				name: 'abortOnError',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'Stop the queue when a task rejects, marking the rest `aborted`. Turn it off to run everything and collect failures.'
+			},
+			{
+				name: 'onSuccess',
+				type: '(data: T, index: number) => void',
+				default: 'undefined',
+				description:
+					'Called when a task resolves, with its index in the original array — the hook for updating the row that just finished'
+			},
+			{
+				name: 'onError',
+				type: '(error: Error, index: number) => void',
+				default: 'undefined',
+				description: 'Called when a task rejects, with its index in the original array'
+			},
+			{
+				name: 'onFinished',
+				type: '() => void',
+				default: 'undefined',
+				description:
+					'Called once, after every task has settled. It takes no index because it is not per-task.'
+			}
+		],
+		returns: [
+			{
+				name: 'tasks',
+				type: '() => readonly AsyncQueueTask<T>[]',
+				description: 'Per-task `status`, `data` and `error`, in the order given'
+			},
+			{
+				name: 'isRunning',
+				type: '() => boolean',
+				description: 'Whether anything is still running or pending'
+			},
+			{ name: 'isFinished', type: '() => boolean', description: 'Whether every task has settled' },
+			{
+				name: 'settled',
+				type: '() => number',
+				description: 'How many tasks have settled, for a progress display'
+			},
+			{
+				name: 'abort',
+				type: '() => void',
+				description: 'Marks everything unsettled as aborted and stops starting new work'
+			}
+		],
+		example: `<script lang="ts">
+  import { useAsyncQueue } from '@ariefsn/svelte-use';
+
+  let { files }: { files: File[] } = $props();
+
+  let urls = $state<(string | null)[]>(files.map(() => null));
+
+  const queue = useAsyncQueue(
+    files.map((file) => () => upload(file)),
+    {
+      concurrency: 3,
+      abortOnError: false,
+      // The index is what makes a per-row update possible: tasks finish out
+      // of order, but the index always points at the right file.
+      onSuccess: (url, index) => (urls[index] = url),
+      onError: (error, index) => console.warn(files[index].name, error)
+    }
+  );
+</script>
+
+<progress value={queue.settled()} max={queue.tasks().length}></progress>
+
+<ul>
+  {#each queue.tasks() as task, i (i)}
+    <li>{files[i].name} — {task.status} {urls[i] ?? ''}</li>
+  {/each}
+</ul>
+
+<button onclick={queue.abort} disabled={!queue.isRunning()}>Cancel</button>`,
+		notes: [
+			'**`abort()` cannot stop work already running.** A `Promise` has no cancellation, so it stops *starting* new tasks and marks the unsettled as aborted. Give each task an `AbortSignal` of your own if the work itself must stop.',
+			'Results stay in the order the tasks were given, regardless of the order they finish in — so `tasks()[i]` always lines up with your input array. `onSuccess` and `onError` both carry that same index, which is what lets a per-row UI update as each task lands: with concurrency above 1 they finish out of order, so completion order is not a usable identifier.',
+			'`abortOnError` defaults to `true`, which suits a dependent sequence. For independent work like a batch upload, turn it off so one failure does not discard the rest.',
+			'Tasks start as soon as the composable is created, not on a separate call.',
+			'A non-`Error` rejection is wrapped in one, so `error.message` is always safe to read.'
+		]
+	},
+	// Web APIs – Device & UI
+	'use-fullscreen': {
+		slug: 'use-fullscreen',
+		title: 'useFullscreen',
+		description:
+			'Displays an element fullscreen. `isFullscreen()` is driven by the `fullscreenchange` event rather than by what was last called, because the user can leave with Escape without telling the page.',
+		usage: `import { useFullscreen } from '@ariefsn/svelte-use';
+
+let player = $state<HTMLElement | null>(null);
+const fullscreen = useFullscreen(() => player);
+await fullscreen.enter();`,
+		params: [
+			{
+				name: 'target',
+				type: 'HTMLElement | (() => HTMLElement | null) | undefined',
+				default: 'document.documentElement',
+				description: 'Element to display. Omit for the whole page.'
+			},
+			{
+				name: 'options',
+				type: 'UseFullscreenOptions',
+				default: '{}',
+				description: 'Destroy behaviour'
+			}
+		],
+		options: [
+			{
+				name: 'exitOnDestroy',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'Leave fullscreen when the owning scope is destroyed. Without it, navigating away leaves the whole page stuck fullscreen.'
+			}
+		],
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether the API is available' },
+			{
+				name: 'isFullscreen',
+				type: '() => boolean',
+				description: 'Whether **this** target is the element currently displayed'
+			},
+			{
+				name: 'enter',
+				type: '() => Promise<void>',
+				description: 'Requests fullscreen. Must be called from a user gesture.'
+			},
+			{
+				name: 'exit',
+				type: '() => Promise<void>',
+				description: 'Leaves fullscreen, if this target is the one displayed'
+			},
+			{ name: 'toggle', type: '() => Promise<void>', description: 'Enters or exits' }
+		],
+		example: `<script lang="ts">
+  import { useFullscreen } from '@ariefsn/svelte-use';
+
+  let player = $state<HTMLElement | null>(null);
+  const fullscreen = useFullscreen(() => player);
+</script>
+
+<div bind:this={player}>
+  <button onclick={fullscreen.toggle}>
+    {fullscreen.isFullscreen() ? 'Exit' : 'Go'} fullscreen
+  </button>
+</div>`,
+		notes: [
+			'`enter()` must be called from a user gesture; browsers reject a request that is not, which surfaces as a rejected promise.',
+			'**`isFullscreen()` is about this target specifically.** Another element being fullscreen reports `false` here, which is what makes per-element toggle buttons behave correctly on a page with several.',
+			'State follows the `fullscreenchange` event, never what was last called — Escape leaves fullscreen without notifying the page, so tracking intent instead of reality would go stale immediately.',
+			'Safari implements only the `webkit`-prefixed API, and TypeScript declares none of it. Both spellings are handled internally.',
+			'SSR safe: `isSupported()` is `false` and `enter()` resolves without doing anything.'
+		]
+	},
+	'use-screen-orientation': {
+		slug: 'use-screen-orientation',
+		title: 'useScreenOrientation',
+		description:
+			'Screen orientation and rotation angle. Reading works everywhere the API exists; **locking** needs fullscreen and is unavailable on desktop entirely.',
+		usage: `import { useScreenOrientation } from '@ariefsn/svelte-use';
+
+const screen = useScreenOrientation();
+screen.orientation(); // → 'portrait-primary'
+screen.angle();       // → 0`,
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether the API is available' },
+			{
+				name: 'orientation',
+				type: '() => OrientationType | null',
+				description: "The current orientation, e.g. `'portrait-primary'`. `null` during SSR."
+			},
+			{
+				name: 'angle',
+				type: '() => number',
+				description: 'Rotation from the natural orientation, in degrees'
+			},
+			{
+				name: 'isLockSupported',
+				type: '() => boolean',
+				description: 'Whether `lock()` exists — it does not on desktop Safari or Firefox'
+			},
+			{
+				name: 'lock',
+				type: '(orientation: OrientationLockType) => Promise<void>',
+				description: 'Locks the screen. Rejects unless the document is fullscreen.'
+			},
+			{ name: 'unlock', type: '() => void', description: 'Releases a lock' }
+		],
+		example: `<script lang="ts">
+  import { useScreenOrientation, useFullscreen } from '@ariefsn/svelte-use';
+
+  const orientation = useScreenOrientation();
+  const fullscreen = useFullscreen();
+
+  // Locking requires fullscreen first — this is the whole dance
+  async function lockLandscape() {
+    await fullscreen.enter();
+    await orientation.lock('landscape');
+  }
+</script>
+
+<p>{orientation.orientation()} at {orientation.angle()}°</p>
+{#if orientation.isLockSupported()}
+  <button onclick={lockLandscape}>Lock landscape</button>
+{/if}`,
+		notes: [
+			'**Locking is far less available than reading.** It requires the document to be fullscreen, and desktop browsers do not implement it at all. Check `isLockSupported()` before offering it.',
+			'`lock()` rejects with a `SecurityError` outside fullscreen and a `NotSupportedError` where it is unavailable. Both are surfaced rather than swallowed, since the caller usually wants to fall back to a CSS-based layout.',
+			"TypeScript's `lib.dom` declares `unlock()` but neither `lock()` nor the `OrientationLockType` union, so both are supplied by this library — `OrientationLockType` is exported for your own signatures.",
+			'SSR safe: `orientation()` is `null` and `angle()` is 0.'
+		]
+	},
+	'use-gamepad': {
+		slug: 'use-gamepad',
+		title: 'useGamepad',
+		description:
+			'Connected gamepads, with button and axis state. The Gamepad API has no events for stick or button movement, so this polls each frame — but **only while a controller is connected**.',
+		usage: `import { useGamepad } from '@ariefsn/svelte-use';
+
+const pads = useGamepad({ fpsLimit: 30 });
+pads.gamepads()[0]?.buttons[0]?.pressed;`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseGamepadOptions',
+				default: '{}',
+				description: 'Polling configuration'
+			}
+		],
+		options: [
+			{
+				name: 'fpsLimit',
+				type: 'number',
+				default: 'undefined',
+				description:
+					'Cap the polling rate. Buttons only change as fast as a human moves them, so ~30 is usually indistinguishable and halves the work.'
+			}
+		],
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether the API is available' },
+			{
+				name: 'gamepads',
+				type: '() => readonly Gamepad[]',
+				description: 'Connected gamepads, refreshed every frame while any are present'
+			},
+			{
+				name: 'isConnected',
+				type: '() => boolean',
+				description: 'Whether at least one gamepad is connected'
+			},
+			{
+				name: 'isPolling',
+				type: '() => boolean',
+				description: 'Whether the frame loop is currently running'
+			},
+			{ name: 'pause', type: '() => void', description: 'Stops polling; state freezes' },
+			{ name: 'resume', type: '() => void', description: 'Resumes polling' }
+		],
+		example: `<script lang="ts">
+  import { useGamepad } from '@ariefsn/svelte-use';
+
+  const pads = useGamepad({ fpsLimit: 30 });
+  const pad = $derived(pads.gamepads()[0]);
+</script>
+
+{#if pad}
+  <p>{pad.id}</p>
+  <p>Left stick: {pad.axes[0].toFixed(2)}, {pad.axes[1].toFixed(2)}</p>
+{:else}
+  <p>Press a button on a connected controller.</p>
+{/if}`,
+		notes: [
+			'**An empty list on load is normal.** Browsers hide gamepads until the user has interacted with one, so a connected controller stays invisible until a button is pressed — this is a deliberate fingerprinting defence, not a bug.',
+			'The polling loop runs **only while a gamepad is connected** and stops when the last one disconnects, so a page with no controller attached does no per-frame work at all.',
+			'`navigator.getGamepads()` returns fresh snapshot objects on every call, not live-updating ones, which is why the whole array is replaced each frame rather than mutated.',
+			'The list is compacted: the raw API returns `null` for empty slots, which would otherwise force every consumer to filter.',
+			'SSR safe: the list is empty and nothing polls.'
+		]
+	},
+	'use-image': {
+		slug: 'use-image',
+		title: 'useImage',
+		description:
+			'Preloads an image and tracks its state. Loading happens on a detached `Image`, so the browser has the bytes before the `<img>` that shows it renders — which is how you avoid a layout jump.',
+		usage: `import { useImage } from '@ariefsn/svelte-use';
+
+const avatar = useImage({ src: '/avatar.png', alt: 'Avatar' });
+avatar.isLoading(); // → true, then false
+avatar.image();     // → HTMLImageElement | null`,
+		params: [
+			{
+				name: 'source',
+				type: 'UseImageSource | (() => UseImageSource)',
+				description: 'What to load. A getter makes it reactive.'
+			}
+		],
+		options: [
+			{ name: 'src', type: 'string', description: 'The image URL' },
+			{ name: 'srcset', type: 'string', description: 'Responsive candidates, as in `srcset`' },
+			{ name: 'sizes', type: 'string', description: 'Which candidate to pick, as in `sizes`' },
+			{ name: 'alt', type: 'string', description: 'Alternative text, forwarded to the element' },
+			{
+				name: 'crossorigin',
+				type: "'anonymous' | 'use-credentials'",
+				description: 'CORS mode. Required before an image can be drawn to a canvas and read back.'
+			},
+			{ name: 'referrerPolicy', type: 'ReferrerPolicy', description: 'Referrer policy' }
+		],
+		returns: [
+			{ name: 'isLoading', type: '() => boolean', description: 'Whether a load is in progress' },
+			{
+				name: 'image',
+				type: '() => HTMLImageElement | null',
+				description: 'The loaded element, or `null` before it resolves or after a failure'
+			},
+			{
+				name: 'error',
+				type: '() => Error | null',
+				description:
+					'The failure. Image errors carry no detail, so this is synthesised from the URL.'
+			},
+			{ name: 'isReady', type: '() => boolean', description: 'Whether the current source loaded' },
+			{ name: 'refresh', type: '() => void', description: 'Loads again, e.g. to retry' }
+		],
+		example: `<script lang="ts">
+  import { useImage } from '@ariefsn/svelte-use';
+
+  let id = $state(1);
+  const avatar = useImage(() => ({ src: \`/avatars/\${id}.png\`, alt: 'Avatar' }));
+</script>
+
+{#if avatar.isLoading()}
+  <div class="skeleton"></div>
+{:else if avatar.error()}
+  <img src="/avatars/fallback.png" alt="Avatar" />
+{:else}
+  <img src={avatar.image()?.src} alt="Avatar" />
+{/if}`,
+		notes: [
+			'The DOM `error` event for an image carries **no detail** — no status code, no reason — so `error()` is a synthesised `Error` naming the URL. That is genuinely all the browser exposes.',
+			'Every attribute is applied **before** `src`, because setting `crossorigin` or `srcset` afterwards can leave the browser fetching with the wrong CORS mode or picking the wrong candidate.',
+			'A reactive source reloads automatically, and the previous result is cleared while the new one is in flight so stale content cannot linger.',
+			'A result arriving for a source that is no longer current is discarded, so a slow first load cannot overwrite a faster second one.',
+			'SSR safe: nothing loads, `isLoading()` is `false` and `image()` is `null`.'
+		]
+	},
+	'use-speech-synthesis': {
+		slug: 'use-speech-synthesis',
+		title: 'useSpeechSynthesis',
+		description:
+			'Text-to-speech via the Speech Synthesis API. Handles the two behaviours that bite: voices load asynchronously, and the utterance queue outlives the page.',
+		usage: `import { useSpeechSynthesis } from '@ariefsn/svelte-use';
+
+const speech = useSpeechSynthesis({ rate: 1.1 });
+speech.speak('Hello there');`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseSpeechSynthesisOptions',
+				default: '{}',
+				description: 'Voice, language and delivery settings'
+			}
+		],
+		options: [
+			{
+				name: 'lang',
+				type: 'string | (() => string)',
+				default: 'document language',
+				description: 'BCP 47 language tag, e.g. `en-GB`'
+			},
+			{
+				name: 'voice',
+				type: 'SpeechSynthesisVoice | null | (() => …)',
+				default: 'null',
+				description: 'Voice to speak with. Pick one from `voices()`.'
+			},
+			{ name: 'rate', type: 'number | (() => number)', default: '1', description: 'Speed, 0.1–10' },
+			{ name: 'pitch', type: 'number | (() => number)', default: '1', description: 'Pitch, 0–2' },
+			{ name: 'volume', type: 'number | (() => number)', default: '1', description: 'Volume, 0–1' }
+		],
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether the API is available' },
+			{
+				name: 'voices',
+				type: '() => readonly SpeechSynthesisVoice[]',
+				description: 'Available voices. Empty until the browser has loaded them.'
+			},
+			{
+				name: 'status',
+				type: '() => SpeechSynthesisStatus',
+				description: "`'idle'`, `'speaking'` or `'paused'`"
+			},
+			{ name: 'isSpeaking', type: '() => boolean', description: 'Whether speech is playing' },
+			{
+				name: 'error',
+				type: '() => SpeechSynthesisErrorEvent | null',
+				description: 'The last genuine error'
+			},
+			{
+				name: 'speak',
+				type: '(text: string) => void',
+				description: 'Speaks the text, replacing anything queued'
+			},
+			{ name: 'pause', type: '() => void', description: 'Pauses playback' },
+			{ name: 'resume', type: '() => void', description: 'Resumes after a pause' },
+			{ name: 'stop', type: '() => void', description: 'Stops and clears the queue' }
+		],
+		example: `<script lang="ts">
+  import { useSpeechSynthesis } from '@ariefsn/svelte-use';
+
+  let text = $state('Hello there');
+  const speech = useSpeechSynthesis();
+
+  // Empty on first render in Chrome — fills in on its own
+  const english = $derived(speech.voices().filter((v) => v.lang.startsWith('en')));
+</script>
+
+<select onchange={(e) => (voice = english[+e.currentTarget.value])}>
+  {#each english as v, i (v.voiceURI)}
+    <option value={i}>{v.name}</option>
+  {/each}
+</select>
+<button onclick={() => speech.speak(text)}>Speak</button>
+<button onclick={speech.stop} disabled={!speech.isSpeaking()}>Stop</button>`,
+		notes: [
+			'**`getVoices()` returns an empty list on first call in Chrome.** Voices load asynchronously and announce themselves with a `voiceschanged` event, so a one-shot read at init would leave the list permanently empty. This listens for that event — but an empty list on the first render is normal, so do not treat it as unsupported.',
+			'**The utterance queue belongs to the browser, not the page.** It keeps speaking after a component unmounts, and after a client-side navigation. The teardown here calls `cancel()`, so leaving the page stops the voice.',
+			'Each `speak()` cancels what is queued rather than appending, since the queue is global and calls would otherwise play one after another in a way nobody intends.',
+			'`canceled` and `interrupted` errors are treated as ordinary control flow — they are what `stop()` and a replacing `speak()` produce — so `error()` reports only genuine failures.',
+			'Voice availability varies enormously by platform, and many voices need a network connection. There is no reliable way to detect that in advance.',
+			'SSR safe: `isSupported()` is `false` and `speak()` does nothing.'
+		]
+	},
+	'use-file-system-access': {
+		slug: 'use-file-system-access',
+		title: 'useFileSystemAccess',
+		description:
+			'Reading and **writing** real files. This is what `useFileDialog` and `useDropZone` cannot do: they hand you a read-only `File`, while this gives a handle, so `save()` writes back to the file the user opened.',
+		usage: `import { useFileSystemAccess } from '@ariefsn/svelte-use';
+
+const fs = useFileSystemAccess({ suggestedName: 'notes.txt' });
+await fs.open();        // picker → reads as text
+await fs.save('edited'); // writes back to the same file`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseFileSystemAccessOptions',
+				default: '{}',
+				description: 'File type filters and the suggested save name'
+			}
+		],
+		options: [
+			{
+				name: 'types',
+				type: 'readonly FilePickerAcceptType[]',
+				default: 'undefined',
+				description: "File types to offer, e.g. `[{ accept: { 'text/plain': ['.txt'] } }]`"
+			},
+			{
+				name: 'excludeAcceptAllOption',
+				type: 'boolean',
+				default: 'false',
+				description: 'Hide the "All files" option'
+			},
+			{
+				name: 'id',
+				type: 'string',
+				default: 'undefined',
+				description: 'Remembers the last directory per id across visits'
+			},
+			{
+				name: 'suggestedName',
+				type: 'string',
+				default: 'undefined',
+				description: 'Default name offered when saving'
+			}
+		],
+		returns: [
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether the API is available — Chromium only today'
+			},
+			{
+				name: 'fileHandle',
+				type: '() => FileSystemFileHandle | null',
+				description: 'The handle to the open file'
+			},
+			{ name: 'file', type: '() => File | null', description: 'The opened `File`' },
+			{ name: 'data', type: '() => string | null', description: 'Text content of the opened file' },
+			{ name: 'fileName', type: '() => string | null', description: "The file's name" },
+			{
+				name: 'error',
+				type: '() => DOMException | null',
+				description: '`AbortError` when the user dismissed the picker'
+			},
+			{ name: 'isBusy', type: '() => boolean', description: 'Whether a picker or IO is running' },
+			{
+				name: 'open',
+				type: '() => Promise<string | null>',
+				description: 'Opens a picker and reads the chosen file as text'
+			},
+			{
+				name: 'save',
+				type: '(contents?: string) => Promise<boolean>',
+				description: 'Writes to the open file, or opens a save picker when none is open'
+			},
+			{
+				name: 'saveAs',
+				type: '(contents?: string) => Promise<boolean>',
+				description: 'Opens a save picker for a new file regardless'
+			},
+			{ name: 'close', type: '() => void', description: 'Clears state without touching the file' }
+		],
+		example: `<script lang="ts">
+  import { useFileSystemAccess } from '@ariefsn/svelte-use';
+
+  const fs = useFileSystemAccess({
+    types: [{ description: 'Text', accept: { 'text/plain': ['.txt', '.md'] } }],
+    suggestedName: 'notes.txt'
+  });
+
+  let draft = $state('');
+
+  async function open() {
+    const text = await fs.open();
+    if (text !== null) draft = text;
+  }
+</script>
+
+<button onclick={open}>Open</button>
+<button onclick={() => fs.save(draft)}>Save</button>
+<textarea bind:value={draft}></textarea>
+<p>{fs.fileName() ?? 'No file open'}</p>`,
+		notes: [
+			'**Chromium only.** Firefox and Safari implement neither picker, so `isSupported()` is `false` there and a download-based fallback is still needed. It is also unavailable inside a cross-origin iframe.',
+			'This is the gap `useFileDialog` and `useDropZone` leave: both are read-only acquisition, handing back a `File` that is a snapshot. A `FileSystemFileHandle` is what makes writing back possible.',
+			'Both pickers must be called from a user gesture. A dismissed picker surfaces as an `AbortError` in `error()` rather than a throw, because cancelling is ordinary behaviour rather than a fault.',
+			'`save()` with no file open falls back to `saveAs()` rather than failing — that is almost always what a Save button should do.',
+			'A write is not committed until the writable stream is closed, which this handles; a partial write left open would silently lose data.',
+			"TypeScript's `lib.dom` declares `FileSystemFileHandle` but not the two picker methods that hand one out, so those are supplied by this library.",
+			'SSR safe: `isSupported()` is `false` and `open()` resolves `null`.'
+		]
+	},
+	// Async – Streams & Workers
+	'use-event-source': {
+		slug: 'use-event-source',
+		title: 'useEventSource',
+		description:
+			'Server-sent events with reactive state. One-way and text-only, and the **browser** reconnects on its own — so there is deliberately no `autoReconnect` option.',
+		usage: `import { useEventSource } from '@ariefsn/svelte-use';
+
+const stream = useEventSource<string>(
+  () => 'https://sse.tools.typinks.com/api/story'
+);
+stream.data();   // → each token as it streams in
+stream.status(); // → 'CONNECTING' | 'OPEN' | 'CLOSED'`,
+		params: [
+			{
+				name: 'url',
+				type: '() => string | undefined',
+				description: 'Getter for the endpoint. Return `undefined` to stay disconnected.'
+			},
+			{
+				name: 'options',
+				type: 'UseEventSourceOptions',
+				default: '{}',
+				description: 'Credentials, named events and connect-on-init behaviour'
+			}
+		],
+		options: [
+			{
+				name: 'withCredentials',
+				type: 'boolean',
+				default: 'false',
+				description: 'Send cookies and HTTP auth to a cross-origin endpoint'
+			},
+			{
+				name: 'events',
+				type: 'readonly string[]',
+				default: '[]',
+				description:
+					'Named events to subscribe to. A server sending `event: ping` does **not** reach the default handler, so an unlisted name is silently dropped.'
+			},
+			{
+				name: 'immediate',
+				type: 'boolean',
+				default: 'true',
+				description: 'Connect as soon as the URL resolves. `false` waits for `open()`.'
+			}
+		],
+		returns: [
+			{
+				name: 'data',
+				type: '() => T | null',
+				description: 'The last payload, JSON-parsed when possible'
+			},
+			{
+				name: 'event',
+				type: '() => string | null',
+				description: "Name of the last event — `'message'` for unnamed ones"
+			},
+			{
+				name: 'lastEventId',
+				type: '() => string | null',
+				description:
+					'The last `id:` field the server sent, or `null` if it sends none. Most endpoints do not, so `null` is normal rather than a fault.'
+			},
+			{ name: 'status', type: '() => EventSourceStatus', description: 'Connection state' },
+			{ name: 'error', type: '() => Event | null', description: 'The last error event' },
+			{
+				name: 'source',
+				type: '() => EventSource | null',
+				description: 'The underlying `EventSource`, for anything this does not wrap'
+			},
+			{ name: 'open', type: '() => void', description: 'Connects, if not already connected' },
+			{
+				name: 'close',
+				type: '() => void',
+				description: 'Closes the stream and stops the browser reconnecting'
+			}
+		],
+		example: `<script lang="ts">
+  import { untrack } from 'svelte';
+  import { useEventSource } from '@ariefsn/svelte-use';
+
+  // A live endpoint you can try: it streams a story token by token
+  let endpoint = $state('https://sse.tools.typinks.com/api/story');
+
+  // Named events must be listed, or they never arrive
+  const stream = useEventSource<string>(() => endpoint || undefined, {
+    events: ['ping']
+  });
+
+  // Accumulate, since each frame replaces data()
+  let story = $state('');
+  $effect(() => {
+    const chunk = stream.data();
+    if (chunk !== null) untrack(() => (story += chunk));
+  });
+</script>
+
+<p>Status: {stream.status()}</p>
+<p>{story}</p>
+<button onclick={stream.close}>Stop</button>`,
+		notes: [
+			'**There is no `autoReconnect` option on purpose.** `EventSource` reconnects by itself when a connection drops, honouring the server’s `retry:` interval. Adding another layer on top would fight it.',
+			"What the browser does *not* recover from is an HTTP-level failure — a 404, or a response that is not `text/event-stream`. That closes the stream permanently and shows up as `status() === 'CLOSED'` with a non-null `error()`. A retryable drop reports `'CONNECTING'` instead, so the two are distinguishable.",
+			'Named events bypass the default handler entirely. If a server sends `event: ping` and `ping` is not in `events`, the message is dropped with no warning — this is the most common surprise with SSE.',
+			'Messages are text only. A payload that parses as JSON is parsed; anything else is left as a string.',
+			'Changing the URL closes the old connection first, and a late frame from it is ignored rather than overwriting fresher state.',
+			'`data()` holds the **latest** frame, not an accumulation. A token-streaming endpoint therefore needs the consumer to append, and appending inside an `$effect` must be wrapped in `untrack` — `story += chunk` reads and writes the same state, which would otherwise re-trigger the effect forever.',
+			'**`lastEventId()` is `null` for most endpoints, and that is not a fault.** It reflects the optional `id:` field. Its only job is resumption: when a stream drops, the browser reconnects by itself and sends the last id back as a `Last-Event-ID` request header, so the server can continue from that point instead of replaying from the start. A server that sends only `data:` lines — which is the common case — has nothing to resume from, and the spec leaves the value as an empty string.',
+			"Likewise `event()` reports `'message'` for any frame the server did not name. A non-null `event()` other than `'message'` means the server sent an explicit `event:` line *and* you listed that name in `events`.",
+			"SSR safe: nothing connects and `status()` is `'CLOSED'`."
+		]
+	},
+	'use-broadcast-channel': {
+		slug: 'use-broadcast-channel',
+		title: 'useBroadcastChannel',
+		description:
+			'Cross-tab messaging over `BroadcastChannel`. Every tab, worker and iframe on the same origin using the same channel name receives what the others post — but the sender never receives its own message.',
+		usage: `import { useBroadcastChannel } from '@ariefsn/svelte-use';
+
+const channel = useBroadcastChannel<{ userId: string }>({ name: 'auth' });
+channel.post({ userId: 'u1' });
+channel.data(); // → what another tab posted`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseBroadcastChannelOptions',
+				description: 'The channel name'
+			}
+		],
+		options: [
+			{
+				name: 'name',
+				type: 'string',
+				description:
+					'Channel name. Every context using the same name on the same origin shares the channel.'
+			}
+		],
+		returns: [
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether `BroadcastChannel` exists'
+			},
+			{ name: 'data', type: '() => T | null', description: 'The last message received' },
+			{
+				name: 'error',
+				type: '() => MessageEvent | null',
+				description: 'The last `messageerror` — a payload that could not be deserialised'
+			},
+			{ name: 'isClosed', type: '() => boolean', description: 'Whether the channel is closed' },
+			{
+				name: 'post',
+				type: '(data: T) => void',
+				description: 'Posts to every **other** context on this channel'
+			},
+			{ name: 'close', type: '() => void', description: 'Closes the channel' }
+		],
+		example: `<script lang="ts">
+  import { useBroadcastChannel } from '@ariefsn/svelte-use';
+  import { goto } from '$app/navigation';
+
+  const auth = useBroadcastChannel<{ userId: string | null }>({ name: 'auth' });
+
+  // Signing out in one tab signs out the others
+  $effect(() => {
+    if (auth.data()?.userId === null) goto('/login');
+  });
+</script>
+
+<button onclick={() => auth.post({ userId: null })}>Sign out everywhere</button>`,
+		notes: [
+			'**The sender never receives its own message.** This is the usual source of confusion when testing with a single tab — open a second one, or create two instances.',
+			'Payloads travel by **structured clone**, not JSON. Objects, `Map`, `Set`, `Date`, `ArrayBuffer` and typed arrays all survive, and a string arrives as the string it was. Functions, DOM nodes and class behaviour do not; posting one throws a `DataCloneError`.',
+			'This is why `useBroadcastChannel` deliberately does **not** share the JSON parsing that `useWebSocket` and `useEventSource` use. Running it here would turn a payload of `\'{"a":1}\'` into an object the sender never sent.',
+			'`useColorMode` uses a *same-page* channel internally rather than this one, because `BroadcastChannel` does not deliver to the context that posted — and that util needs sibling instances in the same tab to update.',
+			'Delivery is asynchronous, so a message posted now is not readable on the next line.',
+			'SSR safe: `isSupported()` is `false` and `post()` is a no-op.'
+		]
+	},
+	'use-web-worker-fn': {
+		slug: 'use-web-worker-fn',
+		title: 'useWebWorkerFn',
+		description:
+			'Runs a function on a Web Worker, off the main thread. The function is serialised with `toString()`, so it **must be entirely self-contained** — it cannot see imports, module constants or closures from the file it was written in.',
+		usage: `import { useWebWorkerFn } from '@ariefsn/svelte-use';
+
+const sorter = useWebWorkerFn((numbers: number[]) =>
+  [...numbers].sort((a, b) => a - b)
+);
+
+const sorted = await sorter.run([5, 1, 4]);`,
+		params: [
+			{
+				name: 'fn',
+				type: '(...args: TArgs) => TResult | Promise<TResult>',
+				description: 'A self-contained function to run off-thread'
+			},
+			{
+				name: 'options',
+				type: 'UseWebWorkerFnOptions',
+				default: '{}',
+				description: 'Timeout and `importScripts` dependencies'
+			}
+		],
+		options: [
+			{
+				name: 'timeout',
+				type: 'number',
+				default: 'undefined',
+				description: 'Milliseconds before a run is abandoned and the worker terminated'
+			},
+			{
+				name: 'dependencies',
+				type: 'readonly string[]',
+				default: '[]',
+				description:
+					'Scripts to `importScripts()` inside the worker, as absolute URLs. The supported way to give the function code it does not carry itself.'
+			}
+		],
+		returns: [
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether `Worker`, `Blob` and `URL.createObjectURL` are all available'
+			},
+			{
+				name: 'run',
+				type: '(...args: TArgs) => Promise<TResult>',
+				description: 'Runs the function off-thread. Starting a run cancels the previous one.'
+			},
+			{
+				name: 'status',
+				type: '() => WebWorkerStatus',
+				description:
+					"State of the most recent run: `'PENDING'`, `'RUNNING'`, `'SUCCESS'`, `'ERROR'`, `'TIMEOUT'` or `'TERMINATED'`"
+			},
+			{
+				name: 'terminate',
+				type: '() => void',
+				description:
+					"Terminates the running worker. The pending promise rejects and `status()` becomes `'TERMINATED'`."
+			}
+		],
+		example: `<script lang="ts">
+  import { useWebWorkerFn } from '@ariefsn/svelte-use';
+
+  // Self-contained: everything it touches is an argument or a built-in
+  const primes = useWebWorkerFn((limit: number) => {
+    const sieve = new Uint8Array(limit + 1);
+    const found: number[] = [];
+    for (let n = 2; n <= limit; n++) {
+      if (sieve[n]) continue;
+      found.push(n);
+      for (let m = n * n; m <= limit; m += n) sieve[m] = 1;
+    }
+    return found;
+  }, { timeout: 5000 });
+
+  let result = $state<number[]>([]);
+</script>
+
+<button onclick={async () => (result = await primes.run(5_000_000))}>
+  Compute
+</button>
+<p>{primes.status()} — {result.length} primes</p>`,
+		notes: [
+			'**The function must be self-contained.** It is serialised with `Function.prototype.toString()` and re-created in a fresh worker scope, so imports, module-level constants and closed-over variables are all unavailable. Referencing one throws *inside the worker* — TypeScript cannot catch it, and the call site looks fine.',
+			'Arguments and the return value cross by structured clone, so they may be objects, `Map`, `Set`, `Date` or typed arrays, but not functions, DOM nodes or class instances with behaviour. A non-cloneable argument rejects the promise rather than failing silently.',
+			'**Async functions written in a `.svelte` or `.svelte.ts` file need no special handling, but only because this works around a compiler detail.** Svelte rewrites every `await` to `(await $.track_reactivity_loss(p))()`, where `$` is its internal import — a name that does not exist in a worker. A small shim for `$` is injected into the worker scope, so `$` is a reserved name there.',
+			'Each `run()` gets a fresh worker, so no state leaks between runs, and starting a run cancels the previous one — its promise rejects rather than resolving late.',
+			"`terminate()` moves the status to `'TERMINATED'`, not `'ERROR'` — the run was cancelled deliberately, not broken. It is also a distinct state from `'RUNNING'` on purpose: a button disabled while `status() === 'RUNNING'` would otherwise stay disabled forever after a cancel. Terminating while idle changes nothing.",
+			'The Blob URL backing the worker is revoked on completion, timeout, `terminate()` and scope destroy. Skipping that leaks a URL per run.',
+			'A strict Content Security Policy needs `worker-src blob:`, or worker construction throws.',
+			'SSR safe: `isSupported()` is `false` and `run()` rejects.'
+		]
+	},
+	// Browser – Media
+	'use-user-media': {
+		slug: 'use-user-media',
+		title: 'useUserMedia',
+		description:
+			'Camera and microphone capture via `getUserMedia`. Nothing is requested until `start()` is called, and changing `constraints` while a stream is live reacquires it — which is how you switch device.',
+		usage: `import { useUserMedia } from '@ariefsn/svelte-use';
+
+const camera = useUserMedia({ constraints: { video: true } });
+await camera.start();
+camera.stream(); // → MediaStream | null`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseUserMediaOptions',
+				default: '{}',
+				description: 'Capture configuration'
+			}
+		],
+		options: [
+			{
+				name: 'constraints',
+				type: 'MediaStreamConstraints | (() => MediaStreamConstraints)',
+				default: '{ audio: true, video: true }',
+				description:
+					'Constraints for `getUserMedia`. A getter makes them reactive: changing them while a stream is live stops it and reacquires with the new ones.'
+			},
+			{
+				name: 'flip',
+				type: 'UserMediaFlip | (() => UserMediaFlip)',
+				default: "'none'",
+				description:
+					"How to mirror the **preview**: `'none'`, `'horizontal'`, `'vertical'` or `'both'`. Display only — it produces a CSS transform and never touches the captured pixels."
+			}
+		],
+		returns: [
+			{ name: 'isSupported', type: '() => boolean', description: 'Whether `getUserMedia` exists' },
+			{
+				name: 'stream',
+				type: '() => MediaStream | null',
+				description: 'The live stream, or `null` when nothing is being captured'
+			},
+			{ name: 'isActive', type: '() => boolean', description: 'Whether a stream is live' },
+			{
+				name: 'error',
+				type: '() => DOMException | null',
+				description:
+					"The last failure. `error()?.name === 'NotAllowedError'` is a denied prompt; `NotFoundError` means no matching device."
+			},
+			{
+				name: 'start',
+				type: '() => Promise<MediaStream | null>',
+				description: 'Acquires a stream, or returns the existing one. Resolves `null` on failure.'
+			},
+			{ name: 'stop', type: '() => void', description: 'Stops every track and clears the stream' },
+			{
+				name: 'restart',
+				type: '() => Promise<MediaStream | null>',
+				description: 'Stops, then acquires again'
+			},
+			{ name: 'flip', type: '() => UserMediaFlip', description: 'The current flip setting' },
+			{
+				name: 'transform',
+				type: '() => string',
+				description:
+					"CSS `transform` for the preview element — `'scaleX(-1)'` for a horizontal flip, `'none'` otherwise"
+			}
+		],
+		example: `<script lang="ts">
+  import { useUserMedia } from '@ariefsn/svelte-use';
+
+  let deviceId = $state<string | undefined>(undefined);
+
+  // Switching deviceId reacquires automatically — no manual stop/start.
+  // Mirroring the self-view costs nothing and never re-prompts.
+  const camera = useUserMedia({
+    constraints: () => ({ video: deviceId ? { deviceId } : true }),
+    flip: 'horizontal'
+  });
+</script>
+
+<button onclick={() => camera.start()} disabled={camera.isActive()}>Start</button>
+<button onclick={camera.stop} disabled={!camera.isActive()}>Stop</button>
+
+{#if camera.error()}
+  <p>{camera.error()?.name === 'NotAllowedError' ? 'Permission denied' : 'Capture failed'}</p>
+{/if}
+
+{#if camera.stream()}
+  <video
+    srcobject={camera.stream()!}
+    style:transform={camera.transform()}
+    autoplay
+    playsinline
+    muted
+  ></video>
+{/if}`,
+		notes: [
+			'Capture never starts on its own. A permission prompt should follow a user action, not a page load.',
+			'Calling `start()` twice in the same tick yields **one** stream and one prompt. Without that guard a double click opens two camera streams, and the second leaks.',
+			'A request that resolves after `stop()` has its tracks stopped rather than becoming the live stream — otherwise the camera light stays on with nothing referencing it.',
+			'Constraints are compared by their serialised form, so an inline `() => ({ video: true })` does not reacquire on every render just because the object identity changed.',
+			'Releasing the `MediaStream` reference is not enough to turn the camera off; every track must be stopped. `stop()` and the destroy teardown both do this.',
+			'**`flip` mirrors the preview, not the capture.** A `MediaStream`’s pixels cannot be flipped without reprocessing every frame, so `transform()` is a CSS value for the element showing the stream. Anything you record, upload or send over WebRTC is unmirrored — which is what you want: a self-view reads naturally when mirrored, but the person at the other end should see you the right way round. If you genuinely need flipped *pixels*, draw the video to a canvas and use `canvas.captureStream()`.',
+			'`flip` never reacquires the stream, so it can be toggled live without a second permission prompt — unlike `constraints`, which does reacquire by design.',
+			'Set `srcobject` (lowercase) in Svelte markup; Svelte maps it to the `srcObject` property, which cannot be expressed as a plain HTML attribute.',
+			'SSR safe: `isSupported()` is `false` and `start()` resolves `null`.'
+		]
+	},
+	'use-display-media': {
+		slug: 'use-display-media',
+		title: 'useDisplayMedia',
+		description:
+			'Screen, window or tab capture via `getDisplayMedia`. Watches for the browser’s own “Stop sharing” control, which ends the tracks without notifying the page.',
+		usage: `import { useDisplayMedia } from '@ariefsn/svelte-use';
+
+const screen = useDisplayMedia();
+await screen.start(); // opens the picker — needs a user gesture`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseDisplayMediaOptions',
+				default: '{}',
+				description: 'Capture configuration'
+			}
+		],
+		options: [
+			{
+				name: 'options',
+				type: 'DisplayMediaStreamOptions | (() => DisplayMediaStreamOptions)',
+				default: '{ video: true }',
+				description:
+					'Passed to `getDisplayMedia`. Unlike `useUserMedia`, changing these does **not** reacquire a live stream — they apply to the next `start()`.'
+			}
+		],
+		returns: [
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether `getDisplayMedia` exists'
+			},
+			{
+				name: 'stream',
+				type: '() => MediaStream | null',
+				description: 'The captured stream, or `null`'
+			},
+			{ name: 'isActive', type: '() => boolean', description: 'Whether capture is live' },
+			{
+				name: 'error',
+				type: '() => DOMException | null',
+				description: 'The last failure — `NotAllowedError` when the picker is dismissed'
+			},
+			{
+				name: 'start',
+				type: '() => Promise<MediaStream | null>',
+				description: 'Opens the picker and acquires a stream'
+			},
+			{ name: 'stop', type: '() => void', description: 'Stops capture' },
+			{
+				name: 'restart',
+				type: '() => Promise<MediaStream | null>',
+				description: 'Stops, then opens the picker again'
+			}
+		],
+		example: `<script lang="ts">
+  import { useDisplayMedia } from '@ariefsn/svelte-use';
+
+  const screen = useDisplayMedia({ options: { video: true, audio: false } });
+</script>
+
+<button onclick={() => screen.start()} disabled={screen.isActive()}>Share screen</button>
+<button onclick={screen.stop} disabled={!screen.isActive()}>Stop</button>
+
+<!-- Flips back to false on its own when the browser's "Stop sharing" is used -->
+<p>Sharing: {screen.isActive()}</p>`,
+		notes: [
+			'`start()` must be called from a user gesture; browsers reject a picker opened without one.',
+			'Ending capture from the browser’s own floating “Stop sharing” bar ends the tracks silently. This composable listens for that and clears `stream()`, so `isActive()` is trustworthy — a naive wrapper reports a live stream forever afterwards.',
+			'Reactive `options` deliberately do **not** trigger a reacquire. Reopening the picker because a checkbox changed would be hostile; call `restart()` explicitly instead.',
+			'Audio capture is not universally available — Chromium can capture tab audio, and Safari captures none.',
+			'SSR safe: `isSupported()` is `false` and `start()` resolves `null`.'
+		]
+	},
+	'use-devices-list': {
+		slug: 'use-devices-list',
+		title: 'useDevicesList',
+		description:
+			'The list of media input and output devices, grouped by kind and refreshed on `devicechange`. Until access is granted every `label` is an empty string, which `permissionGranted()` reports and `ensurePermissions()` resolves.',
+		usage: `import { useDevicesList } from '@ariefsn/svelte-use';
+
+const devices = useDevicesList();
+devices.videoInputs(); // → readonly MediaDeviceInfo[]`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseDevicesListOptions',
+				default: '{}',
+				description: 'Permission behaviour for the initial enumeration'
+			}
+		],
+		options: [
+			{
+				name: 'requestPermissions',
+				type: 'boolean',
+				default: 'false',
+				description:
+					'Ask for access on init so labels are populated immediately. This shows a prompt, so leave it off unless the component only renders after a user action.'
+			},
+			{
+				name: 'constraints',
+				type: 'MediaStreamConstraints',
+				default: '{ audio: true, video: true }',
+				description: 'Constraints for the throwaway stream used to reveal labels'
+			}
+		],
+		returns: [
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether `enumerateDevices` exists'
+			},
+			{
+				name: 'devices',
+				type: '() => readonly MediaDeviceInfo[]',
+				description: 'Every device, in the browser’s order'
+			},
+			{
+				name: 'audioInputs',
+				type: '() => readonly MediaDeviceInfo[]',
+				description: 'Microphones and other audio sources'
+			},
+			{
+				name: 'audioOutputs',
+				type: '() => readonly MediaDeviceInfo[]',
+				description: 'Speakers and other audio sinks'
+			},
+			{
+				name: 'videoInputs',
+				type: '() => readonly MediaDeviceInfo[]',
+				description: 'Cameras'
+			},
+			{
+				name: 'permissionGranted',
+				type: '() => boolean',
+				description: 'Whether labels are populated, i.e. access has been granted'
+			},
+			{
+				name: 'ensurePermissions',
+				type: '() => Promise<boolean>',
+				description: 'Requests access so labels become readable. Resolves whether it worked.'
+			},
+			{
+				name: 'update',
+				type: '() => Promise<void>',
+				description: 'Re-enumerates. Called automatically on `devicechange`.'
+			}
+		],
+		example: `<script lang="ts">
+  import { useDevicesList, useUserMedia } from '@ariefsn/svelte-use';
+
+  const devices = useDevicesList();
+  let deviceId = $state<string | undefined>(undefined);
+  const camera = useUserMedia({
+    constraints: () => ({ video: deviceId ? { deviceId } : true })
+  });
+</script>
+
+{#if !devices.permissionGranted()}
+  <button onclick={devices.ensurePermissions}>Show device names</button>
+{/if}
+
+<select bind:value={deviceId}>
+  {#each devices.videoInputs() as camera (camera.deviceId)}
+    <option value={camera.deviceId}>{camera.label || 'Camera'}</option>
+  {/each}
+</select>`,
+		notes: [
+			'`enumerateDevices()` always resolves, but before access is granted every entry has an empty `label` and an empty `deviceId`. A picker built on it renders a list of blanks, which is why `permissionGranted()` exists.',
+			'`ensurePermissions()` opens a stream purely so the browser reveals labels, then stops it immediately. It is a no-op when labels are already present.',
+			'The list refreshes on `devicechange`, so plugging in a headset updates it without a reload.',
+			'This is the composable that drives a device picker for `useUserMedia` — pass a chosen `deviceId` into its constraints and the stream switches automatically.',
+			'Enumeration can reject inside a cross-origin iframe without the right permissions policy; that surfaces as an empty list rather than a throw.',
+			'SSR safe: `isSupported()` is `false` and every list is empty.'
+		]
+	},
+	// Browser – Appearance
+	'use-color-mode': {
+		slug: 'use-color-mode',
+		title: 'useColorMode',
+		description:
+			'Reactive colour mode with `auto` resolution, persistence and cross-tab sync. `auto` follows the OS preference and keeps following it, because resolution is derived rather than snapshotted.',
+		usage: `import { useColorMode } from '@ariefsn/svelte-use';
+
+const theme = useColorMode();
+theme.toggle();
+theme.isDark(); // → true`,
+		params: [
+			{
+				name: 'options',
+				type: 'UseColorModeOptions',
+				default: '{}',
+				description: 'Configuration'
+			}
+		],
+		options: [
+			{
+				name: 'target',
+				type: '() => HTMLElement | null | undefined',
+				default: 'document.documentElement',
+				description: 'Element receiving the mode'
+			},
+			{
+				name: 'attribute',
+				type: 'string',
+				default: "'class'",
+				description:
+					'Attribute to write. The literal `class` toggles a class instead of calling `setAttribute`.'
+			},
+			{
+				name: 'modes',
+				type: 'Record<ResolvedColorMode, string>',
+				default: "{ light: 'light', dark: 'dark' }",
+				description:
+					'Maps each resolved mode to the attribute value or class name it writes. An empty string removes the attribute, or adds no class.'
+			},
+			{
+				name: 'initialValue',
+				type: 'ColorModeSelection',
+				default: "'auto'",
+				description:
+					'Selection used before storage is consulted. Pass `dark` to hard-default to dark regardless of the OS setting.'
+			},
+			{
+				name: 'storageKey',
+				type: 'string | null',
+				default: "'svelte-use-color-mode'",
+				description: 'Persistence key. `null` disables persistence and keeps the mode in memory.'
+			},
+			{
+				name: 'storageArea',
+				type: "'local' | 'session'",
+				default: "'local'",
+				description: 'Which Web Storage area persists the mode'
+			},
+			{
+				name: 'disableTransition',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'Suppress CSS transitions for one frame while the mode flips, so colours swap instantly instead of cross-fading every transitioned property'
+			},
+			{
+				name: 'onChanged',
+				type: '(resolved, applyDefault) => void',
+				default: 'undefined',
+				description:
+					'Replaces the default DOM write. Receives the resolved mode and the default applier, so it can decorate rather than fully replace.'
+			}
+		],
+		returns: [
+			{
+				name: 'mode',
+				type: '() => ColorModeSelection',
+				description: 'The current selection, which may be `auto`'
+			},
+			{
+				name: 'resolved',
+				type: '() => ResolvedColorMode',
+				description: 'The selection with `auto` resolved against the OS preference'
+			},
+			{ name: 'isDark', type: '() => boolean', description: 'Whether the resolved mode is `dark`' },
+			{
+				name: 'system',
+				type: "() => 'light' | 'dark'",
+				description: 'The OS preference, regardless of the current selection'
+			},
+			{ name: 'set', type: '(mode) => void', description: 'Selects a mode and persists it' },
+			{
+				name: 'toggle',
+				type: '() => void',
+				description:
+					'Flips between light and dark based on what is currently resolved, and therefore leaves `auto`'
+			},
+			{
+				name: 'reset',
+				type: '() => void',
+				description: 'Returns to `initialValue` and clears the persisted selection'
+			}
+		],
+		example: `<script lang="ts">
+  import { useColorMode } from '@ariefsn/svelte-use';
+
+  const theme = useColorMode({ initialValue: 'dark', attribute: 'data-theme' });
+</script>
+
+{#each ['auto', 'light', 'dark'] as const as option}
+  <button class:active={theme.mode() === option} onclick={() => theme.set(option)}>
+    {option}
+  </button>
+{/each}`,
+		notes: [
+			'A separate `useDark` is deliberately absent — it is `useColorMode().isDark`.',
+			'**A composable cannot prevent the first-paint flash.** It runs after hydration, which is after first paint, so a stored mode differing from the server-rendered one always flashes. Paste `colorModeScript()` into `app.html` inside `<head>`, above every stylesheet, to fix it.',
+			'`colorModeScript()` takes the same `storageKey`, `attribute`, `modes` and `initialValue` — pass the same values to both or the script will apply the wrong thing.',
+			'The selection is stored as a bare value (`dark`, not `"dark"`), so the pre-paint script needs no `JSON.parse`.',
+			'Unlike `useTextDirection`, this does **not** run a `MutationObserver`: it owns the attribute rather than sharing it, and two instances both observing and writing would mutually re-trigger. Editing the attribute by hand is therefore not adopted.',
+			'Two instances in the same page stay in sync through an internal channel, because the `storage` event does not fire in the tab that caused the write.'
+		]
+	},
+	'use-preferred-dark': {
+		slug: 'use-preferred-dark',
+		title: 'usePreferredDark',
+		description:
+			'Reactively tracks whether the OS requests a dark colour scheme, via `(prefers-color-scheme: dark)`.',
+		usage: `import { usePreferredDark } from '@ariefsn/svelte-use';
+
+const isDark = usePreferredDark();
+isDark(); // → true when the OS is set to dark`,
+		returns: [
+			{ name: '(return)', type: '() => boolean', description: 'Whether dark mode is preferred' }
+		],
+		example: `<script lang="ts">
+  import { usePreferredDark } from '@ariefsn/svelte-use';
+
+  const prefersDark = usePreferredDark();
+</script>
+
+<img src={prefersDark() ? '/logo-dark.svg' : '/logo-light.svg'} alt="Logo" />`,
+		notes: [
+			'Returns `false` during SSR and until hydration.',
+			'Not the same as `usePreferredColorScheme() === "dark"`: a user agent reporting no preference at all yields `false` here and `no-preference` there. Use this for a binary decision, that one to tell the two apart.',
+			'Exports `PREFERS_DARK_QUERY`, the query literal, so `usePreferredColorScheme` and `useColorMode` share one copy of it.'
+		]
+	},
+	'use-preferred-color-scheme': {
+		slug: 'use-preferred-color-scheme',
+		title: 'usePreferredColorScheme',
+		description:
+			'Reactively tracks the OS colour-scheme preference as `dark`, `light` or `no-preference`.',
+		usage: `import { usePreferredColorScheme } from '@ariefsn/svelte-use';
+
+const scheme = usePreferredColorScheme();
+scheme(); // → 'dark' | 'light' | 'no-preference'`,
+		returns: [
+			{
+				name: '(return)',
+				type: "() => 'dark' | 'light' | 'no-preference'",
+				description: 'The resolved preference'
+			}
+		],
+		example: `<script lang="ts">
+  import { usePreferredColorScheme } from '@ariefsn/svelte-use';
+
+  const scheme = usePreferredColorScheme();
+
+  // Fall back to your own default only when the OS has no opinion
+  const theme = $derived(scheme() === 'no-preference' ? 'dark' : scheme());
+</script>
+
+<p>OS says {scheme()}, using {theme}</p>`,
+		notes: [
+			'Derived from **two** media queries rather than one, so an explicit `light` preference stays distinguishable from a user agent that reports nothing. Older engines and some embedded webviews match neither.',
+			'Returns `no-preference` during SSR.',
+			'A user agent reporting both queries resolves to `dark`, since candidates are checked in order.'
+		]
+	},
+	'use-preferred-reduced-motion': {
+		slug: 'use-preferred-reduced-motion',
+		title: 'usePreferredReducedMotion',
+		description:
+			'Reactively tracks whether the OS requests reduced motion, as `reduce` or `no-preference`.',
+		usage: `import { usePreferredReducedMotion } from '@ariefsn/svelte-use';
+
+const motion = usePreferredReducedMotion();
+motion(); // → 'reduce' when the user asked for less motion`,
+		returns: [
+			{
+				name: '(return)',
+				type: "() => 'reduce' | 'no-preference'",
+				description: 'The resolved preference'
+			}
+		],
+		example: `<script lang="ts">
+  import { usePreferredReducedMotion } from '@ariefsn/svelte-use';
+
+  const motion = usePreferredReducedMotion();
+
+  // Skip the transition entirely rather than shortening it
+  const duration = $derived(motion() === 'reduce' ? 0 : 300);
+</script>`,
+		notes: [
+			'Returns `no-preference` during SSR — the safe default, since animations render normally until the real preference is known.',
+			'Returns the CSS keyword rather than a boolean, matching the rest of the `usePreferred*` family and the value you would write in a `@media` block.',
+			'Prefer removing an animation over merely shortening it; `reduce` is a request to stop moving things, not to move them faster.'
+		]
+	},
+	'use-preferred-contrast': {
+		slug: 'use-preferred-contrast',
+		title: 'usePreferredContrast',
+		description:
+			'Reactively tracks the OS contrast preference as `more`, `less`, `custom` or `no-preference`.',
+		usage: `import { usePreferredContrast } from '@ariefsn/svelte-use';
+
+const contrast = usePreferredContrast();
+contrast(); // → 'more' | 'less' | 'custom' | 'no-preference'`,
+		returns: [
+			{
+				name: '(return)',
+				type: "() => 'more' | 'less' | 'custom' | 'no-preference'",
+				description: 'The resolved preference'
+			}
+		],
+		example: `<script lang="ts">
+  import { usePreferredContrast } from '@ariefsn/svelte-use';
+
+  const contrast = usePreferredContrast();
+  const borderWidth = $derived(contrast() === 'more' ? 2 : 1);
+</script>
+
+<div style="border: {borderWidth}px solid currentColor">Adaptive border</div>`,
+		notes: [
+			'Combines three media queries. Returns `no-preference` during SSR.',
+			'`custom` means the user has set a specific palette — Windows High Contrast, or forced colours — rather than asking for more or less contrast in general.',
+			'**Order is load-bearing:** a forced-colours mode often matches `custom` *and* `more` simultaneously, so `custom` is checked last and the more actionable answer wins.'
+		]
+	},
+	'use-css-var': {
+		slug: 'use-css-var',
+		title: 'useCssVar',
+		description:
+			'Reads and writes a CSS custom property. Writes are instant; reads are deliberately not fully reactive, because custom properties have no change event.',
+		usage: `import { useCssVar } from '@ariefsn/svelte-use';
+
+const accent = useCssVar('--accent');
+accent.set('tomato');
+accent.current(); // → 'tomato'`,
+		params: [
+			{
+				name: 'name',
+				type: 'string | (() => string)',
+				description: 'Custom property name, including the leading `--`'
+			},
+			{
+				name: 'target',
+				type: '() => HTMLElement | null | undefined',
+				default: 'document.documentElement',
+				description: 'Getter for the element to read and write'
+			},
+			{ name: 'options', type: 'UseCssVarOptions', default: '{}', description: 'Configuration' }
+		],
+		options: [
+			{
+				name: 'initialValue',
+				type: 'string',
+				default: "''",
+				description: 'Value reported when the property is unset, unreadable, or during SSR'
+			},
+			{
+				name: 'observe',
+				type: 'boolean',
+				default: 'false',
+				description:
+					"Re-read when the target's `style` or `class` attribute changes. Off by default because each change costs a style recalculation."
+			}
+		],
+		returns: [
+			{ name: 'current', type: '() => string', description: 'The current value, trimmed' },
+			{
+				name: 'set',
+				type: '(value: string) => void',
+				description: 'Writes the property inline and updates the value synchronously'
+			},
+			{
+				name: 'remove',
+				type: '() => void',
+				description: 'Removes the inline property, then re-reads the inherited value'
+			},
+			{ name: 'refresh', type: '() => void', description: 'Forces a `getComputedStyle` re-read' }
+		],
+		example: `<script lang="ts">
+  import { useCssVar, useColorMode } from '@ariefsn/svelte-use';
+
+  useColorMode();
+  // The theme class lands on <html>, which is also the default target,
+  // so observing picks up a theme switch
+  const surface = useCssVar('--color-surface', undefined, { observe: true });
+</script>
+
+<p>Surface is {surface()}</p>`,
+		notes: [
+			'**Writes are authoritative and free.** `set()` updates the element and the reactive value in the same synchronous call, so anything changed through this composable is instantly reactive with no reads.',
+			'**Reads are the compromise.** Custom properties have no change event and `getComputedStyle` forces a style recalculation, so polling is off the table. This reads once at initialisation and then only when asked.',
+			'`observe: true` adds a `MutationObserver` on `style` and `class`, which catches the common case — a theme class flipping on an ancestor. It still misses a swapped stylesheet, a CSSOM write, and an ancestor whose class changed. `refresh()` covers all of those.',
+			'The name must include the leading `--`. Standard properties are not supported: `getPropertyValue("color")` returns a resolved colour rather than failing, which would make a typo look like it worked.',
+			'Values are trimmed, because custom properties preserve leading whitespace and the raw value would not compare equal to what was written.'
+		]
+	},
+	// Element & viewport
+	'use-window-size': {
+		slug: 'use-window-size',
+		title: 'useWindowSize',
+		description:
+			'Reactive viewport dimensions. Tracks `resize` and `orientationchange`, so it stays correct when a mobile device is rotated — which does not always fire `resize` on its own.',
+		usage: `import { useWindowSize } from '@ariefsn/svelte-use';
+
+const { width, height } = useWindowSize();
+width();  // → 1280`,
+		params: [
+			{ name: 'options', type: 'UseWindowSizeOptions', default: '{}', description: 'Configuration' }
+		],
+		options: [
+			{
+				name: 'includeScrollbar',
+				type: 'boolean',
+				default: 'true',
+				description:
+					'`true` uses `innerWidth`/`innerHeight`, which count the scrollbar. `false` uses `documentElement.clientWidth`/`clientHeight`, matching what CSS media queries measure.'
+			},
+			{
+				name: 'initialWidth',
+				type: 'number',
+				default: '0',
+				description: 'Width reported before the first measurement, i.e. during SSR'
+			},
+			{
+				name: 'initialHeight',
+				type: 'number',
+				default: '0',
+				description: 'Height reported before the first measurement, i.e. during SSR'
+			}
+		],
+		returns: [
+			{ name: 'width', type: '() => number', description: 'Viewport width in pixels' },
+			{ name: 'height', type: '() => number', description: 'Viewport height in pixels' }
+		],
+		example: `<script lang="ts">
+  import { useWindowSize } from '@ariefsn/svelte-use';
+
+  // Matching CSS media queries means excluding the scrollbar
+  const { width } = useWindowSize({ includeScrollbar: false });
+</script>
+
+{#if width() < 768}
+  <MobileNav />
+{:else}
+  <DesktopNav />
+{/if}`,
+		notes: [
+			'Also listens for `orientationchange`, because some mobile browsers fire only that on rotation.',
+			'For layout decisions prefer `useMediaQuery` or `useBreakpoints` — they use `matchMedia`, which fires only when a threshold is crossed rather than on every resize frame.',
+			'Set `initialWidth`/`initialHeight` to sensible defaults if you render based on these during SSR; otherwise the server renders as if the viewport were 0 wide.'
+		]
+	},
+
+	'use-element-bounding': {
+		slug: 'use-element-bounding',
+		title: 'useElementBounding',
+		description:
+			'Reactive `getBoundingClientRect()` for an element. Where `useElementSize` reports only width and height, this exposes the full viewport-relative box — position included — and recalculates on resize, scroll, and size changes.',
+		usage: `import { useElementBounding } from '@ariefsn/svelte-use';
+
+let el = $state<HTMLDivElement | null>(null);
+const { top, left, width, height } = useElementBounding(() => el);`,
+		params: [
+			{
+				name: 'target',
+				type: '() => Element | null | undefined',
+				description: 'Reactive getter returning the element to measure'
+			},
+			{
+				name: 'options',
+				type: 'UseElementBoundingOptions',
+				default: '{}',
+				description: 'Configuration'
+			}
+		],
+		options: [
+			{
+				name: 'reset',
+				type: 'boolean',
+				default: 'true',
+				description: 'Reset every value to `0` when the target becomes `null`'
+			},
+			{
+				name: 'windowResize',
+				type: 'boolean',
+				default: 'true',
+				description: 'Recalculate on window `resize`'
+			},
+			{
+				name: 'windowScroll',
+				type: 'boolean',
+				default: 'true',
+				description: 'Recalculate on window `scroll`'
+			}
+		],
+		returns: [
+			{ name: 'x', type: '() => number', description: 'Viewport-relative x (same as `left`)' },
+			{ name: 'y', type: '() => number', description: 'Viewport-relative y (same as `top`)' },
+			{ name: 'top', type: '() => number', description: 'Distance from the top of the viewport' },
+			{ name: 'right', type: '() => number', description: "The element's right edge" },
+			{ name: 'bottom', type: '() => number', description: "The element's bottom edge" },
+			{ name: 'left', type: '() => number', description: 'Distance from the left of the viewport' },
+			{ name: 'width', type: '() => number', description: 'Border-box width' },
+			{ name: 'height', type: '() => number', description: 'Border-box height' },
+			{ name: 'update', type: '() => void', description: 'Recalculates immediately' }
+		],
+		example: `<script lang="ts">
+  import { useElementBounding } from '@ariefsn/svelte-use';
+
+  let anchor = $state<HTMLButtonElement | null>(null);
+  const { bottom, left, width } = useElementBounding(() => anchor);
+</script>
+
+<button bind:this={anchor}>Open menu</button>
+
+<!-- Position a dropdown under the button -->
+<div style="position: fixed; top: {bottom()}px; left: {left()}px; width: {width()}px">
+  …
+</div>`,
+		notes: [
+			'All values are viewport-relative, matching `getBoundingClientRect()`. Add `window.scrollX`/`scrollY` for document coordinates.',
+			'Because the rect is viewport-relative, **scrolling changes `top`/`bottom` even when the element has not moved** — which is why scroll is watched by default.',
+			'The scroll listener uses `capture`, so scrolling inside any ancestor container is picked up, not just the document.',
+			'A `ResizeObserver` covers the element changing size; the scroll and resize listeners cover it moving without resizing.',
+			'**An element that moves without resizing is not detected.** `ResizeObserver` watches only the element\u2019s own size, and moving it fires no scroll or resize event — so a sibling appearing above it, or a layout shift elsewhere on the page, leaves `top`/`bottom` stale. Call `update()` after any such change.'
+		]
+	},
+
+	'use-mouse-in-element': {
+		slug: 'use-mouse-in-element',
+		title: 'useMouseInElement',
+		description:
+			'Reactive pointer position relative to an element. Where `useMouse` gives viewport coordinates and `useElementHover` gives a boolean, this gives the offset *within* an element — what spotlight effects, tilt cards and custom sliders need.',
+		usage: `import { useMouseInElement } from '@ariefsn/svelte-use';
+
+let el = $state<HTMLDivElement | null>(null);
+const { elementX, elementY, isOutside } = useMouseInElement(() => el);`,
+		params: [
+			{
+				name: 'target',
+				type: '() => Element | null | undefined',
+				description: 'Reactive getter returning the element to measure against'
+			},
+			{
+				name: 'options',
+				type: 'UseMouseInElementOptions',
+				default: '{}',
+				description: 'Configuration'
+			}
+		],
+		options: [
+			{
+				name: 'handleOutside',
+				type: 'boolean',
+				default: 'true',
+				description: 'Treat the pointer as outside when it leaves the window entirely'
+			},
+			{
+				name: 'touch',
+				type: 'boolean',
+				default: 'true',
+				description: 'Also track `touchmove`, reporting the first touch point'
+			}
+		],
+		returns: [
+			{ name: 'x', type: '() => number', description: 'Pointer x relative to the viewport' },
+			{ name: 'y', type: '() => number', description: 'Pointer y relative to the viewport' },
+			{
+				name: 'elementX',
+				type: '() => number',
+				description: "Pointer x from the element's left edge"
+			},
+			{
+				name: 'elementY',
+				type: '() => number',
+				description: "Pointer y from the element's top edge"
+			},
+			{
+				name: 'elementPositionX',
+				type: '() => number',
+				description: "The element's distance from the left of the viewport"
+			},
+			{
+				name: 'elementPositionY',
+				type: '() => number',
+				description: "The element's distance from the top of the viewport"
+			},
+			{ name: 'elementWidth', type: '() => number', description: "The element's width" },
+			{ name: 'elementHeight', type: '() => number', description: "The element's height" },
+			{
+				name: 'isOutside',
+				type: '() => boolean',
+				description: "Whether the pointer is outside the element's bounds"
+			}
+		],
+		example: `<script lang="ts">
+  import { useMouseInElement } from '@ariefsn/svelte-use';
+
+  let card = $state<HTMLDivElement | null>(null);
+  const { elementX, elementY, elementWidth, elementHeight, isOutside } =
+    useMouseInElement(() => card);
+
+  // 3D tilt that follows the pointer
+  const rotateX = $derived(isOutside() ? 0 : (elementY() / elementHeight() - 0.5) * -20);
+  const rotateY = $derived(isOutside() ? 0 : (elementX() / elementWidth() - 0.5) * 20);
+</script>
+
+<div bind:this={card} style="transform: perspective(600px) rotateX({rotateX}deg) rotateY({rotateY}deg)">
+  tilt me
+</div>`,
+		notes: [
+			'`elementX`/`elementY` are **not clamped** — they go negative or exceed the element size when the pointer is beyond it. Check `isOutside()` rather than assuming a range.',
+			'The listener is on `window`, not the element, so coordinates keep updating while the pointer is outside — needed for effects that ease back to a resting state.',
+			'`isOutside` starts `true` and stays so until the first pointer movement.',
+			'Measures with `getBoundingClientRect()` on each move, so a scrolled or animated element stays correct without extra wiring.'
+		]
+	},
+
+	'use-infinite-scroll': {
+		slug: 'use-infinite-scroll',
+		title: 'useInfiniteScroll',
+		description:
+			'Loads more content as a scroll container nears its edge. Fires once per arrival, never overlaps calls, and re-checks after each load so a short page that does not fill the container keeps loading until it does.',
+		usage: `import { useInfiniteScroll } from '@ariefsn/svelte-use';
+
+let el = $state<HTMLDivElement | null>(null);
+
+const { isLoading } = useInfiniteScroll(() => el, async () => {
+  items = [...items, ...(await fetchNextPage())];
+}, { distance: 100 });`,
+		params: [
+			{
+				name: 'target',
+				type: '() => HTMLElement | null | undefined',
+				description: 'Reactive getter returning the scroll container, or `null` for the window'
+			},
+			{
+				name: 'onLoadMore',
+				type: '() => void | Promise<void>',
+				description: 'Called when the edge comes within `distance`'
+			},
+			{
+				name: 'options',
+				type: 'UseInfiniteScrollOptions',
+				default: '{}',
+				description: 'Configuration'
+			}
+		],
+		options: [
+			{
+				name: 'distance',
+				type: 'number',
+				default: '0',
+				description: 'How close to the edge, in pixels, before loading is triggered'
+			},
+			{
+				name: 'direction',
+				type: "'top' | 'bottom' | 'left' | 'right'",
+				default: "'bottom'",
+				description:
+					"Which edge to watch. `'top'` suits reverse-chronological feeds such as chat transcripts."
+			},
+			{
+				name: 'canLoadMore',
+				type: '() => boolean',
+				default: '() => true',
+				description:
+					'Whether another page may be loaded. Return `false` once the last page has arrived.'
+			}
+		],
+		returns: [
+			{
+				name: 'isLoading',
+				type: '() => boolean',
+				description: '`true` while `onLoadMore` is in flight'
+			},
+			{
+				name: 'check',
+				type: '() => void',
+				description: 'Checks the scroll position and loads now if the edge is already in range'
+			}
+		],
+		example: `<script lang="ts">
+  import { useInfiniteScroll } from '@ariefsn/svelte-use';
+
+  let el = $state<HTMLDivElement | null>(null);
+  let items = $state<Item[]>([]);
+  let page = $state(0);
+
+  const { isLoading } = useInfiniteScroll(
+    () => el,
+    async () => {
+      items = [...items, ...(await fetchPage(page))];
+      page++;
+    },
+    { distance: 100, canLoadMore: () => page < totalPages }
+  );
+</script>
+
+<div bind:this={el} style="overflow-y: auto; height: 400px">
+  {#each items as item (item.id)}<Row {item} />{/each}
+  {#if isLoading()}<Spinner />{/if}
+</div>`,
+		notes: [
+			'**Always provide `canLoadMore`.** Without it the loader keeps firing at the end of the list, since the container never leaves its edge.',
+			'The first load happens immediately when the container starts at its edge — an empty or short list fires no `scroll` event, so waiting for one would stall forever.',
+			'After each load it re-checks, and keeps loading while the content still does not overflow. One short page would otherwise leave no scrollbar and no way to continue.',
+			'Calls never overlap: a scroll burst while a load is in flight is ignored rather than queued.',
+			'`onLoadMore` may be async. A rejected promise stops the run rather than being swallowed — catch inside the callback if loading should continue.'
+		]
+	},
+
+	'use-textarea-autosize': {
+		slug: 'use-textarea-autosize',
+		title: 'useTextareaAutosize',
+		description:
+			'Grows a textarea to fit its content. Recalculates on input, on window resize, and whenever the reactive `value` getter changes — the last case covering programmatic edits, which fire no `input` event.',
+		usage: `import { useTextareaAutosize } from '@ariefsn/svelte-use';
+
+let el = $state<HTMLTextAreaElement | null>(null);
+let text = $state('');
+
+useTextareaAutosize(() => el, { value: () => text, maxRows: 10 });`,
+		params: [
+			{
+				name: 'target',
+				type: '() => HTMLTextAreaElement | null | undefined',
+				description: 'Reactive getter returning the textarea'
+			},
+			{
+				name: 'options',
+				type: 'UseTextareaAutosizeOptions',
+				default: '{}',
+				description: 'Configuration'
+			}
+		],
+		options: [
+			{
+				name: 'value',
+				type: '() => string',
+				description:
+					'Reactive getter for the current value. Needed because a programmatic change fires no `input` event.'
+			},
+			{
+				name: 'minRows',
+				type: 'number',
+				description: 'Smallest height in rows'
+			},
+			{
+				name: 'maxRows',
+				type: 'number',
+				description: 'Largest height in rows. Past this the textarea scrolls instead.'
+			},
+			{
+				name: 'styleProp',
+				type: "'height' | 'minHeight'",
+				default: "'height'",
+				description:
+					"`'height'` resizes immediately; `'minHeight'` lets it grow but never shrink below a user-dragged size."
+			}
+		],
+		returns: [
+			{ name: 'resize', type: '() => void', description: 'Recalculates the height immediately' },
+			{
+				name: 'height',
+				type: '() => number',
+				description: 'The height last applied, in pixels. `0` before the first measurement.'
+			}
+		],
+		example: `<script lang="ts">
+  import { useTextareaAutosize } from '@ariefsn/svelte-use';
+
+  let el = $state<HTMLTextAreaElement | null>(null);
+  let message = $state('');
+
+  useTextareaAutosize(() => el, {
+    value: () => message,
+    minRows: 2,
+    maxRows: 8
+  });
+</script>
+
+<textarea bind:this={el} bind:value={message} rows="1" style="resize: none"></textarea>`,
+		notes: [
+			'Pass `value` whenever the textarea can change programmatically — clearing it after submit, restoring a draft, inserting a template. Without it those edits leave the height stale.',
+			'Resizing works by collapsing the height, reading `scrollHeight`, then applying it. The collapse is required: `scrollHeight` never reports less than the current height, so without it the textarea could grow but never shrink.',
+			'`overflow-y` is only switched to `auto` once `maxRows` actually clips the content, so no scrollbar appears while the textarea is still growing.',
+			'Set `resize: none` in CSS if you do not want the native resize handle fighting the automatic height.',
+			'Recalculates on window resize too, since wrapping depends on width.'
+		]
+	},
+
+	// Foundational primitives
+	'use-supported': {
+		slug: 'use-supported',
+		title: 'useSupported',
+		description:
+			'Evaluates a feature-detection predicate once, with SSR safety. Replaces the `typeof window !== "undefined" && "X" in window` guard that browser composables would otherwise hand-roll.',
+		usage: `import { useSupported } from '@ariefsn/svelte-use';
+
+const isSupported = useSupported(() => 'geolocation' in navigator);
+isSupported(); // → true in a browser with geolocation, false during SSR`,
+		params: [
+			{
+				name: 'predicate',
+				type: '() => boolean',
+				description: 'Feature test. Only invoked in a browser, never during SSR.'
+			}
+		],
+		returns: [
+			{
+				name: '()',
+				type: '() => boolean',
+				description: 'Whether the feature is available'
+			}
+		],
+		example: `<script lang="ts">
+  import { useSupported } from '@ariefsn/svelte-use';
+
+  const hasClipboard = useSupported(() => 'clipboard' in navigator);
+  const hasVibrate = useSupported(() => 'vibrate' in navigator);
+</script>
+
+{#if hasClipboard()}
+  <button onclick={copy}>Copy</button>
+{:else}
+  <p>Clipboard is unavailable in this browser.</p>
+{/if}`,
+		notes: [
+			'The predicate runs **immediately**, not inside an `$effect`, so the result is available during initialisation and this can be called outside a reactive scope.',
+			'A predicate that throws is treated as unsupported. Touching some APIs throws under a restrictive permissions policy, which is indistinguishable from unavailable.',
+			'Returns `false` during SSR, matching how every browser API behaves there. If you render on that value, expect the server HTML to show the unsupported branch until hydration.',
+			'Support does not change at runtime, so the result is a stable value rather than reactive state — the predicate is evaluated exactly once.'
+		]
+	},
+
+	'use-media-query': {
+		slug: 'use-media-query',
+		title: 'useMediaQuery',
+		description:
+			'Reactively tracks whether a CSS media query matches. Accepts a plain string or a getter, rebuilding the listener when a reactive query changes.',
+		usage: `import { useMediaQuery } from '@ariefsn/svelte-use';
+
+const isWide = useMediaQuery('(min-width: 768px)');
+isWide(); // → true when the viewport is at least 768px`,
+		params: [
+			{
+				name: 'query',
+				type: 'string | (() => string)',
+				description: 'Media query string, or a getter returning one'
+			}
+		],
+		returns: [
+			{
+				name: '()',
+				type: '() => boolean',
+				description: 'Whether the query currently matches'
+			}
+		],
+		example: `<script lang="ts">
+  import { useMediaQuery } from '@ariefsn/svelte-use';
+
+  const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
+  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+
+  // Reactive query — the listener is rebuilt as \`width\` changes
+  let width = $state(768);
+  const matches = useMediaQuery(() => \`(min-width: \${width}px)\`);
+</script>
+
+<p>Theme: {prefersDark() ? 'dark' : 'light'}</p>`,
+		notes: [
+			'The initial match is read **synchronously**, so the first render already has the correct answer rather than flashing the non-matching branch for a frame.',
+			'Returns `false` during SSR, since `matchMedia` does not exist on the server.',
+			'When `query` is a getter, changing it tears down the old listener and attaches a new one.',
+			'`useBreakpoints` is built on this — prefer it when you have a named set of breakpoints.'
+		]
+	},
+
+	'use-raf-fn': {
+		slug: 'use-raf-fn',
+		title: 'useRafFn',
+		description:
+			'Runs a callback on every animation frame, passing the frame `timestamp` and the `delta` since the previous invocation. Optionally throttled with `fpsLimit`.',
+		usage: `import { useRafFn } from '@ariefsn/svelte-use';
+
+const { isActive, pause, resume } = useRafFn(({ delta }) => {
+  position += velocity * delta;
+});`,
+		params: [
+			{
+				name: 'fn',
+				type: '(args: { delta: number; timestamp: number }) => void',
+				description: 'Called once per frame'
+			},
+			{ name: 'options', type: 'UseRafFnOptions', default: '{}', description: 'Loop options' }
+		],
+		options: [
+			{
+				name: 'immediate',
+				type: 'boolean',
+				default: 'true',
+				description: 'Start the loop immediately'
+			},
+			{
+				name: 'fpsLimit',
+				type: 'number',
+				description: 'Cap the callback rate in frames per second. Unlimited when omitted.'
+			}
+		],
+		returns: [
+			{ name: 'isActive', type: '() => boolean', description: '`true` while the loop is running' },
+			{ name: 'pause', type: '() => void', description: 'Stops the loop' },
+			{ name: 'resume', type: '() => void', description: 'Starts the loop' }
+		],
+		example: `<script lang="ts">
+  import { useRafFn } from '@ariefsn/svelte-use';
+
+  let angle = $state(0);
+
+  // Degrees per millisecond keeps the speed frame-rate independent
+  const { isActive, pause, resume } = useRafFn(({ delta }) => {
+    angle = (angle + delta * 0.18) % 360;
+  });
+</script>
+
+<div style="transform: rotate({angle}deg)">spinning</div>
+<button onclick={isActive() ? pause : resume}>
+  {isActive() ? 'pause' : 'resume'}
+</button>`,
+		notes: [
+			'Use `delta` rather than a fixed increment so animation speed stays constant across refresh rates — a 120Hz display fires twice as often as a 60Hz one.',
+			'`delta` is `0` on the first frame, where there is no previous frame to measure against.',
+			'`fpsLimit` throttles the **callback**, not the loop: frames are still requested, they just skip the callback until enough time has elapsed.',
+			'Safe during SSR — no frame is ever requested and `isActive()` stays `false`.',
+			'The loop is cancelled when the owning reactive scope is destroyed.'
+		]
+	},
+
+	'use-until': {
+		slug: 'use-until',
+		title: 'useUntil',
+		description:
+			'Waits for a reactive value to reach a condition, as a promise. Fills the gap left by `useWatch` and `useWhenever`, which are callback-based — this lets you `await` a state change inside ordinary async code.',
+		usage: `import { useUntil } from '@ariefsn/svelte-use';
+
+const { isLoading, data } = useFetch(url);
+await useUntil(isLoading).toBe(false);
+console.log(data());`,
+		params: [
+			{
+				name: 'source',
+				type: '() => T',
+				description: 'Getter returning the reactive value to watch'
+			}
+		],
+		returns: [
+			{
+				name: 'toBe',
+				type: '(expected: T, options?) => Promise<T>',
+				description: 'Strict equality'
+			},
+			{ name: 'toBeTruthy', type: '(options?) => Promise<T>', description: 'Value becomes truthy' },
+			{ name: 'toBeFalsy', type: '(options?) => Promise<T>', description: 'Value becomes falsy' },
+			{
+				name: 'toBeNullish',
+				type: '(options?) => Promise<T>',
+				description: 'Value becomes `null` or `undefined`'
+			},
+			{
+				name: 'toBeDefined',
+				type: '(options?) => Promise<T>',
+				description: 'Value becomes neither `null` nor `undefined`'
+			},
+			{ name: 'toBeNaN', type: '(options?) => Promise<T>', description: 'Value becomes `NaN`' },
+			{
+				name: 'toContain',
+				type: '(item: UseUntilItem<T>, options?) => Promise<T>',
+				description:
+					'Container gains `item`. Works with arrays, strings, `Set`, and `Map` (by key).'
+			},
+			{
+				name: 'toHaveLength',
+				type: '(length: number, options?) => Promise<T>',
+				description: '`length` or `size` reaches the given number'
+			},
+			{
+				name: 'toMatch',
+				type: '(predicate: (value: T) => boolean, options?) => Promise<T>',
+				description: 'Arbitrary predicate passes'
+			},
+			{
+				name: 'changed',
+				type: '(options?) => Promise<T>',
+				description: 'Value changes from what it is now'
+			},
+			{
+				name: 'changedTimes',
+				type: '(times: number, options?) => Promise<T>',
+				description: 'Value changes `times` times'
+			},
+			{
+				name: 'not',
+				type: 'UseUntilChain<T>',
+				description: 'Inverts every matcher, e.g. `not.toBe(5)`'
+			}
+		],
+		options: [
+			{
+				name: 'timeout',
+				type: 'number',
+				description: 'Reject after this many milliseconds. Waits forever when omitted.'
+			},
+			{
+				name: 'resolveOnTimeout',
+				type: 'boolean',
+				default: 'false',
+				description: 'Resolve with the current value on timeout instead of rejecting'
+			}
+		],
+		example: `<script lang="ts">
+  import { useUntil } from '@ariefsn/svelte-use';
+
+  let items = $state<string[]>([]);
+  let status = $state('pending');
+
+  async function run() {
+    // Containment, negation and a timeout
+    await useUntil(() => items).toContain('ready');
+    await useUntil(() => items).toHaveLength(3);
+
+    try {
+      await useUntil(() => status).not.toBe('pending', { timeout: 5000 });
+    } catch {
+      console.warn('still pending after 5s');
+    }
+  }
+</script>`,
+		notes: [
+			'The condition is checked **immediately**, so an already-satisfied value resolves without waiting for a change.',
+			'Creates its own `$effect.root` internally, so it can be called from anywhere — including event handlers and plain async functions outside a component.',
+			'Watching stops as soon as the promise settles, and a pending timeout timer is cleared.',
+			'`toContain` is typed as the container’s element type: calling it on a value that cannot contain anything, or with a mismatched item, is a **compile error** rather than a call that silently never matches.',
+			'`changedTimes` counts transitions, so writing the same value again does not advance the count.'
+		]
+	},
+
+	'use-storage': {
+		slug: 'use-storage',
+		title: 'useStorage',
+		description:
+			'Reactive Web Storage utility with SSR safety and cross-tab sync. The shared implementation behind `useLocalStorage` and `useSessionStorage` — use those unless the storage area needs to be chosen at runtime.',
+		usage: `import { useStorage } from '@ariefsn/svelte-use';
+
+const theme = useStorage('theme', 'light');
+theme.set('dark');
+theme.value;    // 'dark'
+theme.remove(); // back to 'light'`,
+		params: [
+			{ name: 'key', type: 'string', description: 'Storage key' },
+			{
+				name: 'initial',
+				type: 'T',
+				description: 'Fallback used when the key is absent, unreadable, or in SSR'
+			},
+			{
+				name: 'area',
+				type: "'local' | 'session'",
+				default: "'local'",
+				description: 'Which Web Storage area to read and write'
+			},
+			{
+				name: 'options',
+				type: 'UseStorageOptions<T>',
+				default: '{}',
+				description: 'Optional custom serialiser / deserialiser pair'
+			}
+		],
+		options: [
+			{
+				name: 'serializer',
+				type: '(value: T) => string',
+				default: 'JSON.stringify',
+				description: 'Custom serialiser'
+			},
+			{
+				name: 'deserializer',
+				type: '(raw: string) => T',
+				default: 'JSON.parse',
+				description: 'Custom deserialiser'
+			}
+		],
+		returns: [
+			{ name: 'value', type: 'T', description: 'The reactive stored value' },
+			{
+				name: 'set',
+				type: '(value: T) => void',
+				description: 'Writes a new value and persists it'
+			},
+			{
+				name: 'remove',
+				type: '() => void',
+				description: 'Removes the key from storage and resets the value to `initial`'
+			}
+		],
+		example: `<script lang="ts">
+  import { useStorage } from '@ariefsn/svelte-use';
+
+  // Non-JSON values need a serialiser pair
+  const seen = useStorage('last-seen', new Date(), 'session', {
+    serializer: (d) => d.toISOString(),
+    deserializer: (raw) => new Date(raw)
+  });
+</script>
+
+<p>Last seen: {seen.value.toLocaleString()}</p>
+<button onclick={() => seen.set(new Date())}>Update</button>`,
+		notes: [
+			'Storage access is wrapped throughout: quota errors, blocked cookies and private-mode restrictions degrade to the in-memory value rather than throwing.',
+			'A `storage` event listener keeps the value in sync with other tabs on the same origin. Note that only `localStorage` fires these across tabs.',
+			'After `remove()` the write-back is suppressed, so the key is not immediately re-created by the effect that mirrors the value.',
+			'The storage object is resolved lazily rather than captured once, because touching `localStorage` can throw when cookies are blocked.'
+		]
+	},
+
+	// State
 	'use-sorted': {
 		slug: 'use-sorted',
 		title: 'useSorted',
@@ -232,7 +3434,7 @@ const live = useTimeAgo(() => someDate, { interval: 10_000 }); // refresh every 
 		]
 	},
 
-	// ------------------------------------------------ Browser – Keyboard & Scroll
+	// Browser – Keyboard & Scroll
 	'use-magic-keys': {
 		slug: 'use-magic-keys',
 		title: 'useMagicKeys',
@@ -439,7 +3641,7 @@ scroll.scrollTo({ top: 0 }); // imperative scroll`,
 		]
 	},
 
-	// ------------------------------------------------ Browser – Pointer & Drag
+	// Browser – Pointer & Drag
 	'use-mouse': {
 		slug: 'use-mouse',
 		title: 'useMouse',
@@ -636,7 +3838,7 @@ drag.style()     // → "transform: translate(100px, 0px);"`,
 		]
 	},
 
-	// ------------------------------------------------ Browser – Observers
+	// Browser – Observers
 	'use-element-size': {
 		slug: 'use-element-size',
 		title: 'useElementSize',
@@ -883,7 +4085,7 @@ stop(); // disconnect manually`,
 		]
 	},
 
-	// ------------------------------------------------ Browser – Sensors
+	// Browser – Sensors
 	'use-idle': {
 		slug: 'use-idle',
 		title: 'useIdle',
@@ -1034,7 +4236,6 @@ geo.error()            // → GeolocationPositionError | null`,
 		]
 	},
 
-	// ──────────────────────────────────────────── Performance
 	'use-fps': {
 		slug: 'use-fps',
 		title: 'useFps',
@@ -1169,9 +4370,11 @@ search('svelte'); // ← this one fires`,
 		]
 	},
 
-	// ──────────────────────────────────────────── Virtualization
 	'use-virtual-list': {
 		slug: 'use-virtual-list',
+		// The only page the automatic picks cannot serve: it is alone in the
+		// Virtualization group and its copy names no other utility.
+		related: ['use-infinite-scroll', 'use-scroll', 'use-element-size', 'use-intersection-observer'],
 		title: 'useVirtualList',
 		description:
 			'Renders only the items currently visible in a scrollable container. Handles lists of any size with a fixed row height, dramatically reducing DOM nodes.',
@@ -1184,10 +4387,8 @@ const { list, containerProps, wrapperProps } = useVirtualList(
   { itemHeight: 40, overscan: 5 }
 );
 
-// list()             → VirtualItem<T>[] — only visible items
-// list()[0].data     → the source item
-// list()[0].style    → "position: absolute; top: Npx; height: 40px;"
-// list()[0].index    → original index in source array`,
+// list() → VirtualItem<T>[] — only visible items list()[0].data → the source item list()[0].style →
+// "position: absolute; top: Npx; height: 40px;" list()[0].index → original index in source array`,
 		params: [
 			{
 				name: 'list',
@@ -1258,7 +4459,6 @@ const { list, containerProps, wrapperProps } = useVirtualList(
 		]
 	},
 
-	// ──────────────────────────────────────────── Web APIs
 	'use-clipboard': {
 		slug: 'use-clipboard',
 		title: 'useClipboard',
@@ -1398,7 +4598,7 @@ speech.stop();`,
 		]
 	},
 
-	// ------------------------------------------------------------------ State (continued)
+	// State (continued)
 	'use-toggle': {
 		slug: 'use-toggle',
 		title: 'useToggle',
@@ -1557,7 +4757,7 @@ prev()  // → 1`,
 		]
 	},
 
-	// ------------------------------------------------------------------ Reactivity
+	// Reactivity
 	'use-debounce': {
 		slug: 'use-debounce',
 		title: 'useDebounce',
@@ -1612,7 +4812,7 @@ const debounced = useDebounce(() => query, 300);
 		]
 	},
 
-	// --------------------------------------------------------------- Browser – Storage
+	// Browser – Storage
 	'use-base64': {
 		slug: 'use-base64',
 		title: 'useBase64',
@@ -1772,7 +4972,7 @@ const obj = useSessionStorage('my-obj', {}, {
 		]
 	},
 
-	// --------------------------------------------------------------- Browser – Storage (legacy)
+	// Browser – Storage (legacy)
 	'use-local-storage': {
 		slug: 'use-local-storage',
 		title: 'useLocalStorage',
@@ -1815,7 +5015,7 @@ theme.value;       // 'dark'`,
 		]
 	},
 
-	// --------------------------------------------------------------- Browser – Storage (legacy)
+	// Browser – Storage (legacy)
 	'use-indexed-db': {
 		slug: 'use-indexed-db',
 		title: 'useIndexedDB',
@@ -1927,7 +5127,7 @@ const pending = await db.query((n) => !n.done); // Note[]`,
 		]
 	},
 
-	// --------------------------------------------------------------- Browser – Interaction
+	// Browser – Interaction
 	'use-click-outside': {
 		slug: 'use-click-outside',
 		title: 'useClickOutside',
@@ -2134,7 +5334,7 @@ focused() // → true while input has focus`,
 		]
 	},
 
-	// --------------------------------------------------------------- Browser – Sensors
+	// Browser – Sensors
 	'use-breakpoints': {
 		slug: 'use-breakpoints',
 		title: 'useBreakpoints',
@@ -2324,12 +5524,12 @@ hasLeft() // → true when the cursor is outside the viewport`,
 		]
 	},
 
-	// ------------------------------------------------------------ Animation
+	// Animation
 	'use-animate': {
 		slug: 'use-animate',
 		title: 'useAnimate',
 		description:
-			'Reactive wrapper around the Web Animations API. Attaches an <code>Animation</code> to a target element using the provided keyframes and options. The animation is automatically cancelled and re-created whenever the target, keyframes, or options change.',
+			'Reactive wrapper around the Web Animations API. Attaches an `Animation` to a target element using the provided keyframes and options. The animation is automatically cancelled and re-created whenever the target, keyframes, or options change.',
 		usage: `import { useAnimate } from '@ariefsn/svelte-use';
 
 let el = $state<HTMLDivElement | null>(null);
@@ -2355,7 +5555,7 @@ const { play, pause, cancel, finish, isRunning } = useAnimate(
 				type: '() => KeyframeAnimationOptions | undefined',
 				default: 'undefined',
 				description:
-					'Optional reactive getter returning animation options such as <code>duration</code>, <code>easing</code>, <code>iterations</code>'
+					'Optional reactive getter returning animation options such as `duration`, `easing`, `iterations`'
 			}
 		],
 		returns: [
@@ -2382,8 +5582,7 @@ const { play, pause, cancel, finish, isRunning } = useAnimate(
 			{
 				name: 'isRunning',
 				type: '() => boolean',
-				description:
-					'<code>true</code> while the animation <code>playState</code> is <code>"running"</code>'
+				description: '`true` while the animation `playState` is `"running"`'
 			}
 		],
 		example: `<script lang="ts">
@@ -2409,10 +5608,10 @@ const { play, pause, cancel, finish, isRunning } = useAnimate(
 
 <p>Running: {isRunning()}</p>`,
 		notes: [
-			'The animation starts <strong>paused</strong> — call <code>play()</code> to begin.',
-			'Automatically cancelled and re-created when <code>target</code>, <code>keyframes</code>, or <code>options</code> change reactively.',
+			'The animation starts **paused** — call `play()` to begin.',
+			'Automatically cancelled and re-created when `target`, `keyframes`, or `options` change reactively.',
 			'Cleaned up automatically when the owning component is destroyed.',
-			'SSR-safe — no animation is created when <code>target</code> is <code>null</code> or <code>undefined</code>.'
+			'SSR-safe — no animation is created when `target` is `null` or `undefined`.'
 		]
 	},
 
@@ -2420,7 +5619,7 @@ const { play, pause, cancel, finish, isRunning } = useAnimate(
 		slug: 'use-parallax',
 		title: 'useParallax',
 		description:
-			'Tracks mouse movement and exposes the cursor position as an offset relative to the centre of a target element, scaled by a speed multiplier. Use the returned <code>x</code> and <code>y</code> values to drive CSS transforms for parallax depth effects.',
+			'Tracks mouse movement and exposes the cursor position as an offset relative to the centre of a target element, scaled by a speed multiplier. Use the returned `x` and `y` values to drive CSS transforms for parallax depth effects.',
 		usage: `import { useParallax } from '@ariefsn/svelte-use';
 
 let el = $state<HTMLDivElement | null>(null);
@@ -2452,13 +5651,12 @@ const { x, y } = useParallax(() => el, { speed: 0.05 });
 			{
 				name: 'x',
 				type: 'number',
-				description:
-					'Reactive getter — horizontal offset in pixels multiplied by <code>speed</code>'
+				description: 'Reactive getter — horizontal offset in pixels multiplied by `speed`'
 			},
 			{
 				name: 'y',
 				type: 'number',
-				description: 'Reactive getter — vertical offset in pixels multiplied by <code>speed</code>'
+				description: 'Reactive getter — vertical offset in pixels multiplied by `speed`'
 			}
 		],
 		example: `<script lang="ts">
@@ -2476,10 +5674,10 @@ const { x, y } = useParallax(() => el, { speed: 0.05 });
   Move your mouse over me
 </div>`,
 		notes: [
-			'Attaches a single <code>mousemove</code> listener to <code>window</code>.',
+			'Attaches a single `mousemove` listener to `window`.',
 			"The offset is calculated relative to the centre of the element's bounding box.",
 			'Listener is removed automatically when the owning component is destroyed or the target changes.',
-			'SSR-safe — no listener is attached when <code>window</code> is unavailable.'
+			'SSR-safe — no listener is attached when `window` is unavailable.'
 		]
 	},
 
@@ -2487,7 +5685,7 @@ const { x, y } = useParallax(() => el, { speed: 0.05 });
 		slug: 'use-transition',
 		title: 'useTransition',
 		description:
-			'Smoothly interpolates a reactive numeric source value using <code>requestAnimationFrame</code>. When the source changes the composable animates the displayed value from the previous value to the new target over a configurable duration.',
+			'Smoothly interpolates a reactive numeric source value using `requestAnimationFrame`. When the source changes the composable animates the displayed value from the previous value to the new target over a configurable duration.',
 		usage: `import { useTransition } from '@ariefsn/svelte-use';
 
 let target = $state(0);
@@ -2518,7 +5716,7 @@ const displayed = useTransition(() => target, { duration: 500 });
 				type: '(t: number) => number',
 				default: 'cubicInOut',
 				description:
-					'Easing function where <code>t</code> is in the range [0, 1]. Built-in options: <code>linear</code>, <code>cubicInOut</code>.'
+					'Easing function where `t` is in the range [0, 1]. Built-in options: `linear`, `cubicInOut`.'
 			}
 		],
 		returns: [
@@ -2546,19 +5744,19 @@ const displayed = useTransition(() => target, { duration: 500 });
   <button onclick={() => (target = 100)}>100</button>
 </div>`,
 		notes: [
-			'Built-in easing helpers <code>linear</code> and <code>cubicInOut</code> are exported from the same module.',
+			'Built-in easing helpers `linear` and `cubicInOut` are exported from the same module.',
 			'A pending animation frame is always cancelled before a new one begins — rapid source changes never stack animations.',
-			'SSR-safe — jumps directly to the target value when <code>requestAnimationFrame</code> is unavailable.',
+			'SSR-safe — jumps directly to the target value when `requestAnimationFrame` is unavailable.',
 			'Works with any numeric value: percentages, pixel values, angles, etc.'
 		]
 	},
 
-	// ------------------------------------------------------------- Async
+	// Async
 	'use-fetch': {
 		slug: 'use-fetch',
 		title: 'useFetch',
 		description:
-			'Reactive fetch utility with automatic re-execution when the URL changes, in-flight request abortion via <code>AbortController</code>, and full SSR safety.',
+			'Reactive fetch utility with automatic re-execution when the URL changes, in-flight request abortion via `AbortController`, and full SSR safety.',
 		usage: `import { useFetch } from '@ariefsn/svelte-use';
 
 let id = $state(1);
@@ -2571,7 +5769,7 @@ const { data, error, isFetching, execute } = useFetch(
 				name: 'url',
 				type: '() => string | undefined',
 				description:
-					'Reactive getter returning the URL to fetch. Pass <code>undefined</code> to skip fetching.'
+					'Reactive getter returning the URL to fetch. Pass `undefined` to skip fetching.'
 			},
 			{
 				name: 'options',
@@ -2593,25 +5791,24 @@ const { data, error, isFetching, execute } = useFetch(
 				type: 'RequestInit',
 				default: 'undefined',
 				description:
-					'Optional <code>RequestInit</code> options forwarded to every <code>fetch</code> call (headers, method, body, etc.)'
+					'Optional `RequestInit` options forwarded to every `fetch` call (headers, method, body, etc.)'
 			}
 		],
 		returns: [
 			{
 				name: 'data',
 				type: '() => T | null',
-				description:
-					'Parsed JSON response, or <code>null</code> before the first successful response'
+				description: 'Parsed JSON response, or `null` before the first successful response'
 			},
 			{
 				name: 'error',
 				type: '() => Error | null',
-				description: 'Last error, or <code>null</code> when no error has occurred'
+				description: 'Last error, or `null` when no error has occurred'
 			},
 			{
 				name: 'isFetching',
 				type: '() => boolean',
-				description: '<code>true</code> while a request is in-flight'
+				description: '`true` while a request is in-flight'
 			},
 			{
 				name: 'execute',
@@ -2649,9 +5846,9 @@ const { data, error, isFetching, execute } = useFetch(
 </div>`,
 		notes: [
 			'Automatically aborts the in-flight request when the URL changes or the component is destroyed.',
-			'Only JSON responses are parsed — non-OK responses throw an <code>Error</code> with the status code.',
-			'Set <code>immediate: false</code> to control fetching manually via <code>execute()</code>.',
-			'SSR-safe — no fetch is performed when <code>fetch</code> is unavailable.'
+			'Only JSON responses are parsed — non-OK responses throw an `Error` with the status code.',
+			'Set `immediate: false` to control fetching manually via `execute()`.',
+			'SSR-safe — no fetch is performed when `fetch` is unavailable.'
 		]
 	},
 
@@ -2671,7 +5868,7 @@ const { data, status, send, close } = useWebSocket(
 				name: 'url',
 				type: '() => string | undefined',
 				description:
-					'Reactive getter returning the WebSocket URL. Pass <code>undefined</code> to stay disconnected.'
+					'Reactive getter returning the WebSocket URL. Pass `undefined` to stay disconnected.'
 			},
 			{
 				name: 'options',
@@ -2685,7 +5882,7 @@ const { data, status, send, close } = useWebSocket(
 				name: 'protocols',
 				type: 'string | string[]',
 				default: 'undefined',
-				description: 'WebSocket sub-protocol(s) passed to the <code>WebSocket</code> constructor'
+				description: 'WebSocket sub-protocol(s) passed to the `WebSocket` constructor'
 			},
 			{
 				name: 'autoReconnect',
@@ -2698,14 +5895,14 @@ const { data, status, send, close } = useWebSocket(
 				type: 'number',
 				default: '1000',
 				description:
-					'Milliseconds to wait between reconnection attempts (requires <code>autoReconnect: true</code>)'
+					'Milliseconds to wait between reconnection attempts (requires `autoReconnect: true`)'
 			}
 		],
 		returns: [
 			{
 				name: 'data',
 				type: '() => T | null',
-				description: 'Last deserialized message, or <code>null</code> before the first message'
+				description: 'Last deserialized message, or `null` before the first message'
 			},
 			{
 				name: 'status',
@@ -2715,13 +5912,12 @@ const { data, status, send, close } = useWebSocket(
 			{
 				name: 'error',
 				type: '() => Event | null',
-				description: 'Last connection error event, or <code>null</code>'
+				description: 'Last connection error event, or `null`'
 			},
 			{
 				name: 'send',
 				type: '(data: string | ArrayBufferLike | Blob | ArrayBufferView) => void',
-				description:
-					'Send data through the WebSocket. No-ops when the socket is not <code>OPEN</code>.'
+				description: 'Send data through the WebSocket. No-ops when the socket is not `OPEN`.'
 			},
 			{
 				name: 'close',
@@ -2741,7 +5937,7 @@ const { data, status, send, close } = useWebSocket(
   );
 </script>
 
-<p>Status: <strong>{status()}</strong></p>
+<p>Status: **{status()}**</p>
 {#if data()}
   <p>Last message: {JSON.stringify(data())}</p>
 {/if}
@@ -2751,13 +5947,13 @@ const { data, status, send, close } = useWebSocket(
 <button onclick={close}>Disconnect</button>`,
 		notes: [
 			'Incoming messages are automatically parsed as JSON; if parsing fails the raw string value is used.',
-			'Call <code>close()</code> to permanently disconnect — this disables auto-reconnect.',
+			'Call `close()` to permanently disconnect — this disables auto-reconnect.',
 			'Changing the URL getter reactive value triggers a fresh connection.',
-			'SSR-safe — no WebSocket is created when <code>WebSocket</code> is unavailable.'
+			'SSR-safe — no WebSocket is created when `WebSocket` is unavailable.'
 		]
 	},
 
-	// -------------------------------------------------------------- Time
+	// Time
 	'use-interval': {
 		slug: 'use-interval',
 		title: 'useInterval',
@@ -2811,7 +6007,7 @@ const { pause, resume, isActive } = useInterval(
 			{
 				name: 'isActive',
 				type: '() => boolean',
-				description: '<code>true</code> while the interval is running'
+				description: '`true` while the interval is running'
 			}
 		],
 		example: `<script lang="ts">
@@ -2831,8 +6027,8 @@ const { pause, resume, isActive } = useInterval(
   </button>
 </div>`,
 		notes: [
-			'Changing the <code>delay</code> getter value clears the existing interval and starts a new one immediately.',
-			'SSR-safe — uses only <code>setInterval</code> / <code>clearInterval</code>.',
+			'Changing the `delay` getter value clears the existing interval and starts a new one immediately.',
+			'SSR-safe — uses only `setInterval` / `clearInterval`.',
 			'The interval is cleared automatically when the owning reactive scope is destroyed.'
 		]
 	},
@@ -2841,7 +6037,7 @@ const { pause, resume, isActive } = useInterval(
 		slug: 'use-interval-fn',
 		title: 'useIntervalFn',
 		description:
-			'Manually-controlled interval utility. Unlike <code>useInterval</code>, this composable does <strong>not</strong> start automatically — you must call <code>resume()</code> explicitly. The delay is a plain number and does not change after initialisation.',
+			'Manually-controlled interval utility. Unlike `useInterval`, this composable does **not** start automatically — you must call `resume()` explicitly. The delay is a plain number and does not change after initialisation.',
 		usage: `import { useIntervalFn } from '@ariefsn/svelte-use';
 
 const { resume, pause, isActive } = useIntervalFn(() => console.log('tick'), 1000);
@@ -2873,7 +6069,7 @@ pause();    // stop ticking`,
 			{
 				name: 'isActive',
 				type: '() => boolean',
-				description: '<code>true</code> while the interval is running'
+				description: '`true` while the interval is running'
 			}
 		],
 		example: `<script lang="ts">
@@ -2892,8 +6088,8 @@ pause();    // stop ticking`,
   {/if}
 </div>`,
 		notes: [
-			'Does not start automatically — call <code>resume()</code> to begin.',
-			'The delay is fixed at initialisation and cannot be changed reactively (use <code>useInterval</code> for a reactive delay).',
+			'Does not start automatically — call `resume()` to begin.',
+			'The delay is fixed at initialisation and cannot be changed reactively (use `useInterval` for a reactive delay).',
 			'The interval is cleared automatically when the owning reactive scope is destroyed.'
 		]
 	},
@@ -2934,9 +6130,9 @@ precise() // updates every 100ms`,
 
 <p>Current time: {formatted}</p>`,
 		notes: [
-			'SSR-safe — uses only <code>Date.now()</code> and <code>setInterval</code>.',
+			'SSR-safe — uses only `Date.now()` and `setInterval`.',
 			'The interval is cleared automatically when the owning reactive scope is destroyed.',
-			'For a standalone version without options, see <code>useTimestamp</code>.'
+			'For a standalone version without options, see `useTimestamp`.'
 		]
 	},
 
@@ -2993,7 +6189,7 @@ const { isPending, stop, start } = useTimeout(
 			{
 				name: 'isPending',
 				type: '() => boolean',
-				description: '<code>true</code> while the timeout has been scheduled but has not yet fired'
+				description: '`true` while the timeout has been scheduled but has not yet fired'
 			}
 		],
 		example: `<script lang="ts">
@@ -3015,8 +6211,8 @@ const { isPending, stop, start } = useTimeout(
   <button onclick={stop}>Cancel</button>
 </div>`,
 		notes: [
-			'Changing the <code>delay</code> getter while the timeout is pending reschedules it from that moment.',
-			'SSR-safe — uses only <code>setTimeout</code> / <code>clearTimeout</code>.',
+			'Changing the `delay` getter while the timeout is pending reschedules it from that moment.',
+			'SSR-safe — uses only `setTimeout` / `clearTimeout`.',
 			'The timeout is cleared automatically when the owning reactive scope is destroyed.'
 		]
 	},
@@ -3025,7 +6221,7 @@ const { isPending, stop, start } = useTimeout(
 		slug: 'use-timeout-fn',
 		title: 'useTimeoutFn',
 		description:
-			'Manually-controlled timeout utility. Unlike <code>useTimeout</code>, this composable does <strong>not</strong> start automatically — you must call <code>start()</code> explicitly. The timeout fires once, then becomes idle.',
+			'Manually-controlled timeout utility. Unlike `useTimeout`, this composable does **not** start automatically — you must call `start()` explicitly. The timeout fires once, then becomes idle.',
 		usage: `import { useTimeoutFn } from '@ariefsn/svelte-use';
 
 const { start, stop, isPending } = useTimeoutFn(() => console.log('done'), 1000);
@@ -3058,7 +6254,7 @@ isPending();    // → true
 			{
 				name: 'isPending',
 				type: '() => boolean',
-				description: '<code>true</code> while the timeout has been armed but has not yet fired'
+				description: '`true` while the timeout has been armed but has not yet fired'
 			}
 		],
 		example: `<script lang="ts">
@@ -3076,9 +6272,9 @@ isPending();    // → true
   <button onclick={stop}>Cancel</button>
 </div>`,
 		notes: [
-			'Does not start automatically — call <code>start()</code> to arm.',
-			'Calling <code>start()</code> while already pending cancels the current timer and re-arms from the current time.',
-			'The delay is fixed at initialisation (use <code>useTimeout</code> for a reactive delay).',
+			'Does not start automatically — call `start()` to arm.',
+			'Calling `start()` while already pending cancels the current timer and re-arms from the current time.',
+			'The delay is fixed at initialisation (use `useTimeout` for a reactive delay).',
 			'The timeout is cleared automatically when the owning reactive scope is destroyed.'
 		]
 	},
@@ -3087,7 +6283,7 @@ isPending();    // → true
 		slug: 'use-timeout-poll',
 		title: 'useTimeoutPoll',
 		description:
-			'Polling utility that chains <code>setTimeout</code> calls to repeatedly invoke a function, avoiding drift issues inherent in <code>setInterval</code>. The interval represents the delay <em>between</em> the end of one execution and the start of the next.',
+			'Polling utility that chains `setTimeout` calls to repeatedly invoke a function, avoiding drift issues inherent in `setInterval`. The interval represents the delay *between* the end of one execution and the start of the next.',
 		usage: `import { useTimeoutPoll } from '@ariefsn/svelte-use';
 
 const { start, stop, isActive } = useTimeoutPoll(() => fetchData(), 5000);
@@ -3119,7 +6315,7 @@ stop();     // stop polling`,
 			{
 				name: 'isActive',
 				type: '() => boolean',
-				description: '<code>true</code> while polling is active'
+				description: '`true` while polling is active'
 			}
 		],
 		example: `<script lang="ts">
@@ -3144,8 +6340,8 @@ stop();     // stop polling`,
   {/if}
 </div>`,
 		notes: [
-			'Uses chained <code>setTimeout</code> rather than <code>setInterval</code>, so long-running <code>fn</code> invocations cannot stack.',
-			'Does not start automatically — call <code>start()</code> to begin.',
+			'Uses chained `setTimeout` rather than `setInterval`, so long-running `fn` invocations cannot stack.',
+			'Does not start automatically — call `start()` to begin.',
 			'Cleaned up automatically when the owning reactive scope is destroyed.'
 		]
 	},
@@ -3154,7 +6350,7 @@ stop();     // stop polling`,
 		slug: 'use-timestamp',
 		title: 'useTimestamp',
 		description:
-			'Returns a reactive getter that yields the current Unix timestamp in milliseconds, updated at a configurable interval. This is a standalone implementation — it does not delegate to <code>useNow</code>.',
+			'Returns a reactive getter that yields the current Unix timestamp in milliseconds, updated at a configurable interval. This is a standalone implementation — it does not delegate to `useNow`.',
 		usage: `import { useTimestamp } from '@ariefsn/svelte-use';
 
 const timestamp = useTimestamp();
@@ -3186,25 +6382,31 @@ precise() // updates every 100ms`,
 <p>Unix ms: {timestamp()}</p>
 <p>ISO: {new Date(timestamp()).toISOString()}</p>`,
 		notes: [
-			'SSR-safe — uses only <code>Date.now()</code> and <code>setInterval</code>.',
+			'SSR-safe — uses only `Date.now()` and `setInterval`.',
 			'The interval is cleared automatically when the owning reactive scope is destroyed.',
-			'Similar to <code>useNow</code> — both expose the same API. <code>useNow</code> accepts options via its argument.'
+			'Similar to `useNow` — both expose the same API. `useNow` accepts options via its argument.'
 		]
 	},
 
-	// --------------------------------------------------------------- Browser
-	// --------------------------------------------------------------- New v1.1.0 State
+	// Browser
+	// New v1.1.0 State
 	'use-auto-reset-state': {
 		slug: 'use-auto-reset-state',
 		title: 'useAutoResetState',
-		description: 'Creates reactive state that automatically resets to a default value after a specified delay.',
+		description:
+			'Creates reactive state that automatically resets to a default value after a specified delay.',
 		usage: `import { useAutoResetState } from '@ariefsn/svelte-use';
 
 const message = useAutoResetState('default', 3000);
 message.value = 'changed'; // resets to 'default' after 3000ms`,
 		params: [
 			{ name: 'defaultValue', type: 'T', description: 'The value to reset to after the delay' },
-			{ name: 'delay', type: 'number', default: '1000', description: 'Time in milliseconds before auto-reset' }
+			{
+				name: 'delay',
+				type: 'number',
+				default: '1000',
+				description: 'Time in milliseconds before auto-reset'
+			}
 		],
 		returns: [
 			{ name: 'value', type: 'T', description: 'Reactive value that auto-resets (read/write)' }
@@ -3228,10 +6430,19 @@ const state = useDefaultState('fallback');
 state.value = null; // value → 'fallback'`,
 		params: [
 			{ name: 'defaultValue', type: 'T', description: 'The fallback value' },
-			{ name: 'initialValue', type: 'T', default: 'defaultValue', description: 'Optional initial value' }
+			{
+				name: 'initialValue',
+				type: 'T',
+				default: 'defaultValue',
+				description: 'Optional initial value'
+			}
 		],
 		returns: [
-			{ name: 'value', type: 'T', description: 'Reactive value that falls back to default on null/undefined' }
+			{
+				name: 'value',
+				type: 'T',
+				description: 'Reactive value that falls back to default on null/undefined'
+			}
 		],
 		example: `<script lang="ts">
   import { useDefaultState } from '@ariefsn/svelte-use';
@@ -3239,7 +6450,9 @@ state.value = null; // value → 'fallback'`,
 </script>
 <input oninput={(e) => name.value = e.currentTarget.value || null} />
 <p>Hello, {name.value}!</p>`,
-		notes: ['Falsy values like `""`, `0`, `false` are preserved — only `null` and `undefined` trigger fallback.']
+		notes: [
+			'Falsy values like `""`, `0`, `false` are preserved — only `null` and `undefined` trigger fallback.'
+		]
 	},
 
 	'use-last-changed': {
@@ -3250,11 +6463,13 @@ state.value = null; // value → 'fallback'`,
 
 let count = $state(0);
 const lastChanged = useLastChanged(() => count);`,
-		params: [
-			{ name: 'getter', type: '() => T', description: 'Reactive getter to observe' }
-		],
+		params: [{ name: 'getter', type: '() => T', description: 'Reactive getter to observe' }],
 		returns: [
-			{ name: '()', type: '() => number | undefined', description: 'Timestamp of last change, or undefined' }
+			{
+				name: '()',
+				type: '() => number | undefined',
+				description: 'Timestamp of last change, or undefined'
+			}
 		],
 		example: `<script lang="ts">
   import { useLastChanged } from '@ariefsn/svelte-use';
@@ -3263,7 +6478,10 @@ const lastChanged = useLastChanged(() => count);`,
 </script>
 <button onclick={() => count++}>Increment ({count})</button>
 <p>Last changed: {lastChanged() ? new Date(lastChanged()!).toLocaleTimeString() : 'never'}</p>`,
-		notes: ['Returns `undefined` until the first change occurs.', 'Uses `$effect` cleanup to capture the timestamp.']
+		notes: [
+			'Returns `undefined` until the first change occurs.',
+			'Uses `$effect` cleanup to capture the timestamp.'
+		]
 	},
 
 	'use-track-history': {
@@ -3277,15 +6495,27 @@ const tracker = useTrackHistory(() => count, (v) => count = v);
 tracker.undo(); // restores previous value`,
 		params: [
 			{ name: 'getter', type: '() => T', description: 'Reactive getter to track' },
-			{ name: 'setter', type: '(v: T) => void', description: 'Function to update the tracked value' }
+			{
+				name: 'setter',
+				type: '(v: T) => void',
+				description: 'Function to update the tracked value'
+			}
 		],
 		returns: [
 			{ name: 'canUndo', type: '() => boolean', description: 'Whether undo is available' },
 			{ name: 'canRedo', type: '() => boolean', description: 'Whether redo is available' },
 			{ name: 'undo', type: '() => void', description: 'Undo to previous value' },
 			{ name: 'redo', type: '() => void', description: 'Redo to next value' },
-			{ name: 'history', type: '() => HistorySnapshot<T>[]', description: 'Array of past snapshots' },
-			{ name: 'redoHistory', type: '() => HistorySnapshot<T>[]', description: 'Array of undone snapshots' }
+			{
+				name: 'history',
+				type: '() => HistorySnapshot<T>[]',
+				description: 'Array of past snapshots'
+			},
+			{
+				name: 'redoHistory',
+				type: '() => HistorySnapshot<T>[]',
+				description: 'Array of undone snapshots'
+			}
 		],
 		example: `<script lang="ts">
   import { useTrackHistory } from '@ariefsn/svelte-use';
@@ -3295,7 +6525,10 @@ tracker.undo(); // restores previous value`,
 <button onclick={() => count++}>Inc ({count})</button>
 <button onclick={t.undo} disabled={!t.canUndo()}>Undo</button>
 <button onclick={t.redo} disabled={!t.canRedo()}>Redo</button>`,
-		notes: ['Redo history is cleared on new external changes.', 'Each snapshot includes a timestamp.']
+		notes: [
+			'Redo history is cleared on new external changes.',
+			'Each snapshot includes a timestamp.'
+		]
 	},
 
 	'use-history-state': {
@@ -3307,9 +6540,7 @@ tracker.undo(); // restores previous value`,
 const counter = useHistoryState(0);
 counter.value = 1;
 counter.undo(); // counter.value → 0`,
-		params: [
-			{ name: 'initial', type: 'T', description: 'The initial state value' }
-		],
+		params: [{ name: 'initial', type: 'T', description: 'The initial state value' }],
 		returns: [
 			{ name: 'value', type: 'T', description: 'Reactive state value (read/write)' },
 			{ name: 'canUndo', type: '() => boolean', description: 'Whether undo is available' },
@@ -3327,11 +6558,12 @@ counter.undo(); // counter.value → 0`,
 		notes: ['Combines `$state` with `useTrackHistory` for convenience.']
 	},
 
-	// --------------------------------------------------------------- New v1.1.0 Reactivity
+	// New v1.1.0 Reactivity
 	'use-watch': {
 		slug: 'use-watch',
 		title: 'useWatch',
-		description: 'Watches one or more reactive getters and calls a callback with the current and previous values.',
+		description:
+			'Watches one or more reactive getters and calls a callback with the current and previous values.',
 		usage: `import { useWatch } from '@ariefsn/svelte-use';
 
 let count = $state(0);
@@ -3339,9 +6571,22 @@ useWatch(() => count, (curr, prev) => {
   console.log(\`\${prev} → \${curr}\`);
 });`,
 		params: [
-			{ name: 'deps', type: '(() => T) | (() => any)[]', description: 'Getter or array of getters to watch' },
-			{ name: 'fn', type: '(current, previous) => void', description: 'Callback with current and previous values' },
-			{ name: 'options', type: '{ runOnMounted?: boolean }', default: '{ runOnMounted: true }', description: 'Configuration' }
+			{
+				name: 'deps',
+				type: '(() => T) | (() => any)[]',
+				description: 'Getter or array of getters to watch'
+			},
+			{
+				name: 'fn',
+				type: '(current, previous) => void',
+				description: 'Callback with current and previous values'
+			},
+			{
+				name: 'options',
+				type: '{ runOnMounted?: boolean }',
+				default: '{ runOnMounted: true }',
+				description: 'Configuration'
+			}
 		],
 		returns: [],
 		example: `<script lang="ts">
@@ -3354,21 +6599,34 @@ useWatch(() => count, (curr, prev) => {
 </script>
 <button onclick={() => count++}>Inc ({count})</button>
 <p>{log}</p>`,
-		notes: ['Supports single and multiple dependency watching.', 'Set `runOnMounted: false` to skip initial call.']
+		notes: [
+			'Supports single and multiple dependency watching.',
+			'Set `runOnMounted: false` to skip initial call.'
+		]
 	},
 
 	'use-whenever': {
 		slug: 'use-whenever',
 		title: 'useWhenever',
-		description: 'Watches a reactive getter and calls the callback only when the value becomes truthy.',
+		description:
+			'Watches a reactive getter and calls the callback only when the value becomes truthy.',
 		usage: `import { useWhenever } from '@ariefsn/svelte-use';
 
 let ready = $state(false);
 useWhenever(() => ready, () => console.log('ready!'));`,
 		params: [
-			{ name: 'deps', type: '(() => boolean) | (() => boolean)[]', description: 'Boolean getter(s) to watch' },
+			{
+				name: 'deps',
+				type: '(() => boolean) | (() => boolean)[]',
+				description: 'Boolean getter(s) to watch'
+			},
 			{ name: 'fn', type: '() => void', description: 'Callback when truthy' },
-			{ name: 'options', type: '{ runOnMounted?: boolean }', default: '{ runOnMounted: true }', description: 'Configuration' }
+			{
+				name: 'options',
+				type: '{ runOnMounted?: boolean }',
+				default: '{ runOnMounted: true }',
+				description: 'Configuration'
+			}
 		],
 		returns: [],
 		example: `<script lang="ts">
@@ -3393,9 +6651,18 @@ const { current, isLoading, error } = useAsyncState(
   null
 );`,
 		params: [
-			{ name: 'promise', type: '(() => Promise<T>) | Promise<T>', description: 'Async function or promise' },
+			{
+				name: 'promise',
+				type: '(() => Promise<T>) | Promise<T>',
+				description: 'Async function or promise'
+			},
 			{ name: 'initial', type: 'T', description: 'Initial value before resolution' },
-			{ name: 'options', type: 'UseAsyncStateOptions<T>', default: '{}', description: 'Configuration' }
+			{
+				name: 'options',
+				type: 'UseAsyncStateOptions<T>',
+				default: '{}',
+				description: 'Configuration'
+			}
 		],
 		returns: [
 			{ name: 'isReady', type: '() => boolean', description: 'Whether resolved at least once' },
@@ -3412,10 +6679,13 @@ const { current, isLoading, error } = useAsyncState(
   );
 </script>
 {#if isLoading()}<p>Loading…</p>{:else}<pre>{JSON.stringify(current(), null, 2)}</pre>{/if}`,
-		notes: ['Executes immediately by default. Set `immediate: false` to control manually.', 'Supports `onSuccess` and `onError` callbacks.']
+		notes: [
+			'Executes immediately by default. Set `immediate: false` to control manually.',
+			'Supports `onSuccess` and `onError` callbacks.'
+		]
 	},
 
-	// --------------------------------------------------------------- New v1.1.0 Web APIs
+	// New v1.1.0 Web APIs
 	'use-eye-dropper': {
 		slug: 'use-eye-dropper',
 		title: 'useEyeDropper',
@@ -3424,9 +6694,17 @@ const { current, isLoading, error } = useAsyncState(
 const { isSupported, current, open } = useEyeDropper();
 const color = await open();`,
 		returns: [
-			{ name: 'isSupported', type: '() => boolean', description: 'Whether EyeDropper API is available' },
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether EyeDropper API is available'
+			},
 			{ name: 'current', type: '() => string | undefined', description: 'Last picked hex color' },
-			{ name: 'open', type: '() => Promise<string | undefined>', description: 'Opens the eye dropper' }
+			{
+				name: 'open',
+				type: '() => Promise<string | undefined>',
+				description: 'Opens the eye dropper'
+			}
 		],
 		example: `<script lang="ts">
   import { useEyeDropper } from '@ariefsn/svelte-use';
@@ -3471,7 +6749,11 @@ const { files, open, reset } = useFileDialog({ accept: 'image/*' });`,
 const { isSupported, share } = useShare();`,
 		returns: [
 			{ name: 'isSupported', type: '() => boolean', description: 'Whether Web Share is available' },
-			{ name: 'share', type: '(data?) => Promise<boolean>', description: 'Triggers native share dialog' }
+			{
+				name: 'share',
+				type: '(data?) => Promise<boolean>',
+				description: 'Triggers native share dialog'
+			}
 		],
 		example: `<script lang="ts">
   import { useShare } from '@ariefsn/svelte-use';
@@ -3480,7 +6762,10 @@ const { isSupported, share } = useShare();`,
 {#if isSupported()}
   <button onclick={() => share({ title: 'Check this!', url: location.href })}>Share</button>
 {/if}`,
-		notes: ['Must be triggered by a user gesture (button click).', 'Returns `true` on success, `false` on cancel/error.']
+		notes: [
+			'Must be triggered by a user gesture (button click).',
+			'Returns `true` on success, `false` on cancel/error.'
+		]
 	},
 
 	'use-vibrate': {
@@ -3490,10 +6775,19 @@ const { isSupported, share } = useShare();`,
 		usage: `import { useVibrate } from '@ariefsn/svelte-use';
 const { isSupported, vibrate, stop } = useVibrate();`,
 		params: [
-			{ name: 'pattern', type: 'VibratePattern', default: '200', description: 'Default vibration pattern in ms' }
+			{
+				name: 'pattern',
+				type: 'VibratePattern',
+				default: '200',
+				description: 'Default vibration pattern in ms'
+			}
 		],
 		returns: [
-			{ name: 'isSupported', type: '() => boolean', description: 'Whether Vibration API is available' },
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether Vibration API is available'
+			},
 			{ name: 'vibrate', type: '(pattern?) => boolean', description: 'Starts vibration' },
 			{ name: 'stop', type: '() => void', description: 'Stops vibration' }
 		],
@@ -3503,7 +6797,10 @@ const { isSupported, vibrate, stop } = useVibrate();`,
 </script>
 <button onclick={() => vibrate([200, 100, 200])}>Vibrate</button>
 <button onclick={stop}>Stop</button>`,
-		notes: ['Pattern is an array of alternating vibrate/pause durations in ms.', 'Mobile devices only.']
+		notes: [
+			'Pattern is an array of alternating vibrate/pause durations in ms.',
+			'Mobile devices only.'
+		]
 	},
 
 	'use-web-notification': {
@@ -3513,9 +6810,21 @@ const { isSupported, vibrate, stop } = useVibrate();`,
 		usage: `import { useWebNotification } from '@ariefsn/svelte-use';
 const { isSupported, show, close } = useWebNotification({ title: 'Hello!' });`,
 		returns: [
-			{ name: 'isSupported', type: '() => boolean', description: 'Whether Notification API is available' },
-			{ name: 'isPermissionGranted', type: '() => boolean', description: 'Whether permission is granted' },
-			{ name: 'show', type: '(overrides?) => Promise<Notification | null>', description: 'Shows notification' },
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether Notification API is available'
+			},
+			{
+				name: 'isPermissionGranted',
+				type: '() => boolean',
+				description: 'Whether permission is granted'
+			},
+			{
+				name: 'show',
+				type: '(overrides?) => Promise<Notification | null>',
+				description: 'Shows notification'
+			},
 			{ name: 'close', type: '() => void', description: 'Closes active notification' }
 		],
 		example: `<script lang="ts">
@@ -3533,28 +6842,48 @@ const { isSupported, show, close } = useWebNotification({ title: 'Hello!' });`,
 		usage: `import { usePermission } from '@ariefsn/svelte-use';
 const { isSupported, state } = usePermission('camera');`,
 		params: [
-			{ name: 'name', type: 'PermissionName', description: 'Permission to query (e.g., camera, microphone)' }
+			{
+				name: 'name',
+				type: 'PermissionName',
+				description: 'Permission to query (e.g., camera, microphone)'
+			}
 		],
 		returns: [
-			{ name: 'isSupported', type: '() => boolean', description: 'Whether Permissions API is available' },
-			{ name: 'state', type: '() => PermissionState | undefined', description: 'granted, denied, or prompt' }
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether Permissions API is available'
+			},
+			{
+				name: 'state',
+				type: '() => PermissionState | undefined',
+				description: 'granted, denied, or prompt'
+			}
 		],
 		example: `<script lang="ts">
   import { usePermission } from '@ariefsn/svelte-use';
   const cam = usePermission('camera');
 </script>
 <p>Camera: {cam.state() ?? 'unknown'}</p>`,
-		notes: ['Reactively updates when permission state changes.', 'Not all permission names are supported in all browsers.']
+		notes: [
+			'Reactively updates when permission state changes.',
+			'Not all permission names are supported in all browsers.'
+		]
 	},
 
 	'use-wake-lock': {
 		slug: 'use-wake-lock',
 		title: 'useWakeLock',
-		description: 'Prevents the device screen from dimming or locking using the Screen Wake Lock API.',
+		description:
+			'Prevents the device screen from dimming or locking using the Screen Wake Lock API.',
 		usage: `import { useWakeLock } from '@ariefsn/svelte-use';
 const { isSupported, isActive, request, release } = useWakeLock();`,
 		returns: [
-			{ name: 'isSupported', type: '() => boolean', description: 'Whether Wake Lock API is available' },
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether Wake Lock API is available'
+			},
 			{ name: 'isActive', type: '() => boolean', description: 'Whether lock is active' },
 			{ name: 'request', type: '() => Promise<void>', description: 'Request wake lock' },
 			{ name: 'release', type: '() => Promise<void>', description: 'Release wake lock' }
@@ -3566,7 +6895,10 @@ const { isSupported, isActive, request, release } = useWakeLock();`,
 <button onclick={request}>Keep Screen On</button>
 <button onclick={release}>Allow Sleep</button>
 <p>Active: {isActive()}</p>`,
-		notes: ['Released automatically on component destroy.', 'May be released by the browser when tab becomes hidden.']
+		notes: [
+			'Released automatically on component destroy.',
+			'May be released by the browser when tab becomes hidden.'
+		]
 	},
 
 	'use-event-listener': {
@@ -3579,11 +6911,14 @@ useEventListener(window, 'resize', (e) => console.log(e));`,
 			{ name: 'target', type: 'EventTarget | (() => EventTarget)', description: 'Event target' },
 			{ name: 'event', type: 'string | string[]', description: 'Event name(s)' },
 			{ name: 'handler', type: '(e) => void', description: 'Event handler' },
-			{ name: 'options', type: 'AddEventListenerOptions', default: 'undefined', description: 'Listener options' }
+			{
+				name: 'options',
+				type: 'AddEventListenerOptions',
+				default: 'undefined',
+				description: 'Listener options'
+			}
 		],
-		returns: [
-			{ name: '()', type: '() => void', description: 'Manual cleanup function' }
-		],
+		returns: [{ name: '()', type: '() => void', description: 'Manual cleanup function' }],
 		example: `<script lang="ts">
   import { useEventListener } from '@ariefsn/svelte-use';
   let size = $state({ w: 0, h: 0 });
@@ -3598,11 +6933,16 @@ useEventListener(window, 'resize', (e) => console.log(e));`,
 	'use-text-direction': {
 		slug: 'use-text-direction',
 		title: 'useTextDirection',
-		description: 'Reactively tracks and sets the text directionality (dir attribute) of an element.',
+		description:
+			'Reactively tracks and sets the text directionality (dir attribute) of an element.',
 		usage: `import { useTextDirection } from '@ariefsn/svelte-use';
 const { current, set } = useTextDirection();`,
 		returns: [
-			{ name: 'current', type: '() => TextDirection', description: 'Current direction (ltr, rtl, auto)' },
+			{
+				name: 'current',
+				type: '() => TextDirection',
+				description: 'Current direction (ltr, rtl, auto)'
+			},
 			{ name: 'set', type: '(dir) => void', description: 'Set the direction' }
 		],
 		example: `<script lang="ts">
@@ -3612,7 +6952,10 @@ const { current, set } = useTextDirection();`,
 <button onclick={() => set(current() === 'ltr' ? 'rtl' : 'ltr')}>
   Toggle ({current()})
 </button>`,
-		notes: ['Defaults to `document.documentElement`.', 'Uses MutationObserver to track external changes.']
+		notes: [
+			'Defaults to `document.documentElement`.',
+			'Uses MutationObserver to track external changes.'
+		]
 	},
 
 	'use-text-selection': {
@@ -3636,7 +6979,7 @@ const { text, rects, ranges } = useTextSelection();`,
 		notes: ['Listens to `selectionchange` event.', 'SSR-safe.']
 	},
 
-	// --------------------------------------------------------------- New v1.1.0 Sensors
+	// New v1.1.0 Sensors
 	'use-document-visibility': {
 		slug: 'use-document-visibility',
 		title: 'useDocumentVisibility',
@@ -3660,9 +7003,7 @@ const { current } = useDocumentVisibility();`,
 		description: 'Reactively tracks whether the browser window has focus.',
 		usage: `import { useWindowFocus } from '@ariefsn/svelte-use';
 const { focused } = useWindowFocus();`,
-		returns: [
-			{ name: 'focused', type: '() => boolean', description: 'Whether window is focused' }
-		],
+		returns: [{ name: 'focused', type: '() => boolean', description: 'Whether window is focused' }],
 		example: `<script lang="ts">
   import { useWindowFocus } from '@ariefsn/svelte-use';
   const { focused } = useWindowFocus();
@@ -3674,14 +7015,31 @@ const { focused } = useWindowFocus();`,
 	'use-device-motion': {
 		slug: 'use-device-motion',
 		title: 'useDeviceMotion',
-		description: 'Reactive wrapper around the DeviceMotion API for tracking device acceleration and rotation.',
+		description:
+			'Reactive wrapper around the DeviceMotion API for tracking device acceleration and rotation.',
 		usage: `import { useDeviceMotion } from '@ariefsn/svelte-use';
 const { isSupported, acceleration, rotationRate } = useDeviceMotion();`,
 		returns: [
-			{ name: 'isSupported', type: '() => boolean', description: 'Whether DeviceMotion is available' },
-			{ name: 'acceleration', type: '() => DeviceMotionEventAcceleration | null', description: 'Acceleration excluding gravity' },
-			{ name: 'accelerationIncludingGravity', type: '() => DeviceMotionEventAcceleration | null', description: 'Acceleration including gravity' },
-			{ name: 'rotationRate', type: '() => DeviceMotionEventRotationRate | null', description: 'Rotation rate' },
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether DeviceMotion is available'
+			},
+			{
+				name: 'acceleration',
+				type: '() => DeviceMotionEventAcceleration | null',
+				description: 'Acceleration excluding gravity'
+			},
+			{
+				name: 'accelerationIncludingGravity',
+				type: '() => DeviceMotionEventAcceleration | null',
+				description: 'Acceleration including gravity'
+			},
+			{
+				name: 'rotationRate',
+				type: '() => DeviceMotionEventRotationRate | null',
+				description: 'Rotation rate'
+			},
 			{ name: 'interval', type: '() => number', description: 'Sampling interval in ms' }
 		],
 		example: `<script lang="ts">
@@ -3695,11 +7053,16 @@ const { isSupported, acceleration, rotationRate } = useDeviceMotion();`,
 	'use-device-orientation': {
 		slug: 'use-device-orientation',
 		title: 'useDeviceOrientation',
-		description: 'Reactive wrapper around the DeviceOrientation API for tracking physical device orientation.',
+		description:
+			'Reactive wrapper around the DeviceOrientation API for tracking physical device orientation.',
 		usage: `import { useDeviceOrientation } from '@ariefsn/svelte-use';
 const { alpha, beta, gamma } = useDeviceOrientation();`,
 		returns: [
-			{ name: 'isSupported', type: '() => boolean', description: 'Whether DeviceOrientation is available' },
+			{
+				name: 'isSupported',
+				type: '() => boolean',
+				description: 'Whether DeviceOrientation is available'
+			},
 			{ name: 'isAbsolute', type: '() => boolean', description: 'Whether data is absolute' },
 			{ name: 'alpha', type: '() => number | null', description: 'Z-axis rotation (0-360°)' },
 			{ name: 'beta', type: '() => number | null', description: 'X-axis rotation (-180 to 180°)' },
@@ -3757,7 +7120,7 @@ const { x, y } = useScrollbarWidth(() => el);`,
 		notes: ['Uses ResizeObserver to update on size changes.']
 	},
 
-	// --------------------------------------------------------------- New v1.1.0 Interaction
+	// New v1.1.0 Interaction
 	'use-active-element': {
 		slug: 'use-active-element',
 		title: 'useActiveElement',
@@ -3774,7 +7137,10 @@ const { current } = useActiveElement();`,
 <input placeholder="Focus me" />
 <button>Or me</button>
 <p>Active: {current()?.tagName ?? 'none'}</p>`,
-		notes: ['Listens to focus/blur events on window (capture phase).', 'Different from useFocus which tracks a specific element.']
+		notes: [
+			'Listens to focus/blur events on window (capture phase).',
+			'Different from useFocus which tracks a specific element.'
+		]
 	},
 
 	'use-long-press': {
@@ -3789,9 +7155,7 @@ useLongPress(() => el, (e) => console.log('long pressed!'));`,
 			{ name: 'handler', type: '(e: PointerEvent) => void', description: 'Long press callback' },
 			{ name: 'options', type: 'UseLongPressOptions', default: '{}', description: 'Configuration' }
 		],
-		returns: [
-			{ name: '()', type: '() => void', description: 'Manual cleanup function' }
-		],
+		returns: [{ name: '()', type: '() => void', description: 'Manual cleanup function' }],
 		example: `<script lang="ts">
   import { useLongPress } from '@ariefsn/svelte-use';
   let el: HTMLDivElement;
@@ -3801,7 +7165,10 @@ useLongPress(() => el, (e) => console.log('long pressed!'));`,
 <div bind:this={el} style="padding:2rem;background:#1e1e2e;cursor:pointer">
   {pressed ? 'Long pressed!' : 'Hold me...'}
 </div>`,
-		notes: ['Cancels if pointer moves beyond distance threshold.', 'Default delay: 500ms, threshold: 10px.']
+		notes: [
+			'Cancels if pointer moves beyond distance threshold.',
+			'Default delay: 500ms, threshold: 10px.'
+		]
 	},
 
 	'use-start-typing': {
@@ -3811,11 +7178,13 @@ useLongPress(() => el, (e) => console.log('long pressed!'));`,
 		usage: `import { useStartTyping } from '@ariefsn/svelte-use';
 useStartTyping((e) => searchInput.focus());`,
 		params: [
-			{ name: 'callback', type: '(e: KeyboardEvent) => void', description: 'Callback when typing starts' }
+			{
+				name: 'callback',
+				type: '(e: KeyboardEvent) => void',
+				description: 'Callback when typing starts'
+			}
 		],
-		returns: [
-			{ name: '()', type: '() => void', description: 'Manual cleanup function' }
-		],
+		returns: [{ name: '()', type: '() => void', description: 'Manual cleanup function' }],
 		example: `<script lang="ts">
   import { useStartTyping } from '@ariefsn/svelte-use';
   let input: HTMLInputElement;
@@ -3823,7 +7192,10 @@ useStartTyping((e) => searchInput.focus());`,
 </script>
 <p>Start typing anywhere to focus the search:</p>
 <input bind:this={input} placeholder="Search..." />`,
-		notes: ['Ignores keys when active element is an input/textarea/contentEditable.', 'Ignores modifier keys (Ctrl, Meta, Alt).']
+		notes: [
+			'Ignores keys when active element is an input/textarea/contentEditable.',
+			'Ignores modifier keys (Ctrl, Meta, Alt).'
+		]
 	},
 
 	'use-swipe': {
@@ -3839,7 +7211,11 @@ const { direction, isSwiping } = useSwipe(() => el);`,
 		],
 		returns: [
 			{ name: 'isSwiping', type: '() => boolean', description: 'Whether swiping' },
-			{ name: 'direction', type: '() => SwipeDirection', description: 'up, down, left, right, or none' },
+			{
+				name: 'direction',
+				type: '() => SwipeDirection',
+				description: 'up, down, left, right, or none'
+			},
 			{ name: 'coordsStart', type: '() => {x, y}', description: 'Start position' },
 			{ name: 'coordsEnd', type: '() => {x, y}', description: 'End position' },
 			{ name: 'lengthX', type: '() => number', description: 'Horizontal distance' },
@@ -3854,7 +7230,11 @@ const { direction, isSwiping } = useSwipe(() => el);`,
 <div bind:this={el} style="height:200px;background:#1e1e2e;touch-action:none">
   <p>{isSwiping() ? 'Swiping...' : direction() !== 'none' ? direction() : 'Swipe here'}</p>
 </div>`,
-		notes: ['Uses TouchEvents.', 'Default threshold: 50px.', 'Supports `onStart`, `onMove`, `onEnd` callbacks.']
+		notes: [
+			'Uses TouchEvents.',
+			'Default threshold: 50px.',
+			'Supports `onStart`, `onMove`, `onEnd` callbacks.'
+		]
 	},
 
 	'use-navigation-guard': {
@@ -3876,25 +7256,46 @@ const { confirm, cancel } = useNavigationGuard({
 		],
 		example: `<script lang="ts">
   import { useNavigationGuard } from '@ariefsn/svelte-use';
-  let hasChanges = $state(false);
+
+  let draft = $state('');
+  let saved = $state('');
   let showDialog = $state(false);
+
+  const hasUnsavedChanges = $derived(draft !== saved);
+
   const { confirm, cancel } = useNavigationGuard({
-    shouldBlock: () => hasChanges,
-    onBlock: () => showDialog = true
+    shouldBlock: () => hasUnsavedChanges,
+    onBlock: () => (showDialog = true)
   });
 </script>
-<textarea oninput={() => hasChanges = true}></textarea>
+
+<textarea bind:value={draft}></textarea>
+<button onclick={() => (saved = draft)} disabled={!hasUnsavedChanges}>Save</button>
+
 {#if showDialog}
-  <div>Unsaved changes! <button onclick={confirm}>Leave</button> <button onclick={cancel}>Stay</button></div>
+  <div role="alertdialog">
+    <p>Leave without saving?</p>
+    <!-- confirm() bypasses the guard for this one navigation, so there is no
+         need to clear hasUnsavedChanges first -->
+    <button onclick={() => { showDialog = false; confirm(); }}>Leave anyway</button>
+    <button onclick={() => { showDialog = false; cancel(); }}>Stay here</button>
+  </div>
 {/if}`,
-		notes: ['Requires SvelteKit (`$app/navigation`).', 'Handles popstate, link, and goto navigation types.']
+		notes: [
+			'**Requires SvelteKit.** This is the only composable in the library that is not plain-Svelte — it imports `beforeNavigate` and `goto` from `$app/navigation`, a SvelteKit-only module. Every other util works in any Svelte 5 app.',
+			'`@sveltejs/kit` is not declared as a peer dependency, so a non-SvelteKit project importing this util will fail to resolve `$app/navigation` at build time.',
+			'Handles popstate, link, and goto navigation types. Form submissions are not guarded.',
+			'`confirm()` and `cancel()` are actions you call to resolve a pending navigation — not callbacks you supply. Use the `onBlock` option to react to the guard firing.',
+			'`confirm()` lets exactly one navigation through, so you do **not** need to clear your own `shouldBlock` flag before calling it. The bypass is single-use: the next navigation is guarded again.',
+			'`confirm()` is a no-op unless a navigation was actually blocked, since it replays the URL the guard captured.'
+		]
 	},
 
 	'use-scroll-lock': {
 		slug: 'use-scroll-lock',
 		title: 'useScrollLock',
 		description:
-			'Locks and unlocks scroll on a target element (defaults to <code>document.body</code>) by toggling <code>overflow: hidden</code>. The previous overflow value is captured before locking and restored on unlock.',
+			'Locks and unlocks scroll on a target element (defaults to `document.body`) by toggling `overflow: hidden`. The previous overflow value is captured before locking and restored on unlock.',
 		usage: `import { useScrollLock } from '@ariefsn/svelte-use';
 
 const { isLocked, lock, unlock } = useScrollLock();
@@ -3952,9 +7353,9 @@ unlock();     // → overflow restored to original value`,
 <p>Body scroll locked: {isLocked()}</p>`,
 		notes: [
 			'SSR-safe — no DOM operations are performed outside the browser.',
-			'The previous <code>overflow</code> value is captured before locking and restored when <code>unlock()</code> is called, preventing style leaks.',
+			'The previous `overflow` value is captured before locking and restored when `unlock()` is called, preventing style leaks.',
 			'Scroll is automatically unlocked when the component that owns the reactive scope is destroyed.',
-			'Calling <code>lock()</code> multiple times without an intervening <code>unlock()</code> is a no-op — the original overflow is preserved.'
+			'Calling `lock()` multiple times without an intervening `unlock()` is a no-op — the original overflow is preserved.'
 		]
 	}
 };

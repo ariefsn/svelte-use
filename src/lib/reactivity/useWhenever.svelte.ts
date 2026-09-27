@@ -1,22 +1,6 @@
 import { untrack } from 'svelte';
 
-/**
- * Watches a reactive getter and calls the callback only when
- * the value becomes truthy.
- *
- * @param deps - A single boolean getter or array of boolean getters
- * @param fn - Callback to execute when value(s) are truthy
- * @param options - Optional config: `runOnMounted` (default: `true`)
- *
- * @example
- * ```ts
- * let isReady = $state(false);
- * useWhenever(() => isReady, () => {
- *   console.log('now ready!');
- * });
- * isReady = true; // logs 'now ready!'
- * ```
- */
+/** Watches a reactive getter and calls the callback only when the value becomes truthy. */
 export function useWhenever(
 	deps: () => boolean,
 	fn: () => void,

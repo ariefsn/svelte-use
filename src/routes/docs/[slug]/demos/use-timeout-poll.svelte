@@ -44,29 +44,14 @@
 
 	{#if log.length > 0}
 		<div class="divider"></div>
-		<div class="log">
-			{#each log as entry}
-				<div class="log-entry">{entry}</div>
+		<div class="flex flex-col gap-0.5">
+			{#each log as entry, i (i)}
+				<div class="text-accent bg-accent-bg rounded px-2 py-0.5 font-mono text-[0.78rem]">
+					{entry}
+				</div>
 			{/each}
 		</div>
 	{/if}
 
 	<p class="hint">Chained setTimeout — interval measured from end of each execution · 2s</p>
 </div>
-
-<style>
-	.log {
-		display: flex;
-		flex-direction: column;
-		gap: 0.2rem;
-	}
-
-	.log-entry {
-		font-family: monospace;
-		font-size: 0.78rem;
-		color: #a78bfa;
-		background: #1a1630;
-		padding: 0.15rem 0.5rem;
-		border-radius: 4px;
-	}
-</style>

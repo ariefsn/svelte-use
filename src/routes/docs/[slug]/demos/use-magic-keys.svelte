@@ -10,60 +10,39 @@
 <div class="demo-wrap">
 	<p class="hint">Press keys — this panel tracks them live.</p>
 
-	<div class="section-label">Modifier keys</div>
-	<div class="key-grid">
-		{#each singles as k}
-			<div class="key-chip" class:active={keys[k]()}>
-				<span class="key-name">{k}</span>
+	<div class="text-text-faint mt-3 mb-1.5 text-[0.75rem] tracking-[0.06em] uppercase">
+		Modifier keys
+	</div>
+	<div class="flex flex-wrap gap-1.5">
+		{#each singles as k (k)}
+			<div
+				class="min-w-[60px] rounded-md border px-2.5 py-1.5 text-center transition-all duration-100 {keys[
+					k
+				]()
+					? 'bg-accent-bg border-accent'
+					: 'bg-surface border-border'}"
+			>
+				<span class="font-mono text-[0.8rem] {keys[k]() ? 'text-accent' : 'text-text-muted'}"
+					>{k}</span
+				>
 			</div>
 		{/each}
 	</div>
 
-	<div class="section-label">Combos</div>
-	<div class="key-grid">
-		{#each combos as combo}
-			<div class="key-chip wide" class:active={keys[combo]()}>
-				<span class="key-name">{combo}</span>
+	<div class="text-text-faint mt-3 mb-1.5 text-[0.75rem] tracking-[0.06em] uppercase">Combos</div>
+	<div class="flex flex-wrap gap-1.5">
+		{#each combos as combo (combo)}
+			<div
+				class="min-w-[110px] rounded-md border px-2.5 py-1.5 text-center transition-all duration-100 {keys[
+					combo
+				]()
+					? 'bg-accent-bg border-accent'
+					: 'bg-surface border-border'}"
+			>
+				<span class="font-mono text-[0.8rem] {keys[combo]() ? 'text-accent' : 'text-text-muted'}">
+					{combo}
+				</span>
 			</div>
 		{/each}
 	</div>
 </div>
-
-<style>
-	.section-label {
-		font-size: 0.75rem;
-		color: #555;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		margin: 0.75rem 0 0.4rem;
-	}
-	.key-grid {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-	}
-	.key-chip {
-		padding: 0.3rem 0.65rem;
-		border-radius: 6px;
-		border: 1px solid #2e2e2e;
-		background: #1a1a1a;
-		transition: all 0.1s;
-		min-width: 60px;
-		text-align: center;
-	}
-	.key-chip.wide {
-		min-width: 110px;
-	}
-	.key-chip.active {
-		background: #1a1630;
-		border-color: #a78bfa;
-	}
-	.key-name {
-		font-family: monospace;
-		font-size: 0.8rem;
-		color: #777;
-	}
-	.key-chip.active .key-name {
-		color: #a78bfa;
-	}
-</style>

@@ -2,6 +2,7 @@
 	import { useTextDirection } from '$lib/browser/useTextDirection.svelte.js';
 	const { current, set } = useTextDirection();
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">direction</span>

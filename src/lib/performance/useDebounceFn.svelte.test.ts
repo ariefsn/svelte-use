@@ -1,3 +1,4 @@
+import { flushSync } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { useDebounceFn } from './useDebounceFn.svelte.js';
 
@@ -88,6 +89,9 @@ describe('useDebounceFn', () => {
 		const cleanup = $effect.root(() => {
 			const debounced = useDebounceFn(fn, 300);
 			debounced();
+			// Without this the cleanup $effect never runs, so no teardown is
+			// registered and the pending timer survives scope destruction.
+			flushSync();
 		});
 
 		cleanup(); // destroys scope – timer should be cleared

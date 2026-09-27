@@ -2,9 +2,7 @@ import { flushSync } from 'svelte';
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { useMutationObserver } from './useMutationObserver.svelte.js';
 
-// ---------------------------------------------------------------------------
 // Mock MutationObserver
-// ---------------------------------------------------------------------------
 
 class MockMutationObserver {
 	private callback: MutationCallback;
@@ -40,9 +38,7 @@ class MockMutationObserver {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // Setup / teardown
-// ---------------------------------------------------------------------------
 
 beforeEach(() => {
 	MockMutationObserver.instances = [];
@@ -53,9 +49,7 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('useMutationObserver', () => {
 	test('returns an object with a stop function', () => {

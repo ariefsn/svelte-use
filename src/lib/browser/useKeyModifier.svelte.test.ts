@@ -158,9 +158,8 @@ describe('useKeyModifier', () => {
 		// After cleanup, key events should not update the returned getter
 		keyUp('Control');
 		keyDown('Control');
-		// The getter is a snapshot — the state no longer receives updates
-		// but the last read value may be whatever it was at cleanup time.
-		// The important assertion is that no error is thrown.
+		// The getter is a snapshot — the state no longer receives updates but the last read value may
+		// be whatever it was at cleanup time. The important assertion is that no error is thrown.
 		expect(typeof isCtrl()).toBe('boolean');
 	});
 });

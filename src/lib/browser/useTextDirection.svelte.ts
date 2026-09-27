@@ -7,19 +7,7 @@ export interface UseTextDirectionReturn {
 	set: (dir: TextDirection) => void;
 }
 
-/**
- * Reactively tracks and sets the text directionality (`dir` attribute) of an element.
- *
- * @param options - Optional config: `element` (default: `document.documentElement`), `initial` direction
- * @returns Object with reactive `current` getter and `set` function
- *
- * @example
- * ```ts
- * const { current, set } = useTextDirection();
- * set('rtl'); // changes document direction to RTL
- * // current() → 'rtl'
- * ```
- */
+/** Reactively tracks and sets the text directionality (dir attribute) of an element. */
 export function useTextDirection(options?: {
 	element?: HTMLElement;
 	initial?: TextDirection;
@@ -28,9 +16,7 @@ export function useTextDirection(options?: {
 	const el = options?.element ?? (isBrowser ? document.documentElement : null);
 	const initial = options?.initial ?? 'ltr';
 
-	let dir = $state<TextDirection>(
-		(el?.getAttribute('dir') as TextDirection) || initial
-	);
+	let dir = $state<TextDirection>((el?.getAttribute('dir') as TextDirection) || initial);
 
 	function set(value: TextDirection) {
 		dir = value;

@@ -2,9 +2,7 @@ import { flushSync } from 'svelte';
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { useElementSize } from './useElementSize.svelte.js';
 
-// ---------------------------------------------------------------------------
 // Mock ResizeObserver
-// ---------------------------------------------------------------------------
 
 type ResizeCallback = (entries: ResizeObserverEntry[]) => void;
 
@@ -35,9 +33,7 @@ class MockResizeObserver {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // Setup / teardown
-// ---------------------------------------------------------------------------
 
 beforeEach(() => {
 	MockResizeObserver.instances = [];
@@ -48,9 +44,7 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('useElementSize', () => {
 	test('returns 0 for width and height before any resize event', () => {

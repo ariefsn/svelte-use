@@ -14,19 +14,7 @@ export interface UseFileDialogReturn {
 	reset: () => void;
 }
 
-/**
- * Programmatic file input dialog using a hidden `<input type="file">` element.
- *
- * @param options - Configuration for accepted types and multiple selection
- * @returns Object with `files`, `open`, and `reset`
- *
- * @example
- * ```ts
- * const { files, open, reset } = useFileDialog({ accept: 'image/*', multiple: true });
- * open(); // opens file picker
- * // files() → [File, File, ...]
- * ```
- */
+/** Programmatic file input dialog using a hidden input element. */
 export function useFileDialog(options: UseFileDialogOptions = {}): UseFileDialogReturn {
 	const { accept = '*', multiple = false } = options;
 	const isBrowser = typeof document !== 'undefined';

@@ -1,31 +1,45 @@
-/**
- * Registers an event listener with automatic cleanup on component destroy.
- *
- * @param target - The event target (window, document, or element)
- * @param event - Event name or array of event names
- * @param handler - Event handler function
- * @param options - Standard addEventListener options
- * @returns A cleanup function to manually remove the listener
- *
- * @example
- * ```ts
- * // Single event
- * useEventListener(window, 'resize', (e) => console.log(e));
- *
- * // Multiple events
- * useEventListener(document, ['mousedown', 'touchstart'], (e) => {
- *   console.log('interaction', e);
- * });
- * ```
+/* eslint-disable @typescript-eslint/no-explicit-any --
+ * `any` appears only in the overload implementation signature. The four public overloads
+ * above resolve every supported target to its exact event map.
  */
+
+/** The DOM event map for an arbitrary event target. */
+export type EventTargetEventMap<T> = T extends Window
+	? WindowEventMap
+	: T extends Document
+		? DocumentEventMap
+		: T extends MediaDevices
+			? MediaDevicesEventMap
+			: T extends MediaStream
+				? MediaStreamEventMap
+				: T extends MediaStreamTrack
+					? MediaStreamTrackEventMap
+					: T extends EventSource
+						? EventSourceEventMap
+						: T extends BroadcastChannel
+							? BroadcastChannelEventMap
+							: T extends ScreenOrientation
+								? ScreenOrientationEventMap
+								: T extends SpeechSynthesis
+									? SpeechSynthesisEventMap
+									: T extends SpeechSynthesisUtterance
+										? SpeechSynthesisUtteranceEventMap
+										: T extends Worker
+											? WorkerEventMap
+											: T extends AbortSignal
+												? AbortSignalEventMap
+												: T extends HTMLElement
+													? HTMLElementEventMap
+													: Record<string, Event>;
+/** Generic event listener utility with automatic cleanup on component destroy. */
 export function useEventListener<K extends keyof WindowEventMap>(
-	target: Window,
+	target: Window | (() => Window | null | undefined),
 	event: K | K[],
 	handler: (ev: WindowEventMap[K]) => void,
 	options?: boolean | AddEventListenerOptions
 ): () => void;
 export function useEventListener<K extends keyof DocumentEventMap>(
-	target: Document,
+	target: Document | (() => Document | null | undefined),
 	event: K | K[],
 	handler: (ev: DocumentEventMap[K]) => void,
 	options?: boolean | AddEventListenerOptions
@@ -34,6 +48,16 @@ export function useEventListener<K extends keyof HTMLElementEventMap>(
 	target: HTMLElement | (() => HTMLElement | null | undefined),
 	event: K | K[],
 	handler: (ev: HTMLElementEventMap[K]) => void,
+	options?: boolean | AddEventListenerOptions
+): () => void;
+/** Generic event listener utility with automatic cleanup on component destroy. */
+export function useEventListener<
+	T extends EventTarget,
+	K extends keyof EventTargetEventMap<T> & string
+>(
+	target: T | (() => T | null | undefined),
+	event: K | K[],
+	handler: (ev: EventTargetEventMap<T>[K]) => void,
 	options?: boolean | AddEventListenerOptions
 ): () => void;
 export function useEventListener(

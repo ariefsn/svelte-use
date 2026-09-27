@@ -2,12 +2,13 @@
 	import { useFileDialog } from '$lib/browser/useFileDialog.svelte.js';
 	const { files, open, reset } = useFileDialog({ accept: 'image/*', multiple: true });
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">files selected</span>
 		<span class="value accent">{files().length}</span>
 	</div>
-	{#each files() as file}
+	{#each files() as file (file.name)}
 		<div class="row">
 			<span class="label">{file.name}</span>
 			<span class="value accent">{(file.size / 1024).toFixed(1)} KB</span>

@@ -5,6 +5,8 @@
 
 	const { play, pause, cancel, finish, isRunning } = useAnimate(
 		() => el,
+		// Concrete colours rather than `var(--color-accent)`: the Web Animations API
+		// interpolates between colour *values* and will not resolve a custom property.
 		() => [
 			{ transform: 'translateX(0px)', background: '#a78bfa' },
 			{ transform: 'translateX(160px)', background: '#7c3aed' }
@@ -14,8 +16,8 @@
 </script>
 
 <div class="demo-wrap">
-	<div class="stage">
-		<div class="box" bind:this={el}></div>
+	<div class="bg-bg-sunken border-border relative flex h-14 items-center rounded-lg border px-3">
+		<div class="bg-accent h-8 w-8 shrink-0 rounded-md" bind:this={el}></div>
 	</div>
 
 	<div class="row">
@@ -32,24 +34,3 @@
 
 	<p class="hint">play() starts the animation · cancel() resets · finish() jumps to end</p>
 </div>
-
-<style>
-	.stage {
-		height: 56px;
-		background: #0d0d0d;
-		border-radius: 8px;
-		border: 1px solid #222;
-		position: relative;
-		display: flex;
-		align-items: center;
-		padding: 0 12px;
-	}
-
-	.box {
-		width: 32px;
-		height: 32px;
-		border-radius: 6px;
-		background: #a78bfa;
-		flex-shrink: 0;
-	}
-</style>

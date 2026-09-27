@@ -2,9 +2,7 @@ import { flushSync } from 'svelte';
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { useIntersectionObserver } from './useIntersectionObserver.svelte.js';
 
-// ---------------------------------------------------------------------------
 // Mock IntersectionObserver
-// ---------------------------------------------------------------------------
 
 type IntersectionCallback = (entries: IntersectionObserverEntry[]) => void;
 
@@ -16,9 +14,15 @@ class MockIntersectionObserver {
 
 	static instances: MockIntersectionObserver[] = [];
 
+	private disconnected = false;
+
 	observe = vi.fn();
 	unobserve = vi.fn();
-	disconnect = vi.fn();
+	// A real observer stops invoking its callback once disconnected; the mock
+	// has to model that or stop() cannot be tested.
+	disconnect = vi.fn(() => {
+		this.disconnected = true;
+	});
 	takeRecords = vi.fn(() => [] as IntersectionObserverEntry[]);
 
 	constructor(callback: IntersectionCallback, _options?: IntersectionObserverInit) {
@@ -26,8 +30,9 @@ class MockIntersectionObserver {
 		MockIntersectionObserver.instances.push(this);
 	}
 
-	/** Simulate an intersection change. */
+	/** Simulate an intersection change. No-op once disconnected. */
 	trigger(isIntersecting: boolean, target?: Element): void {
+		if (this.disconnected) return;
 		const el = target ?? document.createElement('div');
 		const entry = {
 			isIntersecting,
@@ -43,9 +48,7 @@ class MockIntersectionObserver {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // Setup / teardown
-// ---------------------------------------------------------------------------
 
 beforeEach(() => {
 	MockIntersectionObserver.instances = [];
@@ -56,9 +59,7 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('useIntersectionObserver', () => {
 	test('isIntersecting starts as false', () => {

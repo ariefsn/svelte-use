@@ -1,9 +1,9 @@
 <div align="center">
-  <img src="./static/logo.svg" alt="svelte-use logo" width="120" height="120" />
+  <img src="https://raw.githubusercontent.com/ariefsn/svelte-use/main/static/logo.svg" alt="svelte-use logo" width="120" height="120" />
 
   <h1>@ariefsn/svelte-use</h1>
 
-  <p>A collection of <strong>80+</strong> Svelte 5 runes-first utility composables.<br/>No stores. No external dependencies. SSR-safe. Fully typed.</p>
+  <p>A collection of <strong>100+</strong> Svelte 5 runes-first utility composables.<br/>No stores. No external dependencies. SSR-safe. Fully typed.</p>
 
   <p>
     <a href="https://github.com/ariefsn/svelte-use">
@@ -56,16 +56,20 @@ bun add @ariefsn/svelte-use
 | Composable      | Description                                     |
 | --------------- | ----------------------------------------------- |
 | `useAnimate`    | Reactive Web Animations API wrapper             |
+| `useRafFn`      | Run a callback on every animation frame         |
 | `useParallax`   | Parallax effect based on pointer or device tilt |
 | `useTransition` | Animated numeric transitions with easing        |
 
 ### Async
 
-| Composable      | Description                                    |
-| --------------- | ---------------------------------------------- |
-| `useFetch`      | Reactive fetch with loading/error state        |
-| `useWebSocket`  | Reactive WebSocket with auto-reconnect         |
-| `useAsyncState` | Reactive async/promise state with loading/error |
+| Composable            | Description                                          |
+| --------------------- | ---------------------------------------------------- |
+| `useFetch`            | Reactive fetch with loading/error state              |
+| `useWebSocket`        | Reactive WebSocket with auto-reconnect               |
+| `useAsyncState`       | Reactive async/promise state with loading/error      |
+| `useEventSource`      | Server-sent events; the browser handles reconnection |
+| `useBroadcastChannel` | Cross-tab messaging by structured clone              |
+| `useAsyncQueue`       | Run async tasks with bounded concurrency             |
 
 ### Time
 
@@ -81,20 +85,23 @@ bun add @ariefsn/svelte-use
 
 ### State
 
-| Composable     | Description                                 |
-| -------------- | ------------------------------------------- |
-| `useToggle`    | Reactive boolean toggle                     |
-| `useCounter`   | Reactive counter with inc/dec/reset         |
-| `usePrevious`  | Track previous value of any reactive getter |
-| `useSorted`    | Reactive sorted copy of an array            |
-| `useCycleList` | Cycle through a list reactively             |
-| `useCountdown` | Countdown timer with start/stop/reset       |
-| `useTimeAgo`        | Human-readable relative time string         |
-| `useAutoResetState` | State that auto-resets to default after delay |
-| `useDefaultState`   | State with fallback for null/undefined        |
-| `useLastChanged`    | Timestamp of last reactive value change       |
-| `useTrackHistory`   | Undo/redo history for reactive values         |
-| `useHistoryState`   | State with built-in undo/redo history         |
+| Composable            | Description                                            |
+| --------------------- | ------------------------------------------------------ |
+| `useToggle`           | Reactive boolean toggle                                |
+| `useCounter`          | Reactive counter with inc/dec/reset                    |
+| `usePrevious`         | Track previous value of any reactive getter            |
+| `useSorted`           | Reactive sorted copy of an array                       |
+| `useCycleList`        | Cycle through a list reactively                        |
+| `useCountdown`        | Countdown timer with start/stop/reset                  |
+| `useTimeAgo`          | Human-readable relative time string                    |
+| `useAutoResetState`   | State that auto-resets to default after delay          |
+| `useDefaultState`     | State with fallback for null/undefined                 |
+| `useLastChanged`      | Timestamp of last reactive value change                |
+| `useTrackHistory`     | Undo/redo history for reactive values                  |
+| `useHistoryState`     | State with built-in undo/redo history                  |
+| `useStateMachine`     | Typed finite state machine, inferred from the config   |
+| `useOffsetPagination` | Pagination state that self-corrects when totals shrink |
+| `useConfirmDialog`    | Confirmation flow as a single `await`                  |
 
 ### Reactivity
 
@@ -103,56 +110,66 @@ bun add @ariefsn/svelte-use
 | `useDebounce` | Debounce any reactive getter                     |
 | `useWatch`    | Watch reactive values with current/previous args |
 | `useWhenever` | Watch that fires only when value becomes truthy  |
+| `useUntil`    | Await a reactive value reaching a condition      |
+| `useCloned`   | Deep copy of a reactive value, for edit buffers  |
 
 ### Browser – Keyboard & Scroll
 
-| Composable       | Description                                               |
-| ---------------- | --------------------------------------------------------- |
-| `useMagicKeys`   | Reactive keyboard state via Proxy — single keys or combos |
-| `useKeyModifier` | Track Ctrl/Shift/Alt/Meta state                           |
-| `useScroll`      | Scroll position, direction, edge arrival                  |
-| `useScrollLock`  | Lock/unlock body scroll                                   |
+| Composable          | Description                                               |
+| ------------------- | --------------------------------------------------------- |
+| `useMagicKeys`      | Reactive keyboard state via Proxy — single keys or combos |
+| `useKeyModifier`    | Track Ctrl/Shift/Alt/Meta state                           |
+| `useScroll`         | Scroll position, direction, edge arrival                  |
+| `useScrollLock`     | Lock/unlock body scroll                                   |
+| `useInfiniteScroll` | Load more content as a container nears its edge           |
 
 ### Browser – Pointer & Drag
 
-| Composable        | Description                                        |
-| ----------------- | -------------------------------------------------- |
-| `useMouse`        | Viewport-relative pointer position                 |
-| `useMousePressed` | Detect mouse button press state                    |
-| `useDraggable`    | Full-featured draggable with axis, bounds, handles |
+| Composable          | Description                                        |
+| ------------------- | -------------------------------------------------- |
+| `useMouse`          | Viewport-relative pointer position                 |
+| `useMousePressed`   | Detect mouse button press state                    |
+| `useMouseInElement` | Pointer position relative to an element            |
+| `useDraggable`      | Full-featured draggable with axis, bounds, handles |
 
 ### Browser – Observers
 
 | Composable                | Description                                    |
 | ------------------------- | ---------------------------------------------- |
 | `useElementSize`          | Reactive element dimensions via ResizeObserver |
+| `useElementBounding`      | Reactive full bounding box, position included  |
 | `useIntersectionObserver` | Visibility detection via IntersectionObserver  |
 | `useResizeObserver`       | Raw ResizeObserver with callback               |
 | `useMutationObserver`     | DOM mutation observation                       |
 
 ### Browser – Sensors
 
-| Composable             | Description                                            |
-| ---------------------- | ------------------------------------------------------ |
-| `useIdle`              | Detect user idle state                                 |
-| `useNetwork`           | Network Information API (downlink, RTT, effectiveType) |
-| `useGeolocation`       | Reactive geolocation via watchPosition                 |
-| `useBreakpoints`       | Reactive responsive breakpoints                        |
-| `useBrowserLocation`   | Reactive browser location (URL, hash, search)          |
-| `useNavigatorLanguage` | Reactive navigator language                            |
-| `useOnline`            | Reactive online/offline status                         |
-| `usePageLeave`         | Detect when user leaves the page                       |
-| `useDocumentVisibility`| Reactive document visibility state                     |
-| `useWindowFocus`       | Track whether browser window is focused                |
-| `useDeviceMotion`      | Device acceleration and rotation data                  |
-| `useDeviceOrientation` | Device physical orientation (alpha/beta/gamma)         |
-| `useDevicePixelRatio`  | Reactive device pixel ratio for Retina detection       |
-| `useScrollbarWidth`    | Measure scrollbar width of an element                  |
+| Composable              | Description                                            |
+| ----------------------- | ------------------------------------------------------ |
+| `useMediaQuery`         | Reactively track whether a CSS media query matches     |
+| `useWindowSize`         | Reactive viewport dimensions                           |
+| `useIdle`               | Detect user idle state                                 |
+| `useNetwork`            | Network Information API (downlink, RTT, effectiveType) |
+| `useGeolocation`        | Reactive geolocation via watchPosition                 |
+| `useBreakpoints`        | Reactive responsive breakpoints                        |
+| `useBrowserLocation`    | Reactive browser location (URL, hash, search)          |
+| `useNavigatorLanguage`  | Reactive navigator language                            |
+| `useOnline`             | Reactive online/offline status                         |
+| `usePageLeave`          | Detect when user leaves the page                       |
+| `useDocumentVisibility` | Reactive document visibility state                     |
+| `useWindowFocus`        | Track whether browser window is focused                |
+| `useDeviceMotion`       | Device acceleration and rotation data                  |
+| `useDeviceOrientation`  | Device physical orientation (alpha/beta/gamma)         |
+| `useDevicePixelRatio`   | Reactive device pixel ratio for Retina detection       |
+| `useScreenOrientation`  | Screen orientation and angle, with locking             |
+| `useGamepad`            | Gamepad state, polled only while one is connected      |
+| `useScrollbarWidth`     | Measure scrollbar width of an element                  |
 
 ### Browser – Storage
 
 | Composable          | Description                             |
 | ------------------- | --------------------------------------- |
+| `useStorage`        | Reactive Web Storage (local or session) |
 | `useLocalStorage`   | Reactive localStorage with SSR safety   |
 | `useIndexedDB`      | Reactive IndexedDB with CRUD & querying |
 | `useBase64`         | Reactive Base64 encode/decode           |
@@ -161,24 +178,27 @@ bun add @ariefsn/svelte-use
 
 ### Browser – Interaction
 
-| Composable        | Description                               |
-| ----------------- | ----------------------------------------- |
-| `useClickOutside` | Detect clicks outside an element          |
-| `useDropZone`     | Drag-and-drop zone with file/data support |
-| `useElementHover` | Detect hover state of an element          |
-| `useFocus`        | Reactive focus state of an element        |
-| `useActiveElement`| Track currently focused element globally   |
-| `useLongPress`    | Long press gesture detection               |
-| `useStartTyping`  | Detect typing on non-editable elements     |
-| `useSwipe`        | Touch swipe gesture detection              |
+| Composable            | Description                               |
+| --------------------- | ----------------------------------------- |
+| `useClickOutside`     | Detect clicks outside an element          |
+| `useDropZone`         | Drag-and-drop zone with file/data support |
+| `useElementHover`     | Detect hover state of an element          |
+| `useFocus`            | Reactive focus state of an element        |
+| `useActiveElement`    | Track currently focused element globally  |
+| `useLongPress`        | Long press gesture detection              |
+| `useStartTyping`      | Detect typing on non-editable elements    |
+| `useTextareaAutosize` | Grow a textarea to fit its content        |
+| `useSwipe`            | Touch swipe gesture detection             |
 
 ### Performance
 
-| Composable      | Description                        |
-| --------------- | ---------------------------------- |
-| `useFps`        | Reactive frames-per-second counter |
-| `useThrottleFn` | Throttle any function              |
-| `useDebounceFn` | Debounce any function              |
+| Composable       | Description                                           |
+| ---------------- | ----------------------------------------------------- |
+| `useFps`         | Reactive frames-per-second counter                    |
+| `useThrottleFn`  | Throttle any function                                 |
+| `useDebounceFn`  | Debounce any function                                 |
+| `useWebWorkerFn` | Run a self-contained function off the main thread     |
+| `useMemoize`     | Cache a function's results by its arguments, with LRU |
 
 ### Virtualization
 
@@ -188,27 +208,73 @@ bun add @ariefsn/svelte-use
 
 ### Web APIs
 
-| Composable             | Description                         |
-| ---------------------- | ----------------------------------- |
-| `useClipboard`         | Reactive clipboard read/write       |
-| `useBattery`           | Reactive Battery Status API         |
-| `useSpeechRecognition` | Reactive Web Speech Recognition API |
-| `useEyeDropper`        | EyeDropper API for color picking    |
-| `useFileDialog`        | Programmatic file input dialog      |
-| `useShare`             | Native Web Share API                |
-| `useVibrate`           | Vibration API                       |
-| `useWebNotification`   | Desktop notifications API           |
-| `usePermission`        | Browser Permissions API             |
-| `useWakeLock`          | Screen Wake Lock API                |
-| `useEventListener`     | Generic event listener with cleanup |
-| `useTextDirection`     | Track/set text directionality       |
-| `useTextSelection`     | Track text selection                |
+| Composable             | Description                                      |
+| ---------------------- | ------------------------------------------------ |
+| `useClipboard`         | Reactive clipboard read/write                    |
+| `useBattery`           | Reactive Battery Status API                      |
+| `useSpeechRecognition` | Reactive Web Speech Recognition API              |
+| `useEyeDropper`        | EyeDropper API for color picking                 |
+| `useFileDialog`        | Programmatic file input dialog                   |
+| `useShare`             | Native Web Share API                             |
+| `useVibrate`           | Vibration API                                    |
+| `useWebNotification`   | Desktop notifications API                        |
+| `usePermission`        | Browser Permissions API                          |
+| `useWakeLock`          | Screen Wake Lock API                             |
+| `useFullscreen`        | Display any element fullscreen, Escape-aware     |
+| `useImage`             | Preload an image and track its load state        |
+| `useSpeechSynthesis`   | Text-to-speech, with async voice loading handled |
+| `useFileSystemAccess`  | Read **and write** real files (Chromium only)    |
+| `useSupported`         | SSR-safe one-shot feature detection              |
+| `useEventListener`     | Generic event listener with cleanup              |
+| `useTextDirection`     | Track/set text directionality                    |
+| `useTextSelection`     | Track text selection                             |
+
+### Browser – Appearance
+
+| Composable                  | Description                                              |
+| --------------------------- | -------------------------------------------------------- |
+| `useColorMode`              | Colour mode with `auto` resolution, persistence and sync |
+| `usePreferredDark`          | Whether the OS requests a dark colour scheme             |
+| `usePreferredColorScheme`   | OS colour scheme as `dark` / `light` / `no-preference`   |
+| `usePreferredReducedMotion` | Whether the OS requests reduced motion                   |
+| `usePreferredContrast`      | OS contrast preference, including forced colours         |
+| `useCssVar`                 | Read and write a CSS custom property                     |
+
+### Browser – Document
+
+| Composable     | Description                                             |
+| -------------- | ------------------------------------------------------- |
+| `useTitle`     | Read and write `document.title`, restored on destroy    |
+| `useFavicon`   | Read and write the favicon, adopting an existing link   |
+| `useStyleTag`  | Inject a `<style>` element, deduplicated by id          |
+| `useScriptTag` | Load an external script, deduplicated across call sites |
+
+### Browser – Media
+
+| Composable        | Description                                                        |
+| ----------------- | ------------------------------------------------------------------ |
+| `useUserMedia`    | Camera and microphone capture, device switching, preview mirroring |
+| `useDisplayMedia` | Screen capture that notices the browser's "Stop sharing"           |
+| `useDevicesList`  | Media devices grouped by kind, refreshed on `devicechange`         |
+
+### Head & SEO
+
+| Composable | Description                                                      |
+| ---------- | ---------------------------------------------------------------- |
+| `useSeo`   | Layered SEO metadata as a builder, rendered into `<svelte:head>` |
+| `Seo`      | Component that renders `useSeo` output — the only component here |
 
 ### Browser – Navigation
 
-| Composable            | Description                                 |
-| --------------------- | ------------------------------------------- |
-| `useNavigationGuard`  | SvelteKit navigation guard with confirm/cancel |
+| Composable           | Description                                                   |
+| -------------------- | ------------------------------------------------------------- |
+| `useNavigationGuard` | Navigation guard with confirm/cancel — **requires SvelteKit** |
+| `useUrlSearchParams` | Reactive URL query parameters, with history and hash modes    |
+
+> **Note:** `useNavigationGuard` is the only composable here that is not
+> plain-Svelte. It imports `beforeNavigate` and `goto` from `$app/navigation`,
+> so it works in SvelteKit apps only; `@sveltejs/kit` is not a declared peer
+> dependency. Every other composable in this library runs in any Svelte 5 app.
 
 ---
 
@@ -842,6 +908,14 @@ npm publish --access public
 
 - 📦 **npm**: https://www.npmjs.com/package/@ariefsn/svelte-use
 - 🐙 **GitHub**: https://github.com/ariefsn/svelte-use
+
+## Star History
+
+<p align="center">
+  <a href="https://star-history.dera.page/#ariefsn/svelte-use">
+    <img src="https://star-history.dera.page/svg?repos=ariefsn/svelte-use" alt="Star History Chart" width="800" />
+  </a>
+</p>
 
 ## License
 

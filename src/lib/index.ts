@@ -12,17 +12,44 @@ export { useLastChanged } from './state/useLastChanged.svelte.js';
 export { useTrackHistory } from './state/useTrackHistory.svelte.js';
 export type { HistorySnapshot, UseTrackHistoryReturn } from './state/useTrackHistory.svelte.js';
 export { useHistoryState } from './state/useHistoryState.svelte.js';
+export { useStateMachine } from './state/useStateMachine.svelte.js';
+export type {
+	Transition,
+	StateNode,
+	MachineConfig,
+	StateTransition,
+	UseStateMachineOptions,
+	UseStateMachineReturn
+} from './state/useStateMachine.svelte.js';
+export { useOffsetPagination } from './state/useOffsetPagination.svelte.js';
+export type {
+	PaginationState,
+	UseOffsetPaginationOptions,
+	UseOffsetPaginationReturn
+} from './state/useOffsetPagination.svelte.js';
+export { useConfirmDialog } from './state/useConfirmDialog.svelte.js';
+export type {
+	ConfirmDialogOutcome,
+	UseConfirmDialogOptions,
+	UseConfirmDialogReturn
+} from './state/useConfirmDialog.svelte.js';
 export type { UseHistoryStateReturn } from './state/useHistoryState.svelte.js';
 
 // Reactivity
 export { useDebounce } from './reactivity/useDebounce.svelte.js';
 export { useWatch } from './reactivity/useWatch.svelte.js';
 export { useWhenever } from './reactivity/useWhenever.svelte.js';
+export { useCloned } from './reactivity/useCloned.svelte.js';
+export type { UseClonedOptions, UseClonedReturn } from './reactivity/useCloned.svelte.js';
 export { useAsyncState } from './reactivity/useAsyncState.svelte.js';
-export type { UseAsyncStateOptions, UseAsyncStateReturn } from './reactivity/useAsyncState.svelte.js';
+export type {
+	UseAsyncStateOptions,
+	UseAsyncStateReturn
+} from './reactivity/useAsyncState.svelte.js';
 
 // Browser – Storage
 export { useLocalStorage } from './browser/useLocalStorage.svelte.js';
+export type { UseLocalStorageOptions } from './browser/useLocalStorage.svelte.js';
 export { useIndexedDB } from './browser/useIndexedDB.svelte.js';
 export type { UseIndexedDBOptions } from './browser/useIndexedDB.svelte.js';
 export { useSessionStorage } from './browser/storage/useSessionStorage.svelte.js';
@@ -92,6 +119,13 @@ export { useDeviceOrientation } from './browser/sensors/useDeviceOrientation.sve
 export type { UseDeviceOrientationReturn } from './browser/sensors/useDeviceOrientation.svelte.js';
 export { useDevicePixelRatio } from './browser/sensors/useDevicePixelRatio.svelte.js';
 export type { UseDevicePixelRatioReturn } from './browser/sensors/useDevicePixelRatio.svelte.js';
+export { useScreenOrientation } from './browser/sensors/useScreenOrientation.svelte.js';
+export type {
+	OrientationLockType,
+	UseScreenOrientationReturn
+} from './browser/sensors/useScreenOrientation.svelte.js';
+export { useGamepad } from './browser/sensors/useGamepad.svelte.js';
+export type { UseGamepadOptions, UseGamepadReturn } from './browser/sensors/useGamepad.svelte.js';
 
 // Browser – Interaction
 export { useClickOutside } from './browser/interaction/useClickOutside.svelte.js';
@@ -108,7 +142,11 @@ export { useLongPress } from './browser/interaction/useLongPress.svelte.js';
 export type { UseLongPressOptions } from './browser/interaction/useLongPress.svelte.js';
 export { useStartTyping } from './browser/interaction/useStartTyping.svelte.js';
 export { useSwipe } from './browser/interaction/useSwipe.svelte.js';
-export type { SwipeDirection, UseSwipeOptions, UseSwipeReturn } from './browser/interaction/useSwipe.svelte.js';
+export type {
+	SwipeDirection,
+	UseSwipeOptions,
+	UseSwipeReturn
+} from './browser/interaction/useSwipe.svelte.js';
 
 // Browser – Web APIs
 export { useBattery } from './browser/useBattery.svelte.js';
@@ -116,7 +154,10 @@ export type { UseBatteryReturn } from './browser/useBattery.svelte.js';
 export { useClipboard } from './browser/useClipboard.svelte.js';
 export type { UseClipboardReturn } from './browser/useClipboard.svelte.js';
 export { useSpeechRecognition } from './browser/useSpeechRecognition.svelte.js';
-export type { UseSpeechRecognitionReturn } from './browser/useSpeechRecognition.svelte.js';
+export type {
+	UseSpeechRecognitionOptions,
+	UseSpeechRecognitionReturn
+} from './browser/useSpeechRecognition.svelte.js';
 export { useEyeDropper } from './browser/useEyeDropper.svelte.js';
 export type { UseEyeDropperReturn } from './browser/useEyeDropper.svelte.js';
 export { useFileDialog } from './browser/useFileDialog.svelte.js';
@@ -125,13 +166,34 @@ export { useShare } from './browser/useShare.svelte.js';
 export type { UseShareData, UseShareReturn } from './browser/useShare.svelte.js';
 export { useVibrate } from './browser/useVibrate.svelte.js';
 export type { UseVibrateReturn } from './browser/useVibrate.svelte.js';
+export { useFullscreen } from './browser/useFullscreen.svelte.js';
+export type { UseFullscreenOptions, UseFullscreenReturn } from './browser/useFullscreen.svelte.js';
+export { useImage } from './browser/useImage.svelte.js';
+export type { UseImageSource, UseImageReturn } from './browser/useImage.svelte.js';
+export { useSpeechSynthesis } from './browser/useSpeechSynthesis.svelte.js';
+export type {
+	SpeechSynthesisStatus,
+	UseSpeechSynthesisOptions,
+	UseSpeechSynthesisReturn
+} from './browser/useSpeechSynthesis.svelte.js';
+export { useFileSystemAccess } from './browser/useFileSystemAccess.svelte.js';
+export type {
+	FilePickerAcceptType,
+	FilePickerOptions,
+	UseFileSystemAccessOptions,
+	UseFileSystemAccessReturn
+} from './browser/useFileSystemAccess.svelte.js';
 export { useWebNotification } from './browser/useWebNotification.svelte.js';
-export type { UseWebNotificationOptions, UseWebNotificationReturn } from './browser/useWebNotification.svelte.js';
+export type {
+	UseWebNotificationOptions,
+	UseWebNotificationReturn
+} from './browser/useWebNotification.svelte.js';
 export { usePermission } from './browser/usePermission.svelte.js';
 export type { UsePermissionReturn } from './browser/usePermission.svelte.js';
 export { useWakeLock } from './browser/useWakeLock.svelte.js';
 export type { UseWakeLockReturn } from './browser/useWakeLock.svelte.js';
 export { useEventListener } from './browser/useEventListener.svelte.js';
+export type { EventTargetEventMap } from './browser/useEventListener.svelte.js';
 export { useTextDirection } from './browser/useTextDirection.svelte.js';
 export type { TextDirection, UseTextDirectionReturn } from './browser/useTextDirection.svelte.js';
 export { useTextSelection } from './browser/useTextSelection.svelte.js';
@@ -141,13 +203,24 @@ export type { UseScrollbarWidthReturn } from './browser/useScrollbarWidth.svelte
 
 // Browser – Navigation
 export { useNavigationGuard } from './browser/useNavigationGuard.svelte.js';
-export type { UseNavigationGuardOptions, UseNavigationGuardReturn } from './browser/useNavigationGuard.svelte.js';
+export type {
+	UseNavigationGuardOptions,
+	UseNavigationGuardReturn
+} from './browser/useNavigationGuard.svelte.js';
 
 // Performance
 export { useFps } from './performance/useFps.svelte.js';
 export { useThrottleFn } from './performance/useThrottleFn.svelte.js';
 export { useDebounceFn } from './performance/useDebounceFn.svelte.js';
 export { useIdle } from './performance/useIdle.svelte.js';
+export { useMemoize } from './performance/useMemoize.svelte.js';
+export type { UseMemoizeOptions, UseMemoizeReturn } from './performance/useMemoize.svelte.js';
+export { useWebWorkerFn } from './performance/useWebWorkerFn.svelte.js';
+export type {
+	WebWorkerStatus,
+	UseWebWorkerFnOptions,
+	UseWebWorkerFnReturn
+} from './performance/useWebWorkerFn.svelte.js';
 
 // Animation
 export { useAnimate } from './animation/useAnimate.svelte.js';
@@ -163,6 +236,24 @@ export type {
 	UseWebSocketOptions,
 	UseWebSocketReturn
 } from './async/useWebSocket.svelte.js';
+export { useAsyncQueue } from './async/useAsyncQueue.svelte.js';
+export type {
+	AsyncQueueTask,
+	AsyncQueueTaskStatus,
+	UseAsyncQueueOptions,
+	UseAsyncQueueReturn
+} from './async/useAsyncQueue.svelte.js';
+export { useEventSource } from './async/useEventSource.svelte.js';
+export type {
+	EventSourceStatus,
+	UseEventSourceOptions,
+	UseEventSourceReturn
+} from './async/useEventSource.svelte.js';
+export { useBroadcastChannel } from './async/useBroadcastChannel.svelte.js';
+export type {
+	UseBroadcastChannelOptions,
+	UseBroadcastChannelReturn
+} from './async/useBroadcastChannel.svelte.js';
 
 // Time
 export { useInterval } from './time/useInterval.svelte.js';
@@ -179,3 +270,123 @@ export type { UseTimestampOptions } from './time/useTimestamp.svelte.js';
 
 // Virtual
 export { useVirtualList } from './virtual/useVirtualList.svelte.js';
+export type {
+	VirtualItem,
+	UseVirtualListOptions,
+	UseVirtualListReturn
+} from './virtual/useVirtualList.svelte.js';
+
+// Foundational primitives
+export { useSupported } from './browser/useSupported.svelte.js';
+export { useMediaQuery } from './browser/sensors/useMediaQuery.svelte.js';
+export { useRafFn } from './animation/useRafFn.svelte.js';
+export type {
+	UseRafFnOptions,
+	UseRafFnReturn,
+	UseRafFnCallbackArgs
+} from './animation/useRafFn.svelte.js';
+export { useUntil } from './reactivity/useUntil.svelte.js';
+export type { UseUntilOptions, UseUntilChain, UseUntilItem } from './reactivity/useUntil.svelte.js';
+export { useStorage } from './browser/storage/useStorage.svelte.js';
+export type {
+	UseStorageOptions,
+	UseStorageReturn,
+	StorageArea
+} from './browser/storage/useStorage.svelte.js';
+
+// Element & viewport
+export { useWindowSize } from './browser/useWindowSize.svelte.js';
+export type { UseWindowSizeOptions, UseWindowSizeReturn } from './browser/useWindowSize.svelte.js';
+export { useElementBounding } from './browser/useElementBounding.svelte.js';
+export type {
+	UseElementBoundingOptions,
+	UseElementBoundingReturn
+} from './browser/useElementBounding.svelte.js';
+export { useMouseInElement } from './browser/input/useMouseInElement.svelte.js';
+export type {
+	UseMouseInElementOptions,
+	UseMouseInElementReturn
+} from './browser/input/useMouseInElement.svelte.js';
+export { useInfiniteScroll } from './browser/useInfiniteScroll.svelte.js';
+export type {
+	UseInfiniteScrollOptions,
+	UseInfiniteScrollReturn,
+	InfiniteScrollDirection
+} from './browser/useInfiniteScroll.svelte.js';
+export { useTextareaAutosize } from './browser/input/useTextareaAutosize.svelte.js';
+export type {
+	UseTextareaAutosizeOptions,
+	UseTextareaAutosizeReturn
+} from './browser/input/useTextareaAutosize.svelte.js';
+
+// Browser – Appearance
+export { usePreferredDark, PREFERS_DARK_QUERY } from './browser/sensors/usePreferredDark.svelte.js';
+export { usePreferredColorScheme } from './browser/sensors/usePreferredColorScheme.svelte.js';
+export type { PreferredColorScheme } from './browser/sensors/usePreferredColorScheme.svelte.js';
+export { usePreferredReducedMotion } from './browser/sensors/usePreferredReducedMotion.svelte.js';
+export type { PreferredReducedMotion } from './browser/sensors/usePreferredReducedMotion.svelte.js';
+export { usePreferredContrast } from './browser/sensors/usePreferredContrast.svelte.js';
+export type { PreferredContrast } from './browser/sensors/usePreferredContrast.svelte.js';
+export { useColorMode, colorModeScript } from './browser/document/useColorMode.svelte.js';
+export { DEFAULT_COLOR_MODE_STORAGE_KEY } from './browser/document/colorModeScript.js';
+export type {
+	UseColorModeOptions,
+	UseColorModeReturn,
+	ColorModeScriptOptions,
+	ColorModeSelection,
+	ResolvedColorMode,
+	BasicColorMode
+} from './browser/document/useColorMode.svelte.js';
+export { useCssVar } from './browser/document/useCssVar.svelte.js';
+export type { UseCssVarOptions, UseCssVarReturn } from './browser/document/useCssVar.svelte.js';
+
+// Browser – Document
+export { useTitle } from './browser/document/useTitle.svelte.js';
+export type { UseTitleOptions, UseTitleReturn } from './browser/document/useTitle.svelte.js';
+export { useFavicon } from './browser/document/useFavicon.svelte.js';
+export type { UseFaviconOptions, UseFaviconReturn } from './browser/document/useFavicon.svelte.js';
+export { useStyleTag } from './browser/document/useStyleTag.svelte.js';
+export type {
+	UseStyleTagOptions,
+	UseStyleTagReturn
+} from './browser/document/useStyleTag.svelte.js';
+export { useScriptTag } from './browser/document/useScriptTag.svelte.js';
+export type {
+	UseScriptTagOptions,
+	UseScriptTagReturn,
+	ScriptTagStatus
+} from './browser/document/useScriptTag.svelte.js';
+
+// Browser – Navigation
+export { useUrlSearchParams } from './browser/useUrlSearchParams.svelte.js';
+export type {
+	UseUrlSearchParamsOptions,
+	UseUrlSearchParamsReturn,
+	UrlSearchParamsMode,
+	UrlSearchParamsRecord,
+	UrlSearchParamValue
+} from './browser/useUrlSearchParams.svelte.js';
+
+// Browser – Media
+export { useDevicesList } from './browser/media/useDevicesList.svelte.js';
+export type {
+	UseDevicesListOptions,
+	UseDevicesListReturn
+} from './browser/media/useDevicesList.svelte.js';
+export { useUserMedia } from './browser/media/useUserMedia.svelte.js';
+export type {
+	UseUserMediaOptions,
+	UseUserMediaReturn,
+	UserMediaFlip
+} from './browser/media/useUserMedia.svelte.js';
+export { useDisplayMedia } from './browser/media/useDisplayMedia.svelte.js';
+export type {
+	UseDisplayMediaOptions,
+	UseDisplayMediaReturn
+} from './browser/media/useDisplayMedia.svelte.js';
+
+// Head & SEO
+export { useSeo } from './seo/useSeo.svelte.js';
+export type { SeoLayer, UseSeoReturn } from './seo/useSeo.svelte.js';
+export { default as Seo } from './seo/Seo.svelte';
+export type { SeoData, SeoTag, SeoOpenGraph, SeoTwitter } from './seo/types.js';

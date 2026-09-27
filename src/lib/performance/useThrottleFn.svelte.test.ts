@@ -1,3 +1,4 @@
+import { flushSync } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { useThrottleFn } from './useThrottleFn.svelte.js';
 
@@ -80,6 +81,9 @@ describe('useThrottleFn', () => {
 			throttled();
 			vi.advanceTimersByTime(100);
 			throttled(); // schedules trailing call
+			// Without this the cleanup $effect never runs, so no teardown is
+			// registered and the trailing timer survives scope destruction.
+			flushSync();
 		});
 
 		cleanup(); // destroys scope and clears timer

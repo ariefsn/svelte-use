@@ -1,3 +1,5 @@
+import { useSupported } from '../useSupported.svelte.js';
+
 export interface UseDevicePixelRatioReturn {
 	/** Whether devicePixelRatio is supported */
 	isSupported: () => boolean;
@@ -5,37 +7,21 @@ export interface UseDevicePixelRatioReturn {
 	current: () => number;
 }
 
-/**
- * Reactively tracks the device pixel ratio (DPR).
- *
- * Useful for detecting high-DPI/Retina displays and optimizing rendering.
- *
- * @returns Object with `isSupported` and reactive `current` getter
- *
- * @example
- * ```ts
- * const { current } = useDevicePixelRatio();
- * // current() → 2 (on Retina displays)
- * ```
- */
+/** Reactively tracks the device pixel ratio (DPR) for Retina display detection. */
 export function useDevicePixelRatio(): UseDevicePixelRatioReturn {
-	const isBrowser = typeof window !== 'undefined';
-	const supported = isBrowser && 'devicePixelRatio' in window;
+	const isSupported = useSupported(() => 'devicePixelRatio' in window);
 
-	let ratio = $state(isBrowser ? window.devicePixelRatio : 1);
+	let ratio = $state(isSupported() ? window.devicePixelRatio : 1);
 
 	$effect(() => {
-		if (!supported) return;
+		if (!isSupported()) return;
 
-		function update() {
-			ratio = window.devicePixelRatio;
-		}
-
-		// matchMedia approach: watch for DPR changes
+		// Reading `ratio` is load-bearing: a `(resolution: Xdppx)` query only fires when DPR
+		// *leaves* X, so the listener must be rebuilt per value. Do not untrack this read.
 		const mql = window.matchMedia(`(resolution: ${ratio}dppx)`);
 
 		function onChange() {
-			update();
+			ratio = window.devicePixelRatio;
 		}
 
 		mql.addEventListener('change', onChange);
@@ -46,7 +32,7 @@ export function useDevicePixelRatio(): UseDevicePixelRatioReturn {
 	});
 
 	return {
-		isSupported: () => supported,
+		isSupported,
 		current: () => ratio
 	};
 }

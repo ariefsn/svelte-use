@@ -1,20 +1,25 @@
 <script lang="ts">
 	import { useSpeechRecognition } from '$lib/browser/useSpeechRecognition.svelte.js';
-	import { browser } from '$app/environment';
-
-	// Detect support at component init time (browser only)
-	const isSupported =
-		browser &&
-		(typeof (window as any).SpeechRecognition !== 'undefined' ||
-			typeof (window as any).webkitSpeechRecognition !== 'undefined');
 
 	const speech = useSpeechRecognition();
+	const isSupported = speech.isSupported();
+
+	const errorHints: Record<string, string> = {
+		'not-allowed': 'Microphone permission was denied. Allow it in your browser site settings.',
+		'service-not-allowed': 'The browser blocked the speech service for this page.',
+		network:
+			"The browser's speech service is unreachable. Chromium forks (Arc, Brave, Vivaldi) ship without Google's speech API keys, so this fails there — try Chrome or Edge.",
+		'no-speech': 'No speech was detected before the session timed out.',
+		aborted: 'The session was aborted.'
+	};
 </script>
 
 <div class="demo-wrap">
 	{#if !isSupported}
-		<div class="unsupported">
-			<span class="unsupported-icon">⚠</span>
+		<div
+			class="bg-warning-bg border-border-strong text-text-dim flex items-center gap-2.5 rounded-lg border px-4 py-3 text-[0.87rem]"
+		>
+			<span class="text-warning shrink-0 text-[1.1rem]">⚠</span>
 			<span>
 				Speech Recognition is not supported in this browser. Try Chrome or Edge on desktop.
 			</span>
@@ -23,93 +28,36 @@
 		<p class="hint">Click Start and speak — your browser will transcribe in real time.</p>
 
 		<button
-			class="record-btn"
-			class:recording={speech.isListening()}
+			class="flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-lg border p-2.5 text-[0.9rem] transition-all duration-150 {speech.isListening()
+				? 'bg-danger-bg border-danger text-danger'
+				: 'bg-surface border-border-strong text-text-muted'}"
 			onclick={() => (speech.isListening() ? speech.stop() : speech.start())}
 		>
-			<span class="rec-dot" class:active={speech.isListening()}></span>
+			<span
+				class="h-2 w-2 shrink-0 rounded-full transition-colors duration-200 {speech.isListening()
+					? 'bg-danger animate-pulse'
+					: 'bg-text-faint'}"
+			></span>
 			{speech.isListening() ? 'Stop recording' : 'Start recording'}
 		</button>
 
-		<div class="transcript" class:has-text={!!speech.result()}>
+		{#if speech.error()}
+			<div
+				class="bg-warning-bg border-warning-border text-warning flex flex-col gap-1.5 rounded-lg border px-3 py-2.5 text-[0.83rem] leading-normal [&_span]:opacity-80 [&_strong]:font-mono [&_strong]:font-semibold"
+			>
+				<strong>{speech.error()}</strong>
+				{#if errorHints[speech.error() ?? '']}
+					<span>{errorHints[speech.error() ?? '']}</span>
+				{/if}
+			</div>
+		{/if}
+
+		<div
+			class="bg-bg-sunken border-surface min-h-[80px] rounded-lg border p-3 text-[0.9rem] leading-relaxed transition-colors duration-200 {speech.result()
+				? 'text-text-dim'
+				: 'text-text-faint'}"
+		>
 			{speech.result() || 'Transcript will appear here…'}
 		</div>
 	{/if}
 </div>
-
-<style>
-	.unsupported {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		padding: 0.75rem 1rem;
-		background: #1a1400;
-		border: 1px solid #555;
-		border-radius: 8px;
-		font-size: 0.87rem;
-		color: #aaa;
-	}
-
-	.unsupported-icon {
-		font-size: 1.1rem;
-		flex-shrink: 0;
-		color: #f0a;
-		filter: sepia(1) saturate(3) hue-rotate(10deg);
-	}
-
-	.record-btn {
-		width: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.6rem;
-		padding: 0.65rem;
-		background: #1a1a1a;
-		border: 1px solid #333;
-		border-radius: 8px;
-		color: #888;
-		font-size: 0.9rem;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.record-btn.recording {
-		background: #1a1010;
-		border-color: #f87171;
-		color: #f87171;
-	}
-	.rec-dot {
-		width: 8px;
-		height: 8px;
-		border-radius: 50%;
-		background: #444;
-		flex-shrink: 0;
-		transition: background 0.2s;
-	}
-	.rec-dot.active {
-		background: #f87171;
-		animation: blink 1s infinite;
-	}
-	@keyframes blink {
-		0%,
-		100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0.3;
-		}
-	}
-	.transcript {
-		min-height: 80px;
-		padding: 0.75rem;
-		background: #0d0d0d;
-		border: 1px solid #1e1e1e;
-		border-radius: 8px;
-		font-size: 0.9rem;
-		color: #444;
-		line-height: 1.55;
-		transition: color 0.2s;
-	}
-	.transcript.has-text {
-		color: #ccc;
-	}
-</style>

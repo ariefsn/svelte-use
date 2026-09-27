@@ -3,20 +3,7 @@ export interface UseActiveElementReturn {
 	current: () => Element | null;
 }
 
-/**
- * Tracks the currently focused element in the document.
- *
- * Listens to `focus` and `blur` events on the window to reactively update
- * `document.activeElement`.
- *
- * @returns Object with reactive `current` getter
- *
- * @example
- * ```ts
- * const { current } = useActiveElement();
- * // current() → the element that currently has focus, or null
- * ```
- */
+/** Tracks the currently focused element in the document. */
 export function useActiveElement(): UseActiveElementReturn {
 	const isBrowser = typeof document !== 'undefined';
 

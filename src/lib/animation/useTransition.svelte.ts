@@ -1,53 +1,15 @@
-/**
- * Built-in linear easing — identity function `t → t`.
- *
- * @param t - Normalised time value in the range `[0, 1]`.
- * @returns The same value `t`.
- */
+import { untrack } from 'svelte';
+/** Smoothly interpolates a reactive numeric source value using `requestAnimationFrame`. */
 export function linear(t: number): number {
 	return t;
 }
 
-/**
- * Cubic ease-in-out easing function.
- *
- * @param t - Normalised time value in the range `[0, 1]`.
- * @returns Eased value in the range `[0, 1]`.
- */
+/** Smoothly interpolates a reactive numeric source value using `requestAnimationFrame`. */
 export function cubicInOut(t: number): number {
 	return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-/**
- * Smoothly interpolates a reactive numeric source value using
- * `requestAnimationFrame`.
- *
- * When the source changes the composable animates the displayed value from the
- * previous value to the new target over the configured duration. A pending
- * animation frame is always cancelled before a new one begins, so rapid source
- * changes never cause stacking animations.
- *
- * @param source - Reactive getter that provides the current target number.
- * @param options - Optional configuration object.
- * @param options.duration - Animation duration in milliseconds (default: `300`).
- * @param options.easing - Easing function `(t: number) => number` where `t` is
- *   in the range `[0, 1]` (default: `cubicInOut`).
- * @returns A reactive getter that returns the interpolated value. Read it inside
- *   a reactive context (e.g. a template or `$derived`) to receive live updates.
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useTransition } from '$lib/animation/useTransition.svelte.js';
- *
- *   let target = $state(0);
- *   const displayed = useTransition(() => target, { duration: 500 });
- * </script>
- *
- * <p>{displayed().toFixed(2)}</p>
- * <button onclick={() => (target = 100)}>Animate to 100</button>
- * ```
- */
+/** Smoothly interpolates a reactive numeric source value using `requestAnimationFrame`. */
 export function useTransition(
 	source: () => number,
 	options?: {
@@ -77,7 +39,8 @@ export function useTransition(
 			return;
 		}
 
-		const from = current;
+		// Snapshot, not a dependency.
+		const from = untrack(() => current);
 
 		if (from === to) return;
 

@@ -2,6 +2,7 @@
 	import { useWakeLock } from '$lib/browser/useWakeLock.svelte.js';
 	const { isSupported, isActive, request, release } = useWakeLock();
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">supported</span>

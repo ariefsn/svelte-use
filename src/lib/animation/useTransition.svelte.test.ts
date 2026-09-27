@@ -2,16 +2,11 @@ import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { flushSync } from 'svelte';
 import { useTransition, linear, cubicInOut } from './useTransition.svelte.js';
 
-// ---------------------------------------------------------------------------
 // rAF / performance mock helpers
-// ---------------------------------------------------------------------------
 
 /**
- * Install synchronous fake implementations of `requestAnimationFrame`,
- * `cancelAnimationFrame`, and `performance.now`.
- *
- * `advanceTime(ms)` runs all pending frames up to the specified elapsed time,
- * incrementing the fake clock and invoking each callback in order.
+ * Install synchronous fake implementations of `requestAnimationFrame`, `cancelAnimationFrame`, and
+ * `performance.now`.
  */
 function installFakeRAF() {
 	type Callback = (time: number) => void;
@@ -52,9 +47,7 @@ function installFakeRAF() {
 	return { advanceTime, reset };
 }
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('linear easing', () => {
 	test('returns the same value', () => {
@@ -146,6 +139,52 @@ describe('useTransition', () => {
 
 		// Advance to the midpoint.
 		fakeRAF.advanceTime(100);
+		expect(result!()).toBeCloseTo(50, 0);
+
+		cleanup();
+	});
+
+	test('completes on schedule when stepped frame by frame', () => {
+		// Regression: the effect read `current`, which the per-frame tick writes, so every frame re-ran
+		// the effect and restarted the tween with a fresh startTime.
+		let source = $state(0);
+		let result: ReturnType<typeof useTransition> | undefined;
+
+		const cleanup = $effect.root(() => {
+			result = useTransition(() => source, { duration: 200, easing: linear });
+			flushSync();
+			source = 100;
+			flushSync();
+		});
+
+		// Ten 20ms frames = exactly the 200ms duration.
+		for (let i = 0; i < 10; i++) {
+			fakeRAF.advanceTime(20);
+			flushSync();
+		}
+
+		expect(result!()).toBeCloseTo(100, 1);
+
+		cleanup();
+	});
+
+	test('follows linear easing across successive frames', () => {
+		let source = $state(0);
+		let result: ReturnType<typeof useTransition> | undefined;
+
+		const cleanup = $effect.root(() => {
+			result = useTransition(() => source, { duration: 100, easing: linear });
+			flushSync();
+			source = 100;
+			flushSync();
+		});
+
+		fakeRAF.advanceTime(25);
+		flushSync();
+		expect(result!()).toBeCloseTo(25, 0);
+
+		fakeRAF.advanceTime(25);
+		flushSync();
 		expect(result!()).toBeCloseTo(50, 0);
 
 		cleanup();

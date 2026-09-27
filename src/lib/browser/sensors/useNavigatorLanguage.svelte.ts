@@ -1,17 +1,6 @@
 /**
- * Reactive browser language preference.
- *
- * Returns the current value of `navigator.language` and re-evaluates
- * whenever the browser fires a `languagechange` event. Falls back to
- * `'en'` during SSR.
- *
- * @returns A getter function that returns the current BCP 47 language tag.
- *
- * @example
- * ```ts
- * const language = useNavigatorLanguage();
- * language(); // 'en-US'
- * ```
+ * Reactive browser language preference. Returns `navigator.language` as a BCP 47 language tag and
+ * updates on `languagechange` events. Falls back to `"en"` during SSR.
  */
 export function useNavigatorLanguage(): () => string {
 	const isBrowser = typeof navigator !== 'undefined';

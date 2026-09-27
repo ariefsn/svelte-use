@@ -1,67 +1,7 @@
 <script lang="ts">
-	import {
-		useCounter,
-		useDebounce,
-		useIndexedDB,
-		useLocalStorage,
-		usePrevious,
-		useToggle
-	} from '$lib';
-	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
+	import TableOfContents from '../docs/TableOfContents.svelte';
 	import { sidebar } from '../docs/sidebar.js';
-
-	// --- useToggle ---
-	const toggle = useToggle();
-
-	// --- useCounter ---
-	const counter = useCounter(0);
-
-	// --- usePrevious ---
-	let prevSource = $state(0);
-	const previous = usePrevious(() => prevSource);
-
-	// --- useDebounce ---
-	let query = $state('');
-	const debouncedQuery = useDebounce(() => query, 500);
-
-	// --- useLocalStorage ---
-	const theme = useLocalStorage<'light' | 'dark'>('demo-theme', 'light');
-
-	// --- useIndexedDB ---
-	interface Note {
-		id?: number;
-		text: string;
-		done: boolean;
-	}
-	const db = useIndexedDB<Note>('svelte-use-demo', 'notes');
-	let noteInput = $state('');
-	let filterText = $state('');
-	let queryResults = $state<Note[]>([]);
-
-	const visibleNotes = $derived(
-		filterText.trim()
-			? db.items.filter((n) => n.text.toLowerCase().includes(filterText.toLowerCase()))
-			: db.items
-	);
-
-	async function addNote() {
-		const text = noteInput.trim();
-		if (!text) return;
-		await db.add({ text, done: false });
-		noteInput = '';
-	}
-
-	async function toggleNote(note: Note) {
-		await db.update({ ...note, done: !note.done });
-	}
-
-	async function removeNote(id: number) {
-		await db.remove(id);
-	}
-
-	async function runQuery() {
-		queryResults = await db.query((n) => !n.done);
-	}
 
 	const features = [
 		{
@@ -78,126 +18,179 @@
 		{ icon: '🔌', label: 'Async & WebSocket', desc: 'useFetch, useWebSocket' },
 		{ icon: '⏱️', label: 'Time utilities', desc: 'useInterval, useTimeout, useNow, useTimestamp…' },
 		{ icon: '🖱️', label: 'Pointer & Drag', desc: 'useMouse, useDraggable, useDropZone, useSwipe…' },
-		{ icon: '📡', label: 'Sensors', desc: 'useGeolocation, useDeviceMotion, useDeviceOrientation…' },
+		{
+			icon: '📡',
+			label: 'Sensors',
+			desc: 'useGeolocation, useDeviceMotion, useDeviceOrientation…'
+		},
 		{ icon: '💾', label: 'Storage', desc: 'useLocalStorage, useIndexedDB, useSessionStorage…' },
-		{ icon: '🔔', label: 'Notifications & APIs', desc: 'useWebNotification, usePermission, useShare, useVibrate…' },
+		{
+			icon: '🔔',
+			label: 'Notifications & APIs',
+			desc: 'useWebNotification, usePermission, useShare, useVibrate…'
+		},
 		{ icon: '👆', label: 'Gestures', desc: 'useLongPress, useSwipe, useStartTyping…' },
-		{ icon: '↩️', label: 'History & State', desc: 'useHistoryState, useTrackHistory, useAutoResetState…' }
+		{
+			icon: '↩️',
+			label: 'History & State',
+			desc: 'useHistoryState, useTrackHistory, useAutoResetState…'
+		}
 	];
 
 	// Total composable count from sidebar
-	const totalComposables = sidebar.reduce((acc, g) => acc + g.items.length, 0);
+	/*
+	 * Fixed, unlike the docs pages where sections are conditional — but the ids
+	 * still have to match the `id` attributes below, so they live in one place.
+	 */
+	const tocEntries = [
+		{ id: 'installation', label: 'Installation' },
+		{ id: 'quick-start', label: 'Quick Start' },
+		{ id: 'features', label: 'Features' },
+		{ id: 'utilities', label: 'Utilities' },
+		{ id: 'star-history', label: 'Star History' }
+	];
+
+	/*
+	 * 112px clears the mobile stack: the 53px fixed top bar plus the sticky "On this page" disclosure
+	 * docked beneath it, which ends at 102px.
+	 */
+	const sectionClass = 'mb-14 scroll-mt-24 max-md:scroll-mt-[112px]';
+
+	const allItems = sidebar.flatMap((group) => group.items);
+	/*
+	 * The `use` prefix is the marker that separates a composable from a component — `Seo` is the only
+	 * one of the latter today. Deriving it keeps the claim honest as more of either ship.
+	 */
+	const composableCount = allItems.filter((item) => item.label.startsWith('use')).length;
+	const componentCount = allItems.length - composableCount;
+	const totalUtilities = allItems.length;
+
+	// ── Shared class strings ──────────────────────────────────────────────────
+	const badge =
+		'bg-accent-bg text-accent border-accent-border inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 font-mono text-[0.78rem]';
+	const btn =
+		'inline-flex cursor-pointer items-center rounded-lg px-5 py-2 text-[0.9rem] font-medium no-underline transition-colors';
+	const sectionTitle = 'm-0 mb-4 flex items-center gap-2 text-[1.35rem] font-bold tracking-tight';
+	const card = 'bg-bg-elev border-border rounded-[10px] border px-4.5 py-4';
+	const codeBlock = 'bg-bg border-border m-0 overflow-x-auto rounded-lg border px-5 py-4.5';
+	const codeText =
+		"text-accent font-['Fira_Code','Cascadia_Code',monospace] text-[0.82rem] whitespace-pre";
 </script>
 
-<svelte:head>
-	<title>Svelte Use — Svelte 5 Utility Composables</title>
-	<meta
-		name="description"
-		content="A collection of {totalComposables}+ Svelte 5 runes-first utility composables. No stores, no external dependencies, SSR-safe, fully typed."
-	/>
-	<meta property="og:title" content="Svelte Use — Svelte 5 Utility Composables" />
-	<meta
-		property="og:description"
-		content="A collection of {totalComposables}+ Svelte 5 runes-first utility composables. No stores, no external dependencies, SSR-safe, fully typed."
-	/>
-	<meta property="og:type" content="website" />
-	<meta property="og:url" content={$page.url.href} />
-	<meta property="og:image" content="{$page.url.origin}/logo.svg" />
-	<meta property="og:site_name" content="Svelte Use" />
-	<meta name="twitter:card" content="summary" />
-	<meta name="twitter:title" content="Svelte Use — Svelte 5 Utility Composables" />
-	<meta
-		name="twitter:description"
-		content="A collection of {totalComposables}+ Svelte 5 runes-first utility composables. No stores, no external dependencies, SSR-safe, fully typed."
-	/>
-	<meta name="twitter:image" content="{$page.url.origin}/logo.svg" />
-</svelte:head>
+<!--
+	Wider than a docs page's row on purpose: this page is grids, not prose, so it has no reading
+	measure to protect — the individual prose sections cap themselves at 860px instead.
+-->
+<div class="mx-auto flex w-full flex-col gap-8 xl:max-w-[1400px] xl:flex-row">
+	<TableOfContents entries={tocEntries} />
 
-<div class="page">
-	<!-- ─── Hero ─── -->
-	<header class="hero">
-		<div class="hero-top">
-			<img src="/logo.svg" alt="svelte-use logo" class="hero-logo" width="80" height="80" />
-			<div class="hero-badges">
-				<span class="hero-badge">@ariefsn/svelte-use</span>
-				<a
-					href="https://www.npmjs.com/package/@ariefsn/svelte-use"
-					class="hero-badge hero-badge-link"
-					target="_blank"
-					rel="noopener"
-					aria-label="View on npm"
-				>
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
-						><path d="M0 0v24h24V0H0zm19.2 19.2H4.8V4.8h14.4v14.4z" /><path
-							d="M7.2 7.2h9.6v9.6h-2.4V9.6H12v7.2H7.2z"
-						/></svg
+	<div class="min-w-0 flex-1">
+		<!-- ─── Hero ─── -->
+		<header class="border-border mb-12 border-b pb-12">
+			<div class="mb-5 flex flex-wrap items-center gap-4">
+				<img
+					src="/logo.svg"
+					alt="svelte-use logo"
+					class="h-18 w-18 shrink-0 max-sm:h-14 max-sm:w-14"
+					width="80"
+					height="80"
+				/>
+				<div class="flex flex-wrap items-center gap-2">
+					<span class={badge}>@ariefsn/svelte-use</span>
+					<a
+						href="https://www.npmjs.com/package/@ariefsn/svelte-use"
+						class="{badge} hover:bg-accent-border/30 hover:border-accent-dim no-underline transition-colors"
+						target="_blank"
+						rel="noopener"
+						aria-label="View on npm"
 					>
-					npm
-				</a>
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
+							><path d="M0 0v24h24V0H0zm19.2 19.2H4.8V4.8h14.4v14.4z" /><path
+								d="M7.2 7.2h9.6v9.6h-2.4V9.6H12v7.2H7.2z"
+							/></svg
+						>
+						npm
+					</a>
+					<a
+						href="https://github.com/ariefsn/svelte-use"
+						class="{badge} hover:bg-accent-border/30 hover:border-accent-dim no-underline transition-colors"
+						target="_blank"
+						rel="noopener"
+						aria-label="View on GitHub"
+					>
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
+							><path
+								d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+							/></svg
+						>
+						GitHub
+					</a>
+				</div>
+			</div>
+
+			<!--
+				The gradient needs `text-transparent` plus a background clip, which has no single utility
+				— `bg-clip-text` provides the clip and the gradient utilities supply the rest.
+			-->
+			<h1
+				class="from-text to-accent m-0 mb-3 bg-gradient-to-br bg-clip-text text-[clamp(2rem,6vw,3rem)] font-extrabold tracking-[-0.04em] text-transparent"
+			>
+				Svelte Use
+			</h1>
+			<p
+				class="text-text-muted m-0 mb-7 max-w-[680px] text-[1.05rem] leading-relaxed max-sm:text-[0.95rem]"
+			>
+				A collection of <strong>{totalUtilities}</strong> Svelte 5 runes-first utilities —
+				{composableCount} composables and {componentCount} component.<br />
+				No stores. No external dependencies. SSR-safe. Fully typed.
+			</p>
+
+			<div class="flex flex-wrap gap-3">
+				<a
+					href={resolve('/docs/[slug]', { slug: 'use-toggle' })}
+					class="{btn} bg-accent text-bg hover:bg-accent-strong">Browse Docs</a
+				>
 				<a
 					href="https://github.com/ariefsn/svelte-use"
-					class="hero-badge hero-badge-link"
+					class="{btn} bg-surface text-text border-border-strong hover:bg-surface-2 border"
 					target="_blank"
-					rel="noopener"
-					aria-label="View on GitHub"
+					rel="noopener">GitHub</a
 				>
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
-						><path
-							d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
-						/></svg
-					>
-					GitHub
-				</a>
+				<a
+					href="https://www.npmjs.com/package/@ariefsn/svelte-use"
+					class="{btn} bg-surface text-text border-border-strong hover:bg-surface-2 border"
+					target="_blank"
+					rel="noopener">npm</a
+				>
 			</div>
-		</div>
-		<h1>Svelte Use</h1>
-		<p class="hero-desc">
-			A collection of <strong>{totalComposables}+</strong> Svelte 5 runes-first utility composables.<br
-			/>
-			No stores. No external dependencies. SSR-safe. Fully typed.
-		</p>
+		</header>
 
-		<div class="hero-actions">
-			<a href="/docs/use-toggle" class="btn btn-primary">Browse Docs</a>
-			<a
-				href="https://github.com/ariefsn/svelte-use"
-				class="btn btn-ghost"
-				target="_blank"
-				rel="noopener">GitHub</a
-			>
-			<a
-				href="https://www.npmjs.com/package/@ariefsn/svelte-use"
-				class="btn btn-ghost"
-				target="_blank"
-				rel="noopener">npm</a
-			>
-		</div>
-	</header>
-
-	<!-- ─── Install ─── -->
-	<section class="section">
-		<h2 class="section-title">Installation</h2>
-		<pre class="code-block"><code
-				>{`npm install @ariefsn/svelte-use
+		<!-- ─── Install ─── -->
+		<section id="installation" class="{sectionClass} max-w-[860px]">
+			<h2 class={sectionTitle}>Installation</h2>
+			<pre class={codeBlock}><code class={codeText}
+					>{`npm install @ariefsn/svelte-use
 # or
 pnpm add @ariefsn/svelte-use
 # or
 bun add @ariefsn/svelte-use`}</code
-			></pre>
-		<p class="note">Requires <strong>Svelte 5</strong> as a peer dependency.</p>
-	</section>
+				></pre>
+			<p class="text-text-muted mt-2 mb-0 text-[0.85rem]">
+				Requires <strong class="text-accent">Svelte 5</strong> as a peer dependency.
+			</p>
+		</section>
 
-	<!-- ─── Quick Start ─── -->
-	<section class="section">
-		<h2 class="section-title">Quick Start</h2>
-		<p class="section-desc">
-			All composables follow the runes-first pattern. State is exposed as <strong
-				>getter functions</strong
-			>
-			backed by <code>$state</code> — call them in templates or <code>$derived</code> to read reactively.
-		</p>
-		<pre class="code-block"><code
-				>{`import { useMouse, useScroll, useCountdown } from '@ariefsn/svelte-use';
+		<!-- ─── Quick Start ─── -->
+		<section id="quick-start" class="{sectionClass} max-w-[860px]">
+			<h2 class={sectionTitle}>Quick Start</h2>
+			<p class="doc-prose text-text-dim m-0 mb-4 text-[0.95rem] leading-relaxed">
+				All composables follow the runes-first pattern. State is exposed as <strong
+					>getter functions</strong
+				>
+				backed by <code>$state</code> — call them in templates or <code>$derived</code> to read reactively.
+			</p>
+			<pre class={codeBlock}><code class={codeText}
+					>{`import { useMouse, useScroll, useCountdown } from '@ariefsn/svelte-use';
 
 // Tracks pointer position
 const mouse = useMouse();
@@ -213,676 +206,122 @@ scroll.arrivedState.bottom() // → boolean
 const timer = useCountdown(60);
 timer.start();
 timer.count()    // → 60, 59, 58 …`}</code
-			></pre>
-	</section>
+				></pre>
+		</section>
 
-	<!-- ─── Features ─── -->
-	<section class="section">
-		<h2 class="section-title">Features</h2>
-		<div class="features-grid">
-			{#each features as f}
-				<div class="feature-card">
-					<span class="feature-icon">{f.icon}</span>
-					<strong>{f.label}</strong>
-					<span class="feature-desc">{f.desc}</span>
-				</div>
-			{/each}
-		</div>
-	</section>
+		<!-- ─── Features ─── -->
+		<section id="features" class={sectionClass}>
+			<h2 class={sectionTitle}>Features</h2>
+			<div
+				class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4 max-sm:grid-cols-[repeat(auto-fill,minmax(140px,1fr))]"
+			>
+				{#each features as f (f.label)}
+					<div class="{card} flex flex-col gap-1">
+						<span class="mb-0.5 text-[1.3rem]">{f.icon}</span>
+						<strong class="text-text text-[0.9rem]">{f.label}</strong>
+						<span class="text-text-muted text-[0.8rem]">{f.desc}</span>
+					</div>
+				{/each}
+			</div>
+		</section>
 
-	<!-- ─── Category Overview ─── -->
-	<section class="section">
-		<h2 class="section-title">Utilities <span class="count-badge">{totalComposables}</span></h2>
-		<div class="cat-grid">
-			{#each sidebar as group}
-				<div class="cat-card">
-					<h3 class="cat-title">{group.title}</h3>
-					<ul class="cat-list">
-						{#each group.items as item}
-							<li>
-								<a href="/docs/{item.slug}" class="cat-link">{item.label}</a>
-							</li>
-						{/each}
-					</ul>
-				</div>
-			{/each}
-		</div>
-	</section>
+		<!-- ─── Category Overview ─── -->
+		<section id="utilities" class={sectionClass}>
+			<h2 class={sectionTitle}>
+				Utilities
+				<span
+					class="bg-accent-bg text-accent border-accent-border inline-flex items-center justify-center rounded-full border px-2.5 py-0.5 font-mono text-[0.75rem] font-semibold"
+					>{totalUtilities}</span
+				>
+			</h2>
+			<!--
+				Multi-column, not grid: the 19 group cards run from 1 item to 18, so a grid leaves a hole
+				under every short card.
+			-->
+			<div class="columns-[260px] gap-4">
+				{#each sidebar as group (group.title)}
+					<div class="{card} mb-4 break-inside-avoid">
+						<h3
+							class="text-text-faint m-0 mb-2.5 text-[0.78rem] font-semibold tracking-[0.06em] uppercase"
+						>
+							{group.title}
+						</h3>
+						<ul class="m-0 flex list-none flex-col gap-0.5 p-0">
+							{#each group.items as item (item.slug)}
+								<li>
+									<a
+										href={resolve('/docs/[slug]', { slug: item.slug })}
+										class="text-text-muted hover:text-accent block py-1 font-mono text-[0.85rem] no-underline transition-colors"
+										>{item.label}</a
+									>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/each}
+			</div>
+		</section>
 
-	<!-- ─── Footer ─── -->
-	<footer class="footer">
-		<div class="footer-logo">
-			<img src="/logo.svg" alt="svelte-use logo" width="24" height="24" />
-			<span>Svelte Use</span>
-		</div>
-		<div class="footer-links">
+		<!-- ─── Footer ─── -->
+		<!-- ─── Star History ─── -->
+		<section id="star-history" class={sectionClass}>
+			<h2 class={sectionTitle}>Star History</h2>
 			<a
-				href="https://github.com/ariefsn/svelte-use"
+				href="https://star-history.dera.page/#ariefsn/svelte-use"
 				target="_blank"
 				rel="noopener"
-				class="footer-link"
+				class="border-border block rounded-[10px] border bg-white p-4 no-underline"
 			>
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
-					><path
-						d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
-					/></svg
-				>
-				GitHub
+				<!--
+					`bg-white` is deliberate, not a missed token: the chart is drawn with dark strokes on a
+					transparent ground, so on the dark theme it would be very nearly invisible.
+				-->
+				<img
+					src="https://star-history.dera.page/svg?repos=ariefsn/svelte-use"
+					alt="Star history chart for ariefsn/svelte-use"
+					width="800"
+					height="533"
+					loading="lazy"
+					decoding="async"
+					class="mx-auto block h-auto w-full max-w-[800px]"
+				/>
 			</a>
-			<a
-				href="https://www.npmjs.com/package/@ariefsn/svelte-use"
-				target="_blank"
-				rel="noopener"
-				class="footer-link"
-			>
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
-					><path d="M0 0v24h24V0H0zm19.2 19.2H4.8V4.8h14.4v14.4z" /><path
-						d="M7.2 7.2h9.6v9.6h-2.4V9.6H12v7.2H7.2z"
-					/></svg
+		</section>
+
+		<footer class="border-border mt-8 flex flex-col items-center gap-4 border-t py-8 text-center">
+			<div class="text-accent flex items-center gap-2 font-mono text-[0.95rem] font-bold">
+				<img src="/logo.svg" alt="svelte-use logo" width="24" height="24" />
+				<span>Svelte Use</span>
+			</div>
+			<div class="flex gap-6">
+				<a
+					href="https://github.com/ariefsn/svelte-use"
+					target="_blank"
+					rel="noopener"
+					class="text-text-muted hover:text-accent flex items-center gap-1.5 text-[0.85rem] no-underline transition-colors"
 				>
-				npm
-			</a>
-		</div>
-		<p class="footer-copy">MIT License · Built with Svelte 5</p>
-	</footer>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
+						><path
+							d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+						/></svg
+					>
+					GitHub
+				</a>
+				<a
+					href="https://www.npmjs.com/package/@ariefsn/svelte-use"
+					target="_blank"
+					rel="noopener"
+					class="text-text-muted hover:text-accent flex items-center gap-1.5 text-[0.85rem] no-underline transition-colors"
+				>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
+						><path d="M0 0v24h24V0H0zm19.2 19.2H4.8V4.8h14.4v14.4z" /><path
+							d="M7.2 7.2h9.6v9.6h-2.4V9.6H12v7.2H7.2z"
+						/></svg
+					>
+					npm
+				</a>
+			</div>
+			<p class="text-text-faint m-0 text-[0.8rem]">MIT License · Built with Svelte 5</p>
+		</footer>
+	</div>
 </div>
-
-<style>
-	.page {
-		max-width: 900px;
-	}
-
-	/* ─── Hero ─── */
-	.hero {
-		padding-bottom: 3rem;
-		border-bottom: 1px solid #1e1e1e;
-		margin-bottom: 3rem;
-	}
-
-	.hero-top {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		margin-bottom: 1.25rem;
-		flex-wrap: wrap;
-	}
-
-	.hero-logo {
-		width: 72px;
-		height: 72px;
-		flex-shrink: 0;
-	}
-
-	.hero-badges {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		align-items: center;
-	}
-
-	.hero-badge {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.35rem;
-		background: #1a1630;
-		color: #a78bfa;
-		border: 1px solid #3b2d6e;
-		border-radius: 999px;
-		padding: 0.2rem 0.75rem;
-		font-size: 0.78rem;
-		font-family: monospace;
-	}
-
-	.hero-badge-link {
-		text-decoration: none;
-		transition:
-			background 0.15s,
-			border-color 0.15s;
-	}
-
-	.hero-badge-link:hover {
-		background: #231d45;
-		border-color: #5b3fa0;
-	}
-
-	h1 {
-		font-size: clamp(2rem, 6vw, 3rem);
-		font-weight: 800;
-		margin: 0 0 0.75rem;
-		letter-spacing: -0.04em;
-		background: linear-gradient(135deg, #e8e8e8 40%, #a78bfa);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-	}
-
-	.hero-desc {
-		color: #888;
-		font-size: 1.05rem;
-		line-height: 1.6;
-		margin: 0 0 1.75rem;
-	}
-
-	.hero-actions {
-		display: flex;
-		gap: 0.75rem;
-		flex-wrap: wrap;
-	}
-
-	.btn {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.5rem 1.25rem;
-		border-radius: 8px;
-		font-size: 0.9rem;
-		font-weight: 500;
-		text-decoration: none;
-		transition: all 0.15s;
-		cursor: pointer;
-		border: none;
-	}
-
-	.btn-primary {
-		background: #a78bfa;
-		color: #0f0f0f;
-	}
-
-	.btn-primary:hover {
-		background: #c4b5fd;
-	}
-
-	.btn-secondary {
-		background: #1e1e2e;
-		color: #a78bfa;
-		border: 1px solid #3b2d6e;
-	}
-
-	.btn-secondary:hover {
-		background: #231d45;
-	}
-
-	.btn-ghost {
-		background: #1e1e1e;
-		color: #e8e8e8;
-		border: 1px solid #2e2e2e;
-	}
-
-	.btn-ghost:hover {
-		background: #2a2a2a;
-	}
-
-	/* ─── Sections ─── */
-	.section {
-		margin-bottom: 3.5rem;
-	}
-
-	.section-title {
-		font-size: 1.35rem;
-		font-weight: 700;
-		margin: 0 0 1rem;
-		letter-spacing: -0.02em;
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.count-badge {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		background: #1a1630;
-		color: #a78bfa;
-		border: 1px solid #3b2d6e;
-		border-radius: 999px;
-		padding: 0.1rem 0.6rem;
-		font-size: 0.75rem;
-		font-weight: 600;
-		font-family: monospace;
-	}
-
-	.section-desc {
-		color: #999;
-		line-height: 1.65;
-		margin: 0 0 1rem;
-		font-size: 0.95rem;
-	}
-
-	.inline-link {
-		color: #a78bfa;
-		text-decoration: none;
-	}
-
-	.inline-link:hover {
-		text-decoration: underline;
-	}
-
-	.note {
-		color: #666;
-		font-size: 0.85rem;
-		margin: 0.5rem 0 0;
-	}
-
-	.note strong {
-		color: #a78bfa;
-	}
-
-	/* ─── Code ─── */
-	.code-block {
-		background: #111;
-		border: 1px solid #222;
-		border-radius: 8px;
-		padding: 1.1rem 1.25rem;
-		overflow-x: auto;
-		margin: 0;
-	}
-
-	.code-block code {
-		font-family: 'Fira Code', 'Cascadia Code', monospace;
-		font-size: 0.82rem;
-		color: #a78bfa;
-		white-space: pre;
-	}
-
-	/* ─── Feature Grid ─── */
-	.features-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-		gap: 1rem;
-	}
-
-	.feature-card {
-		background: #141414;
-		border: 1px solid #222;
-		border-radius: 10px;
-		padding: 1rem 1.1rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.feature-icon {
-		font-size: 1.3rem;
-		margin-bottom: 0.15rem;
-	}
-
-	.feature-card strong {
-		font-size: 0.9rem;
-		color: #e8e8e8;
-	}
-
-	.feature-desc {
-		font-size: 0.8rem;
-		color: #666;
-	}
-
-	/* ─── Category Grid ─── */
-	.cat-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-		gap: 1rem;
-	}
-
-	.cat-card {
-		background: #141414;
-		border: 1px solid #222;
-		border-radius: 10px;
-		padding: 1rem 1.1rem;
-	}
-
-	.cat-title {
-		font-size: 0.78rem;
-		font-weight: 600;
-		color: #555;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		margin: 0 0 0.6rem;
-	}
-
-	.cat-list {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-	}
-
-	.cat-link {
-		display: block;
-		color: #888;
-		text-decoration: none;
-		font-family: monospace;
-		font-size: 0.85rem;
-		padding: 0.2rem 0;
-		transition: color 0.15s;
-	}
-
-	.cat-link:hover {
-		color: #a78bfa;
-	}
-
-	/* ─── Demo Grid ─── */
-	.demos-section .section-desc {
-		margin-bottom: 1.5rem;
-	}
-
-	.grid {
-		display: grid;
-		gap: 1.5rem;
-		grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-	}
-
-	.card {
-		background: #161616;
-		border: 1px solid #2a2a2a;
-		border-radius: 10px;
-		padding: 1.5rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.card h2 {
-		font-size: 1.1rem;
-		font-weight: 600;
-		margin: 0;
-		font-family: monospace;
-		color: #a78bfa;
-	}
-
-	.description {
-		margin: 0;
-		color: #aaa;
-		font-size: 0.9rem;
-		line-height: 1.5;
-	}
-
-	.demo {
-		background: #1e1e1e;
-		border: 1px solid #2e2e2e;
-		border-radius: 8px;
-		padding: 1.25rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.actions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
-
-	button {
-		background: #2a2a2a;
-		color: #e8e8e8;
-		border: 1px solid #3a3a3a;
-		border-radius: 6px;
-		padding: 0.35rem 0.75rem;
-		font-size: 0.85rem;
-		cursor: pointer;
-		transition: background 0.15s;
-	}
-
-	button:hover {
-		background: #3a3a3a;
-	}
-
-	.badge {
-		display: inline-block;
-		padding: 0.3rem 0.9rem;
-		border-radius: 999px;
-		font-size: 0.85rem;
-		font-weight: 600;
-		background: #2a2a2a;
-		color: #888;
-		border: 1px solid #3a3a3a;
-		width: fit-content;
-		transition: all 0.15s;
-	}
-
-	.badge.on {
-		background: #1a3a1a;
-		color: #4ade80;
-		border-color: #166534;
-	}
-
-	.count {
-		font-size: 2.5rem;
-		font-weight: 700;
-		font-variant-numeric: tabular-nums;
-		line-height: 1;
-	}
-
-	.kv-row {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		font-size: 0.9rem;
-	}
-
-	.label {
-		color: #666;
-		font-family: monospace;
-		min-width: 70px;
-	}
-
-	.value {
-		font-family: monospace;
-		font-weight: 500;
-	}
-
-	.muted {
-		color: #888;
-	}
-
-	input[type='text'] {
-		width: 100%;
-		background: #2a2a2a;
-		border: 1px solid #3a3a3a;
-		border-radius: 6px;
-		padding: 0.4rem 0.75rem;
-		color: #e8e8e8;
-		font-size: 0.9rem;
-		outline: none;
-		box-sizing: border-box;
-	}
-
-	input[type='text']:focus {
-		border-color: #a78bfa;
-	}
-
-	.hint {
-		margin: 0;
-		color: #555;
-		font-size: 0.8rem;
-		font-style: italic;
-	}
-
-	.idb-row {
-		display: flex;
-		gap: 0.5rem;
-	}
-
-	.idb-row input {
-		flex: 1;
-	}
-
-	.idb-footer {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		font-size: 0.8rem;
-	}
-
-	.note-list {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.35rem;
-	}
-
-	.note-item {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.note-text {
-		flex: 1;
-		font-size: 0.9rem;
-	}
-
-	.note-text.done {
-		text-decoration: line-through;
-		color: #555;
-	}
-
-	.toggle-btn {
-		width: 1.75rem;
-		height: 1.75rem;
-		padding: 0;
-		font-size: 0.8rem;
-		border-radius: 50%;
-		flex-shrink: 0;
-	}
-
-	.toggle-btn.done {
-		background: #1a3a1a;
-		color: #4ade80;
-		border-color: #166534;
-	}
-
-	.remove-btn {
-		width: 1.75rem;
-		height: 1.75rem;
-		padding: 0;
-		font-size: 1rem;
-		color: #888;
-		flex-shrink: 0;
-	}
-
-	.remove-btn:hover {
-		color: #f87171;
-		background: #2a1a1a;
-		border-color: #7f1d1d;
-	}
-
-	pre {
-		background: #111;
-		border: 1px solid #222;
-		border-radius: 8px;
-		padding: 1rem;
-		overflow-x: auto;
-		margin: 0;
-	}
-
-	code {
-		font-family: 'Fira Code', 'Cascadia Code', monospace;
-		font-size: 0.8rem;
-		color: #a78bfa;
-		white-space: pre;
-	}
-
-	.description code {
-		background: #2a2a2a;
-		padding: 0.1rem 0.35rem;
-		border-radius: 4px;
-		font-size: 0.85em;
-		color: #a78bfa;
-	}
-
-	/* ─── Footer ─── */
-	.footer {
-		border-top: 1px solid #1e1e1e;
-		padding: 2rem 0;
-		margin-top: 2rem;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 1rem;
-		text-align: center;
-	}
-
-	.footer-logo {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-family: monospace;
-		font-weight: 700;
-		color: #a78bfa;
-		font-size: 0.95rem;
-	}
-
-	.footer-links {
-		display: flex;
-		gap: 1.5rem;
-	}
-
-	.footer-link {
-		display: flex;
-		align-items: center;
-		gap: 0.4rem;
-		color: #666;
-		text-decoration: none;
-		font-size: 0.85rem;
-		transition: color 0.15s;
-	}
-
-	.footer-link:hover {
-		color: #a78bfa;
-	}
-
-	.footer-copy {
-		color: #444;
-		font-size: 0.8rem;
-		margin: 0;
-	}
-
-	/* ─── Mobile Responsive ─── */
-	@media (max-width: 640px) {
-		.hero-logo {
-			width: 56px;
-			height: 56px;
-		}
-
-		.hero-desc {
-			font-size: 0.95rem;
-		}
-
-		.features-grid {
-			grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-		}
-
-		.cat-grid {
-			grid-template-columns: 1fr 1fr;
-		}
-
-		.grid {
-			grid-template-columns: 1fr;
-		}
-
-		.code-block code,
-		code {
-			font-size: 0.75rem;
-		}
-
-		.count {
-			font-size: 2rem;
-		}
-	}
-
-	@media (max-width: 400px) {
-		.cat-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.features-grid {
-			grid-template-columns: 1fr 1fr;
-		}
-	}
-</style>

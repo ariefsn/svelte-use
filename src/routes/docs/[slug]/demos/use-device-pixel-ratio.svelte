@@ -2,6 +2,7 @@
 	import { useDevicePixelRatio } from '$lib/browser/sensors/useDevicePixelRatio.svelte.js';
 	const { isSupported, current } = useDevicePixelRatio();
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">supported</span>

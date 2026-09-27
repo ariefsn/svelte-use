@@ -9,32 +9,8 @@ export interface UseIntersectionObserverReturn {
 }
 
 /**
- * Reactive intersection observer utility.
- *
- * Wraps the browser `IntersectionObserver` API and exposes reactive getters
- * for the intersection state. The observer is started inside a `$effect` and
- * automatically stopped when the reactive scope is destroyed. It can also be
- * stopped manually via the returned `stop` function.
- *
- * SSR safe — `IntersectionObserver` is only accessed in the browser.
- *
- * @param target - Reactive getter returning the element to observe, or `null`
- * @param options - Standard `IntersectionObserverInit` options (root, rootMargin, threshold)
- * @returns Object with reactive getters `isIntersecting`, `entry`, and a `stop` function
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useIntersectionObserver } from 'svelte-use';
- *
- *   let el = $state<HTMLElement | null>(null);
- *   const { isIntersecting } = useIntersectionObserver(() => el);
- * </script>
- *
- * <div bind:this={el}>
- *   {isIntersecting() ? 'Visible' : 'Hidden'}
- * </div>
- * ```
+ * Reactively tracks whether an element is visible within the viewport (or a scroll container) using
+ * `IntersectionObserver`.
  */
 export function useIntersectionObserver(
 	target: () => Element | null,

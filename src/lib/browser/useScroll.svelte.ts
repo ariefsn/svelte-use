@@ -1,16 +1,12 @@
 /** Options for `useScroll`. */
 export interface UseScrollOptions {
 	/**
-	 * Number of milliseconds to wait after the last scroll event before
-	 * `isScrolling` is set back to `false`.
-	 * @default 150
+	 * Number of milliseconds to wait after the last scroll event before `isScrolling` is set back to
+	 * `false`. Default `150`.
 	 */
 	throttle?: number;
 
-	/**
-	 * Distance in pixels from each edge that is considered "arrived".
-	 * @default 0
-	 */
+	/** Distance in pixels from each edge that is considered "arrived". Default `0`. */
 	offset?: {
 		top?: number;
 		bottom?: number;
@@ -46,23 +42,8 @@ export interface UseScrollReturn {
 }
 
 /**
- * Reactive scroll-state tracker for `window` or any scrollable `HTMLElement`.
- *
- * Tracks scroll position (`x`, `y`), direction, edge-arrival, and an
- * `isScrolling` flag (debounced back to `false` after the last scroll event).
- *
- * @param target - `window`, an `HTMLElement`, or a getter/`undefined` (defaults to `window`)
- * @param options - Optional configuration
- *
- * @example
- * ```ts
- * // Track window scroll
- * const { y, isScrolling, arrivedState } = useScroll();
- *
- * // Track a specific element
- * let el = $state<HTMLElement | null>(null);
- * const scroll = useScroll(() => el);
- * ```
+ * Tracks scroll position, direction, edge arrival, and scrolling state for any scrollable element
+ * or `window`.
  */
 export function useScroll(
 	target?: Window | HTMLElement | (() => HTMLElement | null | undefined) | null,

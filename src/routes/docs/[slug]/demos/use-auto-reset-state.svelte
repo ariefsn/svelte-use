@@ -2,6 +2,7 @@
 	import { useAutoResetState } from '$lib/state/useAutoResetState.svelte.js';
 	const message = useAutoResetState('Ready', 2000);
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">value</span>

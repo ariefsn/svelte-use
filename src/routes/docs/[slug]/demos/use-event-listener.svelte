@@ -2,14 +2,25 @@
 	import { useEventListener } from '$lib/browser/useEventListener.svelte.js';
 	let size = $state({ w: 0, h: 0 });
 	let clicks = $state(0);
-	useEventListener(window, 'resize', () => {
-		size = { w: window.innerWidth, h: window.innerHeight };
-	});
-	useEventListener(document, 'click', () => clicks++);
+	// Getter form, not a bare `window` / `document`: those are evaluated during SSR and throw a
+	// ReferenceError, which 500s the page in `npm run dev`.
+	useEventListener(
+		() => window,
+		'resize',
+		() => {
+			size = { w: window.innerWidth, h: window.innerHeight };
+		}
+	);
+	useEventListener(
+		() => document,
+		'click',
+		() => clicks++
+	);
 	if (typeof window !== 'undefined') {
 		size = { w: window.innerWidth, h: window.innerHeight };
 	}
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">window size</span>

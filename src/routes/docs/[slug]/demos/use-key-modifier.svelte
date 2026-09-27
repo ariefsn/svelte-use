@@ -16,51 +16,20 @@
 
 <div class="demo-wrap">
 	<p class="hint">Hold modifier keys — each indicator lights up in real time.</p>
-	<div class="mod-grid">
-		{#each modifiers as m}
-			<div class="mod-card" class:active={m.getter()}>
-				<span class="mod-label">{m.label}</span>
-				<span class="mod-status">{m.getter() ? 'held' : 'up'}</span>
+	<div class="mt-2 grid grid-cols-2 gap-2">
+		{#each modifiers as m (m)}
+			<div
+				class="flex items-center justify-between rounded-lg border px-4 py-3 transition-all duration-100 {m.getter()
+					? 'bg-accent-bg border-accent'
+					: 'bg-surface border-border'}"
+			>
+				<span class="font-mono text-[0.9rem] {m.getter() ? 'text-accent-strong' : 'text-text-dim'}"
+					>{m.label}</span
+				>
+				<span class="text-[0.75rem] tabular-nums {m.getter() ? 'text-accent' : 'text-text-faint'}"
+					>{m.getter() ? 'held' : 'up'}</span
+				>
 			</div>
 		{/each}
 	</div>
 </div>
-
-<style>
-	.mod-grid {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 0.5rem;
-		margin-top: 0.5rem;
-	}
-	.mod-card {
-		padding: 0.75rem 1rem;
-		border-radius: 8px;
-		border: 1px solid #2e2e2e;
-		background: #1a1a1a;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		transition: all 0.1s;
-	}
-	.mod-card.active {
-		background: #1a1630;
-		border-color: #a78bfa;
-	}
-	.mod-label {
-		font-family: monospace;
-		font-size: 0.9rem;
-		color: #aaa;
-	}
-	.mod-card.active .mod-label {
-		color: #c4b5fd;
-	}
-	.mod-status {
-		font-size: 0.75rem;
-		color: #444;
-		font-variant-numeric: tabular-nums;
-	}
-	.mod-card.active .mod-status {
-		color: #a78bfa;
-	}
-</style>

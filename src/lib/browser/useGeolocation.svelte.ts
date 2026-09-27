@@ -1,6 +1,6 @@
-/**
- * Return value of {@link useGeolocation}.
- */
+import { useSupported } from './useSupported.svelte.js';
+
+/** Return value of {@link useGeolocation}. */
 export interface UseGeolocationReturn {
 	/** Getter for the latest coordinates snapshot, or `null` before the first fix. */
 	coords: () => GeolocationCoordinates | null;
@@ -8,37 +8,15 @@ export interface UseGeolocationReturn {
 	error: () => GeolocationPositionError | null;
 }
 
-/**
- * Reactive Geolocation API wrapper.
- *
- * Calls `navigator.geolocation.watchPosition` and keeps `coords` updated
- * as the device position changes. `error` is populated when the API
- * reports a failure, and is cleared on the next successful fix. Both
- * start as `null`.
- *
- * The watcher is cleared automatically when the reactive scope is
- * destroyed. Safe to call during SSR – no browser APIs are accessed
- * when `navigator` is undefined.
- *
- * @param options - Standard `PositionOptions` forwarded to `watchPosition`.
- * @returns An object with `coords` and `error` getter functions.
- *
- * @example
- * ```ts
- * const { coords, error } = useGeolocation({ enableHighAccuracy: true });
- * coords(); // GeolocationCoordinates | null
- * error();  // GeolocationPositionError | null
- * ```
- */
+/** Reactively tracks the device geographic position using `navigator.geolocation.watchPosition`. */
 export function useGeolocation(options?: PositionOptions): UseGeolocationReturn {
-	const isBrowser = typeof navigator !== 'undefined';
-	const supported = isBrowser && 'geolocation' in navigator;
+	const isSupported = useSupported(() => 'geolocation' in navigator);
 
 	let coords = $state<GeolocationCoordinates | null>(null);
 	let error = $state<GeolocationPositionError | null>(null);
 
 	$effect(() => {
-		if (!supported) return;
+		if (!isSupported()) return;
 
 		const watchId = navigator.geolocation.watchPosition(
 			(position) => {

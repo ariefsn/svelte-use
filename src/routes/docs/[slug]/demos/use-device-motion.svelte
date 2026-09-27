@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { useDeviceMotion } from '$lib/browser/sensors/useDeviceMotion.svelte.js';
-	const { isSupported, acceleration, rotationRate, interval } = useDeviceMotion();
+	const { isSupported, acceleration, interval } = useDeviceMotion();
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">supported</span>

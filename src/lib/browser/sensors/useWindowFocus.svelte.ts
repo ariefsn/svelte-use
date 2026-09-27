@@ -3,17 +3,7 @@ export interface UseWindowFocusReturn {
 	focused: () => boolean;
 }
 
-/**
- * Reactively tracks whether the browser window has focus.
- *
- * @returns Object with reactive `focused` getter
- *
- * @example
- * ```ts
- * const { focused } = useWindowFocus();
- * // focused() → true when window is focused
- * ```
- */
+/** Reactively tracks whether the browser window has focus. */
 export function useWindowFocus(): UseWindowFocusReturn {
 	const isBrowser = typeof window !== 'undefined';
 

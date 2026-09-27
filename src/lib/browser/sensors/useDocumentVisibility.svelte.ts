@@ -3,20 +3,7 @@ export interface UseDocumentVisibilityReturn {
 	current: () => DocumentVisibilityState;
 }
 
-/**
- * Reactively tracks the document visibility state.
- *
- * Useful for pausing animations, stopping API calls, or adjusting behavior
- * when the user switches tabs or minimizes the window.
- *
- * @returns Object with reactive `current` getter ('visible' or 'hidden')
- *
- * @example
- * ```ts
- * const { current } = useDocumentVisibility();
- * // current() → 'visible' | 'hidden'
- * ```
- */
+/** Reactively tracks the document visibility state (visible/hidden). */
 export function useDocumentVisibility(): UseDocumentVisibilityReturn {
 	const isBrowser = typeof document !== 'undefined';
 

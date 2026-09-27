@@ -2,6 +2,7 @@
 	import { useHistoryState } from '$lib/state/useHistoryState.svelte.js';
 	const state = useHistoryState(0);
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">value</span>

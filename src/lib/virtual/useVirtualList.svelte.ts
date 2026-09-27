@@ -1,7 +1,4 @@
-/**
- * A single visible row produced by {@link useVirtualList}.
- * @template T - The type of data stored in the list.
- */
+/** A single visible row produced by {@link useVirtualList}. */
 export interface VirtualItem<T> {
 	/** Zero-based index into the source array. */
 	index: number;
@@ -11,92 +8,49 @@ export interface VirtualItem<T> {
 	style: string;
 }
 
-/**
- * Options accepted by {@link useVirtualList}.
- */
+/** Options accepted by {@link useVirtualList}. */
 export interface UseVirtualListOptions {
 	/** Fixed height of every row in pixels. */
 	itemHeight: number;
 	/**
-	 * Number of extra items to render above and below the visible window to
-	 * reduce blank flashes during fast scrolling.
-	 * @default 3
+	 * Number of extra items to render above and below the visible window to reduce blank flashes
+	 * during fast scrolling. Default `3`.
 	 */
 	overscan?: number;
 }
 
-/**
- * Return value of {@link useVirtualList}.
- * @template T - The type of data stored in the list.
- */
+/** Return value of {@link useVirtualList}. */
 export interface UseVirtualListReturn<T> {
 	/**
-	 * Getter returning only the items that are currently visible (plus
-	 * overscan), each augmented with positional style information.
+	 * Getter returning only the items that are currently visible (plus overscan), each augmented with
+	 * positional style information.
 	 */
 	list: () => VirtualItem<T>[];
 	/**
-	 * Props to spread onto the scrollable outer container element.
-	 * Contains an inline `style` that sets the container height.
+	 * Props to spread onto the scrollable outer container element. Contains an inline `style` that
+	 * sets the container height.
 	 */
 	containerProps: {
 		style: string;
 		onscroll: (event: Event) => void;
 	};
 	/**
-	 * Props to spread onto the inner wrapper element.
-	 * Contains an inline `style` that sets the total list height so the
-	 * scrollbar reflects the full dataset.
+	 * Props to spread onto the inner wrapper element. Contains an inline `style` that sets the total
+	 * list height so the scrollbar reflects the full dataset.
 	 */
 	wrapperProps: {
 		style: string;
 	};
 	/**
-	 * Bind the scrollable container element to this ref so the hook can
-	 * measure its height immediately via `ResizeObserver`, enabling correct
-	 * rendering before the first scroll event fires.
-	 *
-	 * @example
-	 * ```svelte
-	 * <div bind:this={containerRef} ...>
-	 * ```
+	 * Bind the scrollable container to this ref so the hook can measure its height via
+	 * `ResizeObserver`, giving correct rendering before the first scroll event.
 	 */
 	containerRef: (el: HTMLElement | null) => void;
 }
 
 /**
- * High-performance virtual list for Svelte 5.
- *
- * Calculates which items from `list()` are currently visible based on the
- * scroll position of the container, rendering only those items plus an
- * optional overscan buffer. Items are absolutely positioned inside a wrapper
- * whose height equals `list().length * itemHeight` so that the scrollbar
- * behaves as though all items were rendered.
- *
- * No DOM mutations are performed – all calculations are purely reactive.
- * Safe to call during SSR (the initial `scrollTop` is `0`).
- *
- * @param list - Reactive getter returning the full array of items.
- * @param options - `itemHeight` (required) and optional `overscan` count.
- * @returns An object containing `list`, `containerProps`, `wrapperProps`, and `containerRef`.
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useVirtualList } from '$lib/virtual/useVirtualList.svelte.js';
- *
- *   const items = Array.from({ length: 10_000 }, (_, i) => ({ id: i, label: `Item ${i}` }));
- *   const { list, containerProps, wrapperProps, containerRef } = useVirtualList(() => items, { itemHeight: 40 });
- * </script>
- *
- * <div bind:this={containerRef} style={containerProps.style} onscroll={containerProps.onscroll}>
- *   <div style={wrapperProps.style}>
- *     {#each list() as row (row.index)}
- *       <div style={row.style}>{row.data.label}</div>
- *     {/each}
- *   </div>
- * </div>
- * ```
+ * Renders only the items currently visible in a scrollable container. Handles lists of any size
+ * with a fixed row height, dramatically reducing DOM nodes.
  */
 export function useVirtualList<T>(
 	list: () => T[],

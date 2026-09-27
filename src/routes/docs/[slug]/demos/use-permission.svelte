@@ -4,6 +4,7 @@
 	const mic = usePermission('microphone');
 	const geo = usePermission('geolocation');
 </script>
+
 <div class="demo-wrap">
 	<div class="row">
 		<span class="label">camera</span>

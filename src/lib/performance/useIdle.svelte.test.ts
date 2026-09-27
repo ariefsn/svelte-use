@@ -147,7 +147,8 @@ describe('useIdle', () => {
 		cleanup();
 		flushSync();
 
-		// Should not throw
-		vi.advanceTimersByTime(1000);
+		// `requireAssertions` is on, so the "does not throw" has to be asserted
+		// explicitly rather than implied by the absence of a throw.
+		expect(() => vi.advanceTimersByTime(1000)).not.toThrow();
 	});
 });

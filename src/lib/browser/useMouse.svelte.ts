@@ -3,10 +3,7 @@ export type MouseSourceType = 'mouse' | 'touch' | null;
 
 /** Options for `useMouse`. */
 export interface UseMouseOptions {
-	/**
-	 * Whether to track `touchmove` events in addition to `mousemove`.
-	 * @default true
-	 */
+	/** Whether to track `touchmove` events in addition to `mousemove`. Default `true`. */
 	touch?: boolean;
 }
 
@@ -17,40 +14,13 @@ export interface UseMouseReturn {
 	/** Reactive getter for the current pointer Y coordinate (in pixels, relative to viewport). */
 	y: () => number;
 	/**
-	 * Reactive getter for the event source type of the last position update.
-	 * `null` before any movement is detected.
+	 * Reactive getter for the event source type of the last position update. `null` before any
+	 * movement is detected.
 	 */
 	sourceType: () => MouseSourceType;
 }
 
-/**
- * Reactive pointer-position tracker.
- *
- * Tracks the current mouse (and optionally touch) position relative to the
- * viewport. All state is exposed via getter functions backed by Svelte 5
- * `$state` runes. Listeners are registered inside a `$effect` and cleaned up
- * automatically when the reactive scope is destroyed.
- *
- * SSR safe — no listeners are registered outside the browser.
- *
- * @param options - Optional configuration
- * @returns Object with reactive getters `x`, `y`, and `sourceType`
- *
- * @example
- * ```ts
- * const mouse = useMouse();
- *
- * $effect(() => {
- *   console.info(`Pointer at (${mouse.x()}, ${mouse.y()}) via ${mouse.sourceType()}`);
- * });
- * ```
- *
- * @example
- * ```ts
- * // Disable touch tracking
- * const mouse = useMouse({ touch: false });
- * ```
- */
+/** Tracks the current pointer position (mouse or touch) relative to the viewport. */
 export function useMouse(options: UseMouseOptions = {}): UseMouseReturn {
 	const trackTouch = options.touch ?? true;
 

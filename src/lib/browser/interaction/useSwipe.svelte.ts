@@ -30,21 +30,7 @@ export interface UseSwipeReturn {
 	reset: () => void;
 }
 
-/**
- * Detects touch swipe gestures on an element.
- *
- * @param target - A getter returning the target element
- * @param options - Configuration for threshold, callbacks
- * @returns Object with `isSwiping`, `direction`, `coordsStart`, `coordsEnd`, `lengthX`, `lengthY`, `reset`
- *
- * @example
- * ```ts
- * let el: HTMLElement;
- * const { direction, isSwiping } = useSwipe(() => el, {
- *   onEnd: (e, dir) => console.log('swiped', dir)
- * });
- * ```
- */
+/** Detects touch swipe gestures on an element. */
 export function useSwipe(
 	target: () => HTMLElement | null | undefined,
 	options: UseSwipeOptions = {}

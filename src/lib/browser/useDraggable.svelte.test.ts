@@ -3,13 +3,11 @@ import { describe, expect, test, vi } from 'vitest';
 import { useDraggable } from './useDraggable.svelte.js';
 import type { UseDraggableOptions } from './useDraggable.svelte.js';
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 /**
- * Creates a bare `HTMLElement` with a minimal `setPointerCapture` stub
- * (jsdom does not implement it).
+ * Creates a bare `HTMLElement` with a minimal `setPointerCapture` stub (jsdom does not implement
+ * it).
  */
 function makeEl(): HTMLElement {
 	const el = document.createElement('div');
@@ -88,9 +86,7 @@ function setupDraggable(opts: UseDraggableOptions = {}) {
 	return { el, drag, cleanup };
 }
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('useDraggable', () => {
 	describe('initial state', () => {

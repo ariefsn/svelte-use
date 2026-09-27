@@ -5,7 +5,7 @@ import { usePrevious } from './usePrevious.svelte.js';
 describe('usePrevious', () => {
 	test('returns undefined before any change', () => {
 		const cleanup = $effect.root(() => {
-			let count = $state(0);
+			const count = $state(0);
 			const prev = usePrevious(() => count);
 
 			// Effect has not run yet — previous is undefined
@@ -16,7 +16,7 @@ describe('usePrevious', () => {
 
 	test('returns undefined after first effect run (initial value not a "change")', () => {
 		const cleanup = $effect.root(() => {
-			let count = $state(0);
+			const count = $state(0);
 			const prev = usePrevious(() => count);
 
 			flushSync(); // effect runs for the first time with value 0
