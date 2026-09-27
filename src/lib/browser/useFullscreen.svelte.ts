@@ -161,7 +161,17 @@ export function useFullscreen(
 	if (exitOnDestroy) {
 		// Dependency-free: a re-run would exit the fullscreen it just entered.
 		$effect(() => () => {
-			if (fullscreenElement() === resolveTarget()) void exit();
+			if (fullscreenElement() !== resolveTarget()) return;
+
+			/*
+			 * Swallowed deliberately, and only here. Teardown often runs while
+			 * the document is being torn down too, and `exitFullscreen()` then
+			 * rejects with "Document not active" — an unhandled rejection that
+			 * fails a test run even though every assertion passed. There is
+			 * also nobody left to report it to at this point. Callers who
+			 * invoke `exit()` themselves still get the rejection.
+			 */
+			exit().catch(() => {});
 		});
 	}
 
