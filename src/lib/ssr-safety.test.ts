@@ -14,7 +14,11 @@ const constructors: Record<string, () => unknown> = {
 	useBase64: () => lib.useBase64(() => ''),
 	useBattery: () => lib.useBattery(),
 	useBrowserLocation: () => lib.useBrowserLocation(),
-	useClickOutside: () => lib.useClickOutside(() => null, () => {}),
+	useClickOutside: () =>
+		lib.useClickOutside(
+			() => null,
+			() => {}
+		),
 	useClipboard: () => lib.useClipboard(),
 	useColorMode: () => lib.useColorMode(),
 	useCssVar: () => lib.useCssVar('--probe'),
@@ -30,7 +34,11 @@ const constructors: Record<string, () => unknown> = {
 	useFullscreen: () => lib.useFullscreen(),
 	useIdle: () => lib.useIdle(),
 	useIndexedDB: () => lib.useIndexedDB('ssr-probe', 'notes'),
-	useInfiniteScroll: () => lib.useInfiniteScroll(() => null, () => {}),
+	useInfiniteScroll: () =>
+		lib.useInfiniteScroll(
+			() => null,
+			() => {}
+		),
 	useKeyModifier: () => lib.useKeyModifier('ctrl'),
 	useMagicKeys: () => lib.useMagicKeys(),
 	useMouse: () => lib.useMouse(),
