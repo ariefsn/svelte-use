@@ -111,6 +111,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `useWakeLock`, `useSpeechRecognition` and `useWebNotification` did not release their resource when the owning scope was destroyed. Each registered a teardown that read reactive state, which from that context returns a stale value, so the cleanup silently did nothing: the screen stayed awake, the microphone stayed active, and the notification was never closed. Calling `close()` and then unmounting also closed the notification twice. All three now read a plain non-reactive mirror in the teardown
+- `useFullscreen` could reject with "Document not active" while exiting on destroy, when teardown ran against a document already being torn down — an unhandled rejection that failed test runs even when every assertion passed. Callers who invoke `exit()` themselves still receive the rejection
 - Open Graph tags on the documentation site pointed at `http://sveltekit-prerender`, a placeholder SvelteKit substitutes for the origin during prerendering. Every page was affected; `SeoData.baseUrl` and a configured prerender origin resolve it
 - The documentation site's `og:image` was an SVG, which Facebook, X, LinkedIn and WhatsApp do not render, so shared links previewed without an image. It is now a PNG
 - `app.html` carried a static `<title>` that preceded the rendered one. Browsers and crawlers use the first title in a document, so every templated page title was being ignored
