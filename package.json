@@ -3,6 +3,14 @@
 	"version": "1.2.0",
 	"description": "Collection of reactive utility composables for Svelte 5 inspired by VueUse.",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ariefsn/svelte-use.git"
+	},
+	"homepage": "https://svelte-use.ariefsn.dev",
+	"bugs": {
+		"url": "https://github.com/ariefsn/svelte-use/issues"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",
