@@ -26,9 +26,6 @@ describe('useSpeechRecognition', () => {
 		mockInstance = makeMockRecognition();
 
 		// vi.fn() with an arrow function cannot be used as a constructor (no `new`).
-		// A constructor that explicitly returns an object causes `new` to return
-		// that object, so all property mutations (onresult, onend, etc.) happen
-		// on the shared mockInstance and remain observable in tests.
 		const instance = mockInstance;
 		function MockClass() {
 			return instance;

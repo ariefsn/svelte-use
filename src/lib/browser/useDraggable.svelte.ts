@@ -23,14 +23,13 @@ export interface DraggableBounds {
 }
 
 /**
- * Lifecycle callbacks fired during a drag interaction.
- * All callbacks receive the current pointer position and the originating
- * `PointerEvent`.
+ * Lifecycle callbacks fired during a drag interaction. All callbacks receive the current pointer
+ * position and the originating `PointerEvent`.
  */
 export interface DraggableCallbacks {
 	/**
-	 * Called when a drag gesture starts (on `pointerdown` on the handle).
-	 * Return `false` to cancel the drag before it begins.
+	 * Called when a drag gesture starts (on `pointerdown` on the handle). Return `false` to cancel
+	 * the drag before it begins.
 	 */
 	onStart?: (position: DraggablePosition, event: PointerEvent) => void | false;
 	/** Called on every `pointermove` while dragging. */
@@ -41,76 +40,46 @@ export interface DraggableCallbacks {
 
 /** Options for `useDraggable`. */
 export interface UseDraggableOptions {
-	/**
-	 * Starting position of the draggable element.
-	 * @default { x: 0, y: 0 }
-	 */
+	/** Starting position of the draggable element. Default `{ x: 0, y: 0 }`. */
 	initialValue?: DraggablePosition;
 
-	/**
-	 * Axis along which dragging is allowed.
-	 * @default 'both'
-	 */
+	/** Axis along which dragging is allowed. Default `'both'`. */
 	axis?: DraggableAxis;
 
 	/**
-	 * When `true`, position tracks the pointer coordinate directly instead of
-	 * computing a delta from the grab point.
-	 * @default false
+	 * When `true`, position tracks the pointer coordinate directly instead of computing a delta from
+	 * the grab point. Default `false`.
 	 */
 	exact?: boolean;
 
-	/**
-	 * Call `event.preventDefault()` on pointer events during drag.
-	 * @default false
-	 */
+	/** Call `event.preventDefault()` on pointer events during drag. Default `false`. */
 	preventDefault?: boolean;
 
-	/**
-	 * Call `event.stopPropagation()` on pointer events during drag.
-	 * @default false
-	 */
+	/** Call `event.stopPropagation()` on pointer events during drag. Default `false`. */
 	stopPropagation?: boolean;
 
-	/**
-	 * Use the capture phase for pointer event listeners.
-	 * @default false
-	 */
+	/** Use the capture phase for pointer event listeners. Default `false`. */
 	capture?: boolean;
 
-	/**
-	 * When `true`, dragging is disabled entirely.
-	 * @default false
-	 */
+	/** When `true`, dragging is disabled entirely. Default `false`. */
 	disabled?: boolean;
 
 	/**
-	 * Restrict which mouse button initiates a drag.
-	 * Maps to `PointerEvent.button`: `0` = primary, `1` = middle, `2` = secondary.
-	 * `undefined` allows any button.
-	 * @default 0
+	 * Restrict which mouse button initiates a drag. Maps to `PointerEvent.button`: `0` = primary, `1`
+	 * = middle, `2` = secondary. `undefined` allows any button. Default `0`.
 	 */
 	button?: number;
 
-	/**
-	 * Restrict dragging to specific pointer types.
-	 * `undefined` / empty allows all pointer types.
-	 */
+	/** Restrict dragging to specific pointer types. `undefined` / empty allows all pointer types. */
 	pointerTypes?: DraggablePointerType[];
 
 	/**
-	 * Optional drag handle — the element that receives the initial
-	 * `pointerdown`. Defaults to `target` when not provided.
-	 * Accepts a reactive getter so it can be swapped at runtime.
+	 * Optional drag handle — the element that receives the initial `pointerdown`. Defaults to
+	 * `target` when not provided. Accepts a reactive getter so it can be swapped at runtime.
 	 */
 	handle?: HTMLElement | (() => HTMLElement | null | undefined) | null;
 
-	/**
-	 * Container bounds for clamping the position.
-	 * Accepts a static `DraggableBounds` object, an `HTMLElement` whose
-	 * bounding client rect is used as the clamp region, or a getter that
-	 * returns either.
-	 */
+	/** Container bounds for clamping the position. */
 	containerBounds?:
 		| DraggableBounds
 		| HTMLElement
@@ -118,17 +87,16 @@ export interface UseDraggableOptions {
 		| null;
 
 	/**
-	 * An alternative element that is visually moved during dragging.
-	 * Does not affect position state; `style()` will still reflect the
-	 * computed `x`/`y`. Accepts a getter for reactivity.
+	 * An alternative element that is visually moved during dragging. Does not affect position state;
+	 * `style()` will still reflect the computed `x`/`y`. Accepts a getter for reactivity.
 	 */
 	draggingElement?: HTMLElement | (() => HTMLElement | null | undefined) | null;
 
 	/** Lifecycle callbacks. */
 	onStart?: DraggableCallbacks['onStart'];
-	/** @see DraggableCallbacks.onMove */
+	/** Called on each move. See `DraggableCallbacks.onMove`. */
 	onMove?: DraggableCallbacks['onMove'];
-	/** @see DraggableCallbacks.onEnd */
+	/** Called when the drag ends. See `DraggableCallbacks.onEnd`. */
 	onEnd?: DraggableCallbacks['onEnd'];
 }
 
@@ -141,17 +109,13 @@ export interface UseDraggableReturn {
 	/** Reactive getter; `true` while a drag gesture is in progress. */
 	isDragging: () => boolean;
 	/**
-	 * Reactive getter that returns a CSS `transform` string suitable for use
-	 * as an inline style value.
-	 *
-	 * @example `"transform: translate(120px, 80px);"`
+	 * Reactive getter that returns a CSS `transform` string suitable for use as an inline style
+	 * value.
 	 */
 	style: () => string;
 }
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function resolveElement(
 	ref: HTMLElement | (() => HTMLElement | null | undefined) | null | undefined
@@ -176,12 +140,8 @@ function resolveBounds(
 	if (!resolved) return null;
 
 	if (resolved instanceof HTMLElement) {
-		// The drag position (x, y) lives in the same local offset-space as the
-		// element's CSS transform, NOT in viewport/client space.  Using
-		// getBoundingClientRect() here would yield viewport-absolute numbers that
-		// would be wildly off.  Instead we compute bounds from the container's
-		// own dimensions so that x ∈ [0, containerWidth - elWidth] and
-		// y ∈ [0, containerHeight - elHeight].
+		// Bounds come from the container's own offset dimensions, not from
+		// getBoundingClientRect(): (x, y) is offset-space, not viewport space.
 		const elWidth = draggableEl ? draggableEl.offsetWidth : 0;
 		const elHeight = draggableEl ? draggableEl.offsetHeight : 0;
 		return {
@@ -201,48 +161,11 @@ function clamp(value: number, min: number | undefined, max: number | undefined):
 	return value;
 }
 
-// ---------------------------------------------------------------------------
 // Implementation
-// ---------------------------------------------------------------------------
 
 /**
- * Full-featured reactive drag utility built on the Pointer Events API.
- *
- * Tracks an element's drag position and exposes it via reactive getter
- * functions backed by Svelte 5 `$state` runes. All DOM interaction is
- * handled inside `$effect`, ensuring proper cleanup when the reactive scope
- * is destroyed.
- *
- * Features:
- * - Axis constraint (`'both'`, `'x'`, `'y'`)
- * - Exact mode — position tracks pointer directly instead of using a delta
- * - `preventDefault` / `stopPropagation` control
- * - Capture-phase listeners
- * - Disabled flag
- * - Button filter (primary, middle, secondary)
- * - Pointer-type filter (`'mouse'`, `'touch'`, `'pen'`)
- * - Separate handle element
- * - Container bounds clamping (static object or `HTMLElement`)
- * - Custom dragging element
- * - Lifecycle callbacks (`onStart`, `onMove`, `onEnd`)
- *
- * SSR safe — no DOM APIs are called outside the browser.
- *
- * @param target - The element to make draggable (or a reactive getter for it)
- * @param options - Optional configuration
- * @returns Reactive getters `x`, `y`, `isDragging`, and `style`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useDraggable } from '$lib/browser/useDraggable.svelte.js';
- *
- *   let el = $state<HTMLDivElement | null>(null);
- *   const drag = useDraggable(() => el, { axis: 'x' });
- * </script>
- *
- * <div bind:this={el} style={drag.style()}>Drag me</div>
- * ```
+ * Makes any element draggable with full control over axis constraints, bounds, pointer types,
+ * handles, and callbacks.
  */
 export function useDraggable(
 	target: HTMLElement | (() => HTMLElement | null | undefined) | null,
@@ -276,9 +199,7 @@ export function useDraggable(
 
 	const style = $derived(`transform: translate(${x}px, ${y}px);`);
 
-	// ------------------------------------------------------------------
 	// Event handlers (defined outside $effect so they are stable refs)
-	// ------------------------------------------------------------------
 
 	function applyEventOptions(event: PointerEvent): void {
 		if (preventDefault) event.preventDefault();
@@ -363,9 +284,7 @@ export function useDraggable(
 		onEnd?.({ x, y }, event);
 	}
 
-	// ------------------------------------------------------------------
 	// Register / cleanup listeners
-	// ------------------------------------------------------------------
 
 	$effect(() => {
 		if (typeof window === 'undefined') return;

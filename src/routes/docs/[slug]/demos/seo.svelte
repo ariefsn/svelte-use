@@ -3,12 +3,6 @@
 
 	/*
 	 * Deliberately does NOT render <Seo />.
-	 *
-	 * The root layout already renders one for this page. A second instance
-	 * would append another <title> and another <meta name="description"> to
-	 * the same head — the exact duplication this component's docs warn about,
-	 * on the very page documenting it. So the markup it *would* produce is
-	 * shown as text instead.
 	 */
 	let title = $state('Seo');
 	let description = $state('Renders SEO metadata into svelte:head.');

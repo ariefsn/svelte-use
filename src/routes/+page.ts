@@ -1,13 +1,7 @@
 import type { SeoData } from '$lib';
 import { sidebar } from '../docs/sidebar.js';
 
-/**
- * Homepage metadata.
- *
- * It lives in a `load` rather than a `<svelte:head>` block because the single
- * `<Seo />` in `+layout.svelte` is the one render site — a second head block
- * here would emit duplicate meta tags, and crawlers take the first.
- */
+/** Homepage metadata. */
 export const load = () => {
 	const allItems = sidebar.flatMap((group) => group.items);
 	// Matches the split in +page.svelte: `Seo` is a component, not a composable.

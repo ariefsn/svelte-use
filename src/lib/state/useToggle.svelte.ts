@@ -1,15 +1,6 @@
 /**
- * Reactive boolean toggle utility.
- *
- * @param initial - Initial boolean value (default: `false`)
- * @returns Object with reactive `value`, `toggle`, and `set` functions
- *
- * @example
- * ```ts
- * const { value, toggle, set } = useToggle();
- * toggle(); // value → true
- * set(false); // value → false
- * ```
+ * A reactive boolean toggle. Flips between `true` and `false` with a `toggle()` call, or force a
+ * specific value with `set()`.
  */
 export function useToggle(initial = false) {
 	let value = $state(initial);

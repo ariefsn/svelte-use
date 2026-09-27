@@ -3,9 +3,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { useSpeechSynthesis } from './useSpeechSynthesis.svelte.js';
 
 /**
- * Headless Chromium ships no voices and speaks nothing, so the API is stubbed.
- * `useSupported` evaluates its probe immediately, so stubs go in before the
- * composable is constructed.
+ * Headless Chromium ships no voices and speaks nothing, so the API is stubbed. `useSupported`
+ * evaluates its probe immediately, so stubs go in before the composable is constructed.
  */
 
 class FakeUtterance extends EventTarget {

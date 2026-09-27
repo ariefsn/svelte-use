@@ -2,12 +2,7 @@ import { flushSync } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { useEventSource } from './useEventSource.svelte.js';
 
-/**
- * There is no SSE server in the test environment, so `EventSource` is stubbed.
- * The composable resolves the global at call time rather than capturing it at
- * module scope, which is what makes `vi.stubGlobal` work here — but the stub
- * must still be installed before the composable is constructed.
- */
+/** There is no SSE server in the test environment, so `EventSource` is stubbed. */
 
 let instances: FakeEventSource[] = [];
 

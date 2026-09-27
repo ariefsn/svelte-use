@@ -3,10 +3,8 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useDisplayMedia } from './useDisplayMedia.svelte.js';
 
 /**
- * Screen capture cannot be exercised for real in headless Chromium — it needs
- * a picker and a user gesture — so `getDisplayMedia` is stubbed. The stub must
- * be installed before the composable is constructed, because `useSupported`
- * evaluates its probe immediately.
+ * Screen capture cannot be exercised for real in headless Chromium — it needs a picker and a user
+ * gesture — so `getDisplayMedia` is stubbed.
  */
 
 class FakeTrack extends EventTarget {

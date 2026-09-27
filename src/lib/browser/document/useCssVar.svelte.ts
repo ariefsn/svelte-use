@@ -2,18 +2,11 @@ import { toGetter, type MaybeGetter } from '../../internal/toGetter.js';
 
 /** Options for `useCssVar`. */
 export interface UseCssVarOptions {
-	/**
-	 * Value reported when the property is unset, unreadable, or during SSR.
-	 * @default ''
-	 */
+	/** Value reported when the property is unset, unreadable, or during SSR. Default `''`. */
 	initialValue?: string;
 	/**
-	 * Re-read the computed value when the target's `style` or `class`
-	 * attribute changes.
-	 *
-	 * Off by default because each change costs a style recalculation. Even on,
-	 * it is a heuristic — see the reactivity note on the docs page.
-	 * @default false
+	 * Re-read the computed value when the target's `style` or `class` attribute changes. Default
+	 * `false`.
 	 */
 	observe?: boolean;
 }
@@ -31,40 +24,8 @@ export interface UseCssVarReturn {
 }
 
 /**
- * Reads and writes a CSS custom property.
- *
- * Writes are authoritative and free: `set()` updates the element and the
- * reactive value in the same synchronous call, so anything changed through
- * this composable is instantly reactive.
- *
- * Reads are the compromise. Custom properties have no change event and
- * `getComputedStyle` forces a style recalculation, so this reads once at
- * initialisation and then only when asked. `observe: true` adds a
- * `MutationObserver` on `style` and `class`, which catches the common case —
- * a theme class flipping on `<html>` — but not a swapped stylesheet, a CSSOM
- * write, or an ancestor changing. `refresh()` covers the rest.
- *
- * The name must include the leading `--`. Standard properties are not
- * supported: `getPropertyValue('color')` returns a resolved colour rather than
- * failing, which would make a typo look like it worked.
- *
- * @param name - Custom property name including `--`, or a getter
- * @param target - Getter for the element. Defaults to `document.documentElement`
- * @param options - Initial value and observation behaviour
- * @returns Object with `current`, `set`, `remove` and `refresh`
- *
- * @example
- * ```ts
- * const accent = useCssVar('--accent');
- * accent.set('tomato');
- * accent.current(); // → 'tomato'
- * ```
- *
- * @example
- * ```ts
- * // Pick up a theme class flipping on <html>
- * const surface = useCssVar('--color-surface', undefined, { observe: true });
- * ```
+ * Reads and writes a CSS custom property. Writes are instant; reads are deliberately not fully
+ * reactive, because custom properties have no change event.
  */
 export function useCssVar(
 	name: MaybeGetter<string>,

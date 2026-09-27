@@ -51,17 +51,15 @@
 	];
 
 	/*
-	 * 112px clears the mobile stack: the 53px fixed top bar plus the sticky
-	 * "On this page" disclosure docked beneath it, which ends at 102px.
-	 * Measured, not guessed — an anchor landing behind the TOC is invisible.
+	 * 112px clears the mobile stack: the 53px fixed top bar plus the sticky "On this page" disclosure
+	 * docked beneath it, which ends at 102px.
 	 */
 	const sectionClass = 'mb-14 scroll-mt-24 max-md:scroll-mt-[112px]';
 
 	const allItems = sidebar.flatMap((group) => group.items);
 	/*
-	 * The `use` prefix is the marker that separates a composable from a
-	 * component — `Seo` is the only one of the latter today. Deriving it keeps
-	 * the claim honest as more of either ship.
+	 * The `use` prefix is the marker that separates a composable from a component — `Seo` is the only
+	 * one of the latter today. Deriving it keeps the claim honest as more of either ship.
 	 */
 	const composableCount = allItems.filter((item) => item.label.startsWith('use')).length;
 	const componentCount = allItems.length - composableCount;
@@ -80,10 +78,8 @@
 </script>
 
 <!--
-	Wider than a docs page's row on purpose: this page is grids, not prose, so
-	it has no reading measure to protect — the individual prose sections cap
-	themselves at 860px instead. Letting the row reach 1400 keeps the utilities
-	grid at four columns on a wide screen once the rail has taken its 208px.
+	Wider than a docs page's row on purpose: this page is grids, not prose, so it has no reading
+	measure to protect — the individual prose sections cap themselves at 860px instead.
 -->
 <div class="mx-auto flex w-full flex-col gap-8 xl:max-w-[1400px] xl:flex-row">
 	<TableOfContents entries={tocEntries} />
@@ -133,10 +129,9 @@
 			</div>
 
 			<!--
-			The gradient needs `text-transparent` plus a background clip, which has
-			no single utility — `bg-clip-text` provides the clip and the gradient
-			utilities supply the rest.
-		-->
+				The gradient needs `text-transparent` plus a background clip, which has no single utility
+				— `bg-clip-text` provides the clip and the gradient utilities supply the rest.
+			-->
 			<h1
 				class="from-text to-accent m-0 mb-3 bg-gradient-to-br bg-clip-text text-[clamp(2rem,6vw,3rem)] font-extrabold tracking-[-0.04em] text-transparent"
 			>
@@ -240,12 +235,9 @@ timer.count()    // → 60, 59, 58 …`}</code
 				>
 			</h2>
 			<!--
-			Multi-column, not grid: the 19 group cards run from 1 item to 18, so a
-			grid leaves a hole under every short card. `columns-[260px]` is also
-			inherently responsive — 1 column on a phone through 4 at full width —
-			with no breakpoints. Reading order becomes column-major, which for an
-			A–Z reference list is the conventional presentation.
-		-->
+				Multi-column, not grid: the 19 group cards run from 1 item to 18, so a grid leaves a hole
+				under every short card.
+			-->
 			<div class="columns-[260px] gap-4">
 				{#each sidebar as group (group.title)}
 					<div class="{card} mb-4 break-inside-avoid">
@@ -281,11 +273,9 @@ timer.count()    // → 60, 59, 58 …`}</code
 				class="border-border block rounded-[10px] border bg-white p-4 no-underline"
 			>
 				<!--
-				`bg-white` is deliberate, not a missed token: the chart is drawn with
-				dark strokes on a transparent ground, so on the dark theme it would be
-				very nearly invisible. Explicit width/height reserve the space, since
-				an external SVG has no intrinsic size until it loads.
-			-->
+					`bg-white` is deliberate, not a missed token: the chart is drawn with dark strokes on a
+					transparent ground, so on the dark theme it would be very nearly invisible.
+				-->
 				<img
 					src="https://star-history.dera.page/svg?repos=ariefsn/svelte-use"
 					alt="Star history chart for ariefsn/svelte-use"

@@ -1,31 +1,13 @@
 export type ClickOutsideEvent = 'click' | 'mousedown' | 'pointerdown';
 
 export interface UseClickOutsideOptions {
-	/** The DOM event type to listen for. @default 'pointerdown' */
+	/** The DOM event type to listen for. Default `'pointerdown'`. */
 	event?: ClickOutsideEvent;
 }
 
 /**
- * Calls `handler` whenever a pointer event fires outside of `target`.
- *
- * The listener is attached to `document` and compares the event target against
- * the element returned by `target`. Nothing happens when `target` returns a
- * nullish value, making the hook safe to use before the element is mounted and
- * in SSR environments.
- *
- * @param target - Reactive getter that returns the element to watch
- * @param handler - Callback invoked with the triggering event when a click outside occurs
- * @param options - Optional configuration
- * @param options.event - DOM event type to listen for (default: `'pointerdown'`)
- *
- * @example
- * ```ts
- * let el = $state<HTMLElement | null>(null);
- * useClickOutside(
- *   () => el,
- *   () => { open = false; }
- * );
- * ```
+ * Calls a handler whenever a pointer event fires outside of the target element. Useful for closing
+ * dropdowns, modals, and menus.
  */
 export function useClickOutside(
 	target: () => HTMLElement | null | undefined,

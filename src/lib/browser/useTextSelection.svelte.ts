@@ -9,18 +9,7 @@ export interface UseTextSelectionReturn {
 	selection: () => Selection | null;
 }
 
-/**
- * Reactively tracks the current text selection in the document.
- *
- * @returns Object with `text`, `rects`, `ranges`, and `selection` getters
- *
- * @example
- * ```ts
- * const { text, rects } = useTextSelection();
- * // text() → 'selected text'
- * // rects() → [DOMRect, ...]
- * ```
- */
+/** Reactively tracks the current text selection in the document. */
 export function useTextSelection(): UseTextSelectionReturn {
 	const isBrowser = typeof window !== 'undefined';
 

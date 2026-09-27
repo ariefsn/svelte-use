@@ -5,12 +5,7 @@ import { useSupported } from '../useSupported.svelte.js';
 
 /** Options for `useGamepad`. */
 export interface UseGamepadOptions {
-	/**
-	 * Cap the polling rate, in frames per second. Unlimited when omitted.
-	 *
-	 * Buttons and axes only change as fast as a human moves them, so a limit
-	 * around 30 is usually indistinguishable and halves the work.
-	 */
+	/** Cap the polling rate, in frames per second. Unlimited when omitted. */
 	fpsLimit?: number;
 }
 
@@ -31,40 +26,8 @@ export interface UseGamepadReturn {
 }
 
 /**
- * Connected gamepads, with button and axis state.
- *
- * The Gamepad API has no events for button or stick movement — the only way to
- * read them is to call `navigator.getGamepads()` every frame, so this runs a
- * `useRafFn` loop. That loop is **started only while a gamepad is connected**
- * and stopped again when the last one disconnects, so a page with no
- * controller attached does no per-frame work.
- *
- * `getGamepads()` returns fresh snapshot objects on each call rather than
- * live-updating ones, which is why the array is replaced wholesale every frame.
- *
- * Browsers also hide gamepads until the user has interacted with one, so an
- * empty list on load is normal — press a button to make it appear.
- *
- * SSR: `isSupported()` is `false` and the list is empty.
- *
- * @param options - Polling rate cap
- * @returns Gamepad state plus `pause` and `resume`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useGamepad } from '@ariefsn/svelte-use';
- *
- *   const pads = useGamepad({ fpsLimit: 30 });
- *   const first = $derived(pads.gamepads()[0]);
- * </script>
- *
- * {#if first}
- *   <p>{first.id} — A pressed: {first.buttons[0]?.pressed}</p>
- * {:else}
- *   <p>Press a button on a connected controller.</p>
- * {/if}
- * ```
+ * Connected gamepads, with button and axis state. The Gamepad API has no events for stick or button
+ * movement, so this polls each frame — but **only while a controller is connected**.
  */
 export function useGamepad(options: UseGamepadOptions = {}): UseGamepadReturn {
 	const { fpsLimit } = options;
@@ -86,13 +49,7 @@ export function useGamepad(options: UseGamepadOptions = {}): UseGamepadReturn {
 
 	const loop = useRafFn(poll, { immediate: false, fpsLimit });
 
-	/**
-	 * Polls only while something is connected, so an idle page costs nothing.
-	 *
-	 * Deliberately decides from the freshly read list rather than from
-	 * `gamepads`: this runs inside an `$effect`, and reading the same state it
-	 * writes would make the effect re-trigger itself forever.
-	 */
+	/** Polls only while something is connected, so an idle page costs nothing. */
 	function syncLoop(): void {
 		const pads = read();
 		gamepads = pads;
@@ -104,14 +61,8 @@ export function useGamepad(options: UseGamepadOptions = {}): UseGamepadReturn {
 	useEventListener(() => window, 'gamepaddisconnected', syncLoop);
 
 	$effect(() => {
-		// A gamepad the user already pressed before this mounted is visible
-		// immediately, without waiting for a connect event.
-		//
-		// `untrack` is load-bearing. `useRafFn.resume()` reads its own `active`
-		// state internally, so calling it inside a tracking pass would make
-		// this effect depend on it: a later `pause()` would re-run the effect,
-		// which would resume again, and the loop could never be stopped. The
-		// read-write cycle is invisible here — it lives inside the primitive.
+		// Picks up a gamepad pressed before mount. Untracked: `resume()` reads its own `active`
+		// state, so a tracked call would let a later `pause()` re-resume and never stop.
 		untrack(() => syncLoop());
 	});
 

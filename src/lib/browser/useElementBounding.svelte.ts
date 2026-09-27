@@ -1,19 +1,12 @@
 /** Options for `useElementBounding`. */
 export interface UseElementBoundingOptions {
-	/**
-	 * Reset every value to `0` when the target becomes `null`.
-	 * @default true
-	 */
+	/** Reset every value to `0` when the target becomes `null`. Default `true`. */
 	reset?: boolean;
-	/**
-	 * Recalculate on window `resize`.
-	 * @default true
-	 */
+	/** Recalculate on window `resize`. Default `true`. */
 	windowResize?: boolean;
 	/**
-	 * Recalculate on window `scroll`. The rect is viewport-relative, so
-	 * scrolling changes `top`/`bottom` even when the element has not moved.
-	 * @default true
+	 * Recalculate on window `scroll`. The rect is viewport-relative, so scrolling changes
+	 * `top`/`bottom` even when the element has not moved. Default `true`.
 	 */
 	windowScroll?: boolean;
 }
@@ -40,36 +33,7 @@ export interface UseElementBoundingReturn {
 	update: () => void;
 }
 
-/**
- * Reactive `getBoundingClientRect()` for an element.
- *
- * Where `useElementSize` reports only width and height via `ResizeObserver`,
- * this exposes the full viewport-relative box — position included — and
- * recalculates on resize, scroll, and DOM mutations that move the element.
- *
- * All values are in CSS pixels relative to the viewport, matching
- * `getBoundingClientRect()`. Add `window.scrollX`/`scrollY` for document
- * coordinates.
- *
- * SSR safe: every value is `0` until the effect runs in the browser.
- *
- * @param target - Reactive getter returning the element to measure, or `null`
- * @param options - Optional configuration
- * @returns Object with reactive getters for each rect edge, plus `update`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useElementBounding } from '@ariefsn/svelte-use';
- *
- *   let el = $state<HTMLDivElement | null>(null);
- *   const { top, left, width, height } = useElementBounding(() => el);
- * </script>
- *
- * <div bind:this={el}>measured</div>
- * <p>{width()} × {height()} at ({left()}, {top()})</p>
- * ```
- */
+/** Reactive `getBoundingClientRect()` for an element. */
 export function useElementBounding(
 	target: () => Element | null | undefined,
 	options: UseElementBoundingOptions = {}

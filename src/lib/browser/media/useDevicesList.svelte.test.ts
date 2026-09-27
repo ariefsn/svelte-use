@@ -2,11 +2,7 @@ import { flushSync, tick } from 'svelte';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useDevicesList } from './useDevicesList.svelte.js';
 
-/**
- * Headless Chromium reports no real capture hardware, so `enumerateDevices`
- * is stubbed. `useSupported` evaluates its probe immediately, so every stub is
- * installed before the composable is constructed.
- */
+/** Headless Chromium reports no real capture hardware, so `enumerateDevices` is stubbed. */
 
 function device(kind: MediaDeviceKind, label: string, deviceId = `${kind}:${label}`) {
 	return {

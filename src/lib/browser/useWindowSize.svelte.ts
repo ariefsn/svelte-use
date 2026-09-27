@@ -1,24 +1,10 @@
 /** Options for `useWindowSize`. */
 export interface UseWindowSizeOptions {
-	/**
-	 * Include the scrollbar in the reported width/height.
-	 *
-	 * `true` uses `window.innerWidth`/`innerHeight`, which count the
-	 * scrollbar. `false` uses `document.documentElement.clientWidth`/
-	 * `clientHeight`, which match what CSS media queries measure.
-	 *
-	 * @default true
-	 */
+	/** Include the scrollbar in the reported width/height. Default `true`. */
 	includeScrollbar?: boolean;
-	/**
-	 * Width reported before the first measurement, i.e. during SSR.
-	 * @default 0
-	 */
+	/** Width reported before the first measurement, i.e. during SSR. Default `0`. */
 	initialWidth?: number;
-	/**
-	 * Height reported before the first measurement, i.e. during SSR.
-	 * @default 0
-	 */
+	/** Height reported before the first measurement, i.e. during SSR. Default `0`. */
 	initialHeight?: number;
 }
 
@@ -31,28 +17,8 @@ export interface UseWindowSizeReturn {
 }
 
 /**
- * Reactive viewport dimensions.
- *
- * Tracks `resize` and `orientationchange`, so it stays correct when a mobile
- * device is rotated — which does not always fire `resize` on its own.
- *
- * SSR safe: returns `initialWidth`/`initialHeight` on the server and measures
- * for real once the effect runs in the browser.
- *
- * @param options - Optional configuration
- * @returns Object with reactive `width` and `height` getters
- *
- * @example
- * ```ts
- * const { width, height } = useWindowSize();
- * // width() → 1280
- * ```
- *
- * @example
- * ```ts
- * // Match what CSS media queries see, excluding the scrollbar
- * const { width } = useWindowSize({ includeScrollbar: false });
- * ```
+ * Reactive viewport dimensions. Tracks `resize` and `orientationchange`, so it stays correct when a
+ * mobile device is rotated — which does not always fire `resize` on its own.
  */
 export function useWindowSize(options: UseWindowSizeOptions = {}): UseWindowSizeReturn {
 	const { includeScrollbar = true, initialWidth = 0, initialHeight = 0 } = options;

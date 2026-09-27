@@ -1,27 +1,6 @@
 /**
- * Locks and unlocks the scroll of a target `HTMLElement` (defaults to
- * `document.body`) by toggling `overflow: hidden`.
- *
- * The element's previous `overflow` style is captured before locking and
- * restored when `unlock()` is called or the owning reactive scope is
- * destroyed, ensuring no style leaks.
- *
- * Safe to call in SSR — no DOM operations are performed outside the browser.
- *
- * @param target - Optional reactive getter returning the element to lock.
- *   Defaults to `document.body` when omitted or when the getter returns
- *   `null`/`undefined`.
- * @returns Object with `isLocked`, `lock`, and `unlock`
- *
- * @example
- * ```ts
- * const { isLocked, lock, unlock } = useScrollLock();
- *
- * // Lock when a modal opens
- * $effect(() => {
- *   if (modalOpen) lock(); else unlock();
- * });
- * ```
+ * Locks and unlocks scroll on a target element (defaults to `document.body`) by toggling `overflow:
+ * hidden`. The previous overflow value is captured before locking and restored on unlock.
  */
 export function useScrollLock(target?: () => HTMLElement | null | undefined): {
 	isLocked: () => boolean;

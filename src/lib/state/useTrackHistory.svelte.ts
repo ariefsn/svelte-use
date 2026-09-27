@@ -20,23 +20,7 @@ export interface UseTrackHistoryReturn<T> {
 	redo: () => void;
 }
 
-/**
- * Tracks changes to a reactive value and provides undo/redo functionality.
- *
- * @param getter - Reactive getter returning the value to track
- * @param setter - Function to update the tracked value
- * @returns Object with `canUndo`, `canRedo`, `undo`, `redo`, `history`, `redoHistory`
- *
- * @example
- * ```ts
- * let count = $state(0);
- * const tracker = useTrackHistory(() => count, (v) => count = v);
- * count = 1;
- * count = 2;
- * tracker.undo(); // count → 1
- * tracker.redo(); // count → 2
- * ```
- */
+/** Tracks changes to a reactive value and provides undo/redo functionality. */
 export function useTrackHistory<T>(
 	getter: () => T,
 	setter: (v: T) => void

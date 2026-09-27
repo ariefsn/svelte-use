@@ -1,20 +1,11 @@
 export interface UseUntilOptions {
 	/** Reject after this many milliseconds. Waits forever when omitted. */
 	timeout?: number;
-	/**
-	 * Resolve with the current value on timeout instead of rejecting
-	 * (default: `false`).
-	 */
+	/** Resolve with the current value on timeout instead of rejecting (default: `false`). */
 	resolveOnTimeout?: boolean;
 }
 
-/**
- * The element type `toContain` accepts for a given container type.
- *
- * Resolves to the array/Set element, the Map key, or `string` for strings.
- * For anything that cannot contain an item this is `never`, which makes
- * `toContain` a compile error rather than a call that silently never matches.
- */
+/** The element type `toContain` accepts for a given container type. */
 export type UseUntilItem<T> = T extends string
 	? string
 	: T extends ReadonlyArray<infer E>
@@ -38,13 +29,7 @@ export interface UseUntilChain<T> {
 	toBeDefined(options?: UseUntilOptions): Promise<T>;
 	/** Waits until the value is `NaN`. */
 	toBeNaN(options?: UseUntilOptions): Promise<T>;
-	/**
-	 * Waits until the value contains `item`.
-	 *
-	 * Works with arrays, strings, `Set`, and `Map` (by key). `item` is typed
-	 * as the container's element type, so a mismatched item — or calling this
-	 * on a value that cannot contain anything — is a compile error.
-	 */
+	/** Waits until the value contains `item`. */
 	toContain(item: UseUntilItem<T>, options?: UseUntilOptions): Promise<T>;
 	/** Waits until the value's `length` or `size` equals `length`. */
 	toHaveLength(length: number, options?: UseUntilOptions): Promise<T>;
@@ -58,12 +43,7 @@ export interface UseUntilChain<T> {
 	readonly not: UseUntilChain<T>;
 }
 
-/**
- * Runtime containment check across the common container shapes.
- *
- * Generic in both the container and the item so no top type is written here;
- * each branch is narrowed by the guard above it.
- */
+/** Runtime containment check across the common container shapes. */
 function contains<V, I>(value: V, item: I): boolean {
 	if (typeof value === 'string') return value.includes(String(item));
 	if (Array.isArray(value)) return value.includes(item);
@@ -73,11 +53,8 @@ function contains<V, I>(value: V, item: I): boolean {
 }
 
 /**
- * Length for arrays and strings, size for Set/Map, and `length` for anything
- * else that carries a numeric one (NodeList, FileList, arguments).
- *
- * Returns `undefined` when the value has no meaningful length, which never
- * equals the requested number.
+ * Length for arrays and strings, size for Set/Map, and `length` for anything else that carries a
+ * numeric one (NodeList, FileList, arguments).
  */
 function lengthOf<V>(value: V): number | undefined {
 	if (typeof value === 'string' || Array.isArray(value)) return value.length;
@@ -89,37 +66,7 @@ function lengthOf<V>(value: V): number | undefined {
 	return undefined;
 }
 
-/**
- * Waits for a reactive value to reach a condition, as a promise.
- *
- * Fills the gap left by `useWatch` / `useWhenever`, which are callback-based:
- * this lets you `await` a state change inside ordinary async code.
- *
- * The condition is checked immediately, so an already-satisfied value resolves
- * without waiting for a change. Watching stops as soon as the promise settles.
- *
- * Because it creates its own `$effect.root` internally, it can be called from
- * anywhere — including outside a component, such as in an event handler or a
- * plain async function.
- *
- * @param source - Getter returning the reactive value to watch
- * @returns A chainable object of condition matchers, each returning a promise
- *
- * @example
- * ```ts
- * const { isLoading, data } = useFetch(url);
- * await useUntil(isLoading).toBe(false);
- * console.log(data());
- * ```
- *
- * @example
- * ```ts
- * // Containment, length, negation and timeouts
- * await useUntil(items).toContain('ready');
- * await useUntil(items).toHaveLength(3);
- * await useUntil(status).not.toBe('pending', { timeout: 5000 });
- * ```
- */
+/** Waits for a reactive value to reach a condition, as a promise. */
 export function useUntil<T>(source: () => T): UseUntilChain<T> {
 	function watch(predicate: (value: T) => boolean, options: UseUntilOptions = {}): Promise<T> {
 		const { timeout, resolveOnTimeout = false } = options;
@@ -132,9 +79,8 @@ export function useUntil<T>(source: () => T): UseUntilChain<T> {
 				if (settled) return;
 				settled = true;
 				if (timer !== undefined) clearTimeout(timer);
-				// Deferred for two reasons: `stop` is still in its temporal
-				// dead zone when the predicate matches on the first run, and
-				// tearing a scope down from inside its own effect is unsafe.
+				// Deferred for two reasons: `stop` is still in its temporal dead zone when the predicate
+				// matches on the first run, and tearing a scope down from inside its own effect is unsafe.
 				queueMicrotask(() => stop());
 				run();
 			}

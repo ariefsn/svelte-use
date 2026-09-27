@@ -1,9 +1,4 @@
-/**
- * How a reveal ended.
- *
- * A discriminated union, so `if (isCanceled)` narrows `data` to the type that
- * branch actually carries.
- */
+/** How a reveal ended. */
 export type ConfirmDialogOutcome<TConfirm, TCancel> =
 	| { readonly isCanceled: false; readonly data: TConfirm }
 	| { readonly isCanceled: true; readonly data: TCancel };
@@ -33,52 +28,8 @@ export interface UseConfirmDialogReturn<TReveal, TConfirm, TCancel> {
 }
 
 /**
- * Turns a confirmation dialog into a single `await`.
- *
- * Logic only — you still write the markup. What it removes is the awkward
- * shape of imperative confirmation: instead of setting a flag, passing
- * callbacks down, and resuming work in one of them, the whole flow reads
- * top-to-bottom:
- *
- * ```ts
- * const { isCanceled } = await reveal();
- * if (isCanceled) return;
- * await deleteAccount();
- * ```
- *
- * Two cases that quietly hang a naive implementation are handled: unmounting
- * while the dialog is open resolves the promise as cancelled rather than
- * leaving the caller's `await` pending forever, and a second `reveal()` while
- * one is open cancels the first rather than orphaning it.
- *
- * Pure state with no DOM, so it renders on the server.
- *
- * @template TReveal - What `reveal()` carries, for rendering the prompt
- * @template TConfirm - What `confirm()` returns
- * @template TCancel - What `cancel()` returns
- * @param options - Lifecycle callbacks
- * @returns Dialog state plus `reveal`, `confirm` and `cancel`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useConfirmDialog } from '@ariefsn/svelte-use';
- *
- *   const dialog = useConfirmDialog<string>();
- *
- *   async function remove(name: string) {
- *     const { isCanceled } = await dialog.reveal(name);
- *     if (isCanceled) return;
- *     await deleteItem(name);
- *   }
- * </script>
- *
- * {#if dialog.isRevealed()}
- *   <p>Delete {dialog.revealData()}?</p>
- *   <button onclick={() => dialog.confirm()}>Delete</button>
- *   <button onclick={() => dialog.cancel()}>Keep</button>
- * {/if}
- * ```
+ * Turns a confirmation dialog into a single `await`. Logic only — you still write the markup; what
+ * it removes is the awkward shape of flags and callbacks.
  */
 export function useConfirmDialog<TReveal = void, TConfirm = void, TCancel = void>(
 	options: UseConfirmDialogOptions<TReveal, TConfirm, TCancel> = {}

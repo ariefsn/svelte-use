@@ -1,13 +1,4 @@
-/**
- * Loaded on demand by the `useScriptTag` documentation demo.
- *
- * Deliberately same-origin and dependency-free: a demo that reaches for a
- * third-party CDN shows an error rather than a feature whenever that CDN is
- * blocked, offline, or has moved the file.
- *
- * Defines exactly one global, so the demo can show that a script's globals
- * become available only once it has executed.
- */
+/** Loaded on demand by the `useScriptTag` documentation demo. */
 window.svelteUseDemoScript = {
 	loadedAt: Date.now(),
 

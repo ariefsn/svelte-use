@@ -2,9 +2,7 @@ import { flushSync } from 'svelte';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useFetch } from './useFetch.svelte.js';
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function mockFetchOnce(body: unknown, status = 200) {
 	vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
@@ -19,18 +17,14 @@ function mockFetchError(message: string) {
 	vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(new Error(message));
 }
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('useFetch', () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
 	});
 
-	// -------------------------------------------------------------------------
 	// Default behavior
-	// -------------------------------------------------------------------------
 
 	test('initial state: data null, error null, isFetching false', () => {
 		const cleanup = $effect.root(() => {
@@ -65,9 +59,7 @@ describe('useFetch', () => {
 		expect(fetchSpy).not.toHaveBeenCalled();
 	});
 
-	// -------------------------------------------------------------------------
 	// Success case
-	// -------------------------------------------------------------------------
 
 	test('fetches immediately and populates data on success', async () => {
 		mockFetchOnce({ id: 1, name: 'Alice' });
@@ -144,9 +136,7 @@ describe('useFetch', () => {
 		cleanup();
 	});
 
-	// -------------------------------------------------------------------------
 	// Error case
-	// -------------------------------------------------------------------------
 
 	test('sets error when fetch rejects', async () => {
 		mockFetchError('Network failure');
@@ -205,9 +195,7 @@ describe('useFetch', () => {
 		cleanup();
 	});
 
-	// -------------------------------------------------------------------------
 	// Reactive update case
-	// -------------------------------------------------------------------------
 
 	test('re-fetches when URL changes', async () => {
 		const fetchSpy = vi
@@ -287,9 +275,8 @@ describe('useFetch', () => {
 			});
 		});
 
-		// First call: error path is already set up by mockFetchError above
-		// but mockFetchError was called before the effect root, so let's
-		// use a fresh spy approach:
+		// First call: error path is already set up by mockFetchError above but mockFetchError was
+		// called before the effect root, so let's use a fresh spy approach:
 		await vi.waitFor(() => {
 			expect(capturedError).not.toBeNull();
 		});
@@ -308,9 +295,7 @@ describe('useFetch', () => {
 		cleanup();
 	});
 
-	// -------------------------------------------------------------------------
 	// Cleanup behavior
-	// -------------------------------------------------------------------------
 
 	test('aborts in-flight request on scope destroy', async () => {
 		let abortSignal: AbortSignal | undefined = undefined;
@@ -362,9 +347,7 @@ describe('useFetch', () => {
 		cleanup();
 	});
 
-	// -------------------------------------------------------------------------
 	// SSR safety
-	// -------------------------------------------------------------------------
 
 	test('does not throw when fetch is undefined (SSR)', () => {
 		const originalFetch = globalThis.fetch;

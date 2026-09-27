@@ -1,11 +1,6 @@
 import { useSupported } from '../browser/useSupported.svelte.js';
 
-/**
- * Lifecycle state of the most recent `run()`.
- *
- * `TERMINATED` is distinct from `ERROR`: the run was cancelled deliberately,
- * by `terminate()` or by a newer run superseding it, rather than failing.
- */
+/** Lifecycle state of the most recent `run()`. */
 export type WebWorkerStatus =
 	| 'PENDING'
 	| 'RUNNING'
@@ -14,23 +9,7 @@ export type WebWorkerStatus =
 	| 'TIMEOUT'
 	| 'TERMINATED';
 
-/**
- * Stands in for Svelte's internal namespace inside the worker.
- *
- * The Svelte compiler rewrites **every `await`** in a `.svelte` or
- * `.svelte.ts` module to `(await $.track_reactivity_loss(promise))()`, where
- * `$` is its client-internals import. That name does not exist in a worker, so
- * without this shim any async function written in a component file fails with
- * a bare `$ is not defined` — and only sometimes, since the instrumentation is
- * a development-mode warning aid.
- *
- * The real helper awaits the promise and returns a thunk yielding its value,
- * doing reactivity bookkeeping on the side. A worker has no effects to track,
- * so reproducing just the await-and-thunk behaviour is faithful.
- *
- * `$` is therefore a reserved name in the worker scope. Existing definitions
- * (from an `importScripts` dependency) are preserved rather than replaced.
- */
+/** Stands in for Svelte's internal namespace inside the worker. */
 const SVELTE_AWAIT_SHIM = `
 var $ = self.$ || {};
 if (!$.track_reactivity_loss) {
@@ -42,18 +21,9 @@ if (!$.for_await_track_reactivity_loss) {
 
 /** Options for `useWebWorkerFn`. */
 export interface UseWebWorkerFnOptions {
-	/**
-	 * Milliseconds before a run is abandoned and the worker terminated.
-	 * Omit for no limit.
-	 */
+	/** Milliseconds before a run is abandoned and the worker terminated. Omit for no limit. */
 	timeout?: number;
-	/**
-	 * Scripts to `importScripts()` inside the worker, as absolute URLs.
-	 *
-	 * This is the supported way to give the function code it does not carry
-	 * itself, since the function is serialised without its surrounding scope.
-	 * @default []
-	 */
+	/** Scripts to `importScripts()` inside the worker, as absolute URLs. Default `[]`. */
 	dependencies?: readonly string[];
 }
 
@@ -69,43 +39,7 @@ export interface UseWebWorkerFnReturn<TArgs extends readonly unknown[], TResult>
 	terminate: () => void;
 }
 
-/**
- * Runs a function on a Web Worker, off the main thread.
- *
- * **The function is serialised with `Function.prototype.toString()` and must
- * be entirely self-contained.** It runs in a fresh worker scope with no access
- * to imports, module-level constants, closures or anything else from the file
- * it was written in — referencing any of them throws inside the worker rather
- * than at the call site. Pass everything it needs as arguments, or load it
- * with `dependencies`.
- *
- * Arguments and the return value cross by structured clone, so they may be
- * objects, `Map`, `Set`, `Date` or typed arrays, but not functions, DOM nodes
- * or class instances with behaviour. TypeScript cannot check this; it fails at
- * runtime with a `DataCloneError`.
- *
- * Each `run()` uses a fresh worker, so no state leaks between runs, and
- * starting a run cancels any previous one.
- *
- * SSR: `isSupported()` is `false` and `run()` rejects.
- *
- * @template TArgs - The function's parameters
- * @template TResult - What it resolves to
- * @param fn - A self-contained function to run off-thread
- * @param options - Timeout and `importScripts` dependencies
- * @returns `run`, `status`, `terminate` and `isSupported`
- *
- * @example
- * ```ts
- * // Self-contained: everything it uses is either an argument or built in
- * const sorter = useWebWorkerFn((numbers: number[]) =>
- *   [...numbers].sort((a, b) => a - b)
- * );
- *
- * const sorted = await sorter.run([5, 1, 4]);
- * sorter.status(); // → 'SUCCESS'
- * ```
- */
+/** Runs a function on a Web Worker, off the main thread. */
 export function useWebWorkerFn<TArgs extends readonly unknown[], TResult>(
 	fn: (...args: TArgs) => TResult | Promise<TResult>,
 	options: UseWebWorkerFnOptions = {}
@@ -147,9 +81,7 @@ export function useWebWorkerFn<TArgs extends readonly unknown[], TResult>(
 		rejectPending = null;
 		cleanup();
 
-		// Only move the status when a run was actually cancelled. Terminating
-		// while idle should not report a cancellation that never happened —
-		// and leaving it on RUNNING would strand any UI gated on that.
+		// Only move the status when a run was actually cancelled.
 		if (reject) {
 			status = 'TERMINATED';
 			reject(new Error('The worker was terminated.'));

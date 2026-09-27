@@ -3,36 +3,18 @@ import { acquireHeadElement, type HeadElementHandle } from './internal/headEleme
 
 /** Options for `useStyleTag`. */
 export interface UseStyleTagOptions {
-	/**
-	 * Element id, and the dedupe key: two call sites sharing an id share one
-	 * `<style>` element. Omit for a private tag with a generated id — an
-	 * anonymous tag is never shared, so passing an explicit id is how a caller
-	 * opts into sharing.
-	 * @default a generated `svelte-use-style-<n>`
-	 */
+	/** Element id, and the dedupe key: two call sites sharing an id share one `<style>` element. */
 	id?: string;
-	/**
-	 * `media` attribute, e.g. `'print'`.
-	 * @default undefined
-	 */
+	/** `media` attribute, e.g. `'print'`. Default `undefined`. */
 	media?: string;
 	/**
-	 * Inject as soon as the composable initialises. When `false` nothing is
-	 * appended until `load()` is called.
-	 * @default true
+	 * Inject as soon as the composable initialises. When `false` nothing is appended until `load()`
+	 * is called. Default `true`.
 	 */
 	immediate?: boolean;
-	/**
-	 * Detach the tag once the last consumer's scope is destroyed. Scoped CSS
-	 * should not outlive its component, so this defaults on — the opposite of
-	 * `useScriptTag`, where re-running a script has side effects.
-	 * @default true
-	 */
+	/** Detach the tag once the last consumer's scope is destroyed. */
 	removeOnDestroy?: boolean;
-	/**
-	 * Container to append into.
-	 * @default () => document.head
-	 */
+	/** Container to append into. Default `() => document.head`. */
 	parent?: () => HTMLElement | null | undefined;
 }
 
@@ -45,8 +27,8 @@ export interface UseStyleTagReturn {
 	/** Whether the tag is currently in the document. */
 	isLoaded: () => boolean;
 	/**
-	 * Replaces the CSS text. Overwritten again if a reactive `css` source is
-	 * in use and later changes — the source wins.
+	 * Replaces the CSS text. Overwritten again if a reactive `css` source is in use and later changes
+	 * — the source wins.
 	 */
 	set: (css: string) => void;
 	/** Appends the tag if absent. Idempotent. */
@@ -58,37 +40,8 @@ export interface UseStyleTagReturn {
 let counter = 0;
 
 /**
- * Injects a `<style>` element and keeps its contents in sync.
- *
- * Reactive CSS is re-applied on change without recreating the element. Tags
- * are deduplicated by id, so two components passing the same id share one
- * element and it survives until both release it.
- *
- * SSR safe: nothing is appended and `isLoaded()` stays `false`, while `css()`
- * still reports the resolved text.
- *
- * @param css - CSS text, or a getter for reactive CSS
- * @param options - id, media, and lifecycle behaviour
- * @returns Object with `id`, reactive `css` / `isLoaded`, and `set` / `load` / `unload`
- *
- * @example
- * ```ts
- * const tag = useStyleTag('.highlight { color: tomato; }');
- * tag.isLoaded(); // → true in a browser
- * ```
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useStyleTag } from '@ariefsn/svelte-use';
- *
- *   let hue = $state(200);
- *   useStyleTag(() => `.themed { color: hsl(${hue} 80% 60%); }`);
- * </script>
- *
- * <input type="range" min="0" max="360" bind:value={hue} />
- * <p class="themed">Recoloured as you drag.</p>
- * ```
+ * Injects a `style` element and keeps its contents in sync. Tags are deduplicated by id, so two
+ * call sites sharing an id share one element and it survives until both release it.
  */
 export function useStyleTag(
 	css: MaybeGetter<string>,
@@ -105,14 +58,7 @@ export function useStyleTag(
 	const id = options.id ?? `svelte-use-style-${++counter}`;
 
 	let handle: HeadElementHandle<HTMLStyleElement, null> | null = null;
-	/**
-	 * The text actually applied.
-	 *
-	 * A *writable* `$derived`: `set()` can override it, and the next change to
-	 * a reactive `css` source overwrites that override again — which is the
-	 * documented precedence, and cheaper than mirroring the source through an
-	 * effect.
-	 */
+	/** The text actually applied. */
 	let applied = $derived(getCss());
 	let isLoaded = $state(false);
 

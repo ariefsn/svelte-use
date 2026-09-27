@@ -18,26 +18,20 @@ export type UrlSearchParamsRecord = Record<string, UrlSearchParamValue>;
 /** Options for `useUrlSearchParams`. */
 export interface UseUrlSearchParamsOptions {
 	/**
-	 * How writes reach the URL. `'replace'` overwrites the current history
-	 * entry, `'push'` adds one, and `false` keeps parameters in memory only.
-	 * @default 'replace'
+	 * How writes reach the URL. `'replace'` overwrites the current history entry, `'push'` adds one,
+	 * and `false` keeps parameters in memory only. Default `'replace'`.
 	 */
 	write?: 'replace' | 'push' | false;
 	/**
-	 * Milliseconds to coalesce rapid writes. With `write: 'push'` this controls
-	 * how many history entries a burst of changes produces.
-	 * @default 0
+	 * Milliseconds to coalesce rapid writes. With `write: 'push'` this controls how many history
+	 * entries a burst of changes produces. Default `0`.
 	 */
 	debounce?: number;
-	/**
-	 * Drop keys whose value is `''` or `[]` instead of emitting `?key=`.
-	 * @default true
-	 */
+	/** Drop keys whose value is `''` or `[]` instead of emitting `?key=`. Default `true`. */
 	removeEmptyValues?: boolean;
 	/**
-	 * Values applied at initialisation for keys the URL does not already
-	 * define. Never overrides what is in the URL.
-	 * @default {}
+	 * Values applied at initialisation for keys the URL does not already define. Never overrides what
+	 * is in the URL. Default `{}`.
 	 */
 	initial?: UrlSearchParamsRecord;
 }
@@ -45,8 +39,8 @@ export interface UseUrlSearchParamsOptions {
 /** Return value of `useUrlSearchParams`. */
 export interface UseUrlSearchParamsReturn {
 	/**
-	 * Snapshot of the current parameters. A fresh object each time it changes,
-	 * so mutating it does nothing — use `set` / `remove` / `replace`.
+	 * Snapshot of the current parameters. A fresh object each time it changes, so mutating it does
+	 * nothing — use `set` / `remove` / `replace`.
 	 */
 	params: () => UrlSearchParamsRecord;
 	/** One parameter, or `undefined` when absent. */
@@ -131,43 +125,8 @@ function composeUrl(query: string, mode: UrlSearchParamsMode): string {
 }
 
 /**
- * Reads and writes URL parameters reactively.
- *
- * Tracks `popstate` and `hashchange`, so back/forward navigation and external
- * URL edits flow back into `params()`. Writes go through `history.replaceState`
- * or `pushState`.
- *
- * There is deliberately **no effect that reads `params`**. An effect writing
- * the URL from the parameters would loop in the hash modes — changing the hash
- * fires `hashchange`, the listener reparses, the effect re-runs — so writes are
- * imperative, reads are event-driven, and a plain non-reactive record of the
- * last written string lets the listener recognise its own echo.
- *
- * SSR safe: parameters resolve to `initial` and no history call is made.
- *
- * @param mode - Where the parameters live in the URL
- * @param options - Write strategy, debouncing and initial values
- * @returns Object with reactive `params` / `query` getters and mutation functions
- *
- * @example
- * ```ts
- * const params = useUrlSearchParams();
- * params.set('page', '2');
- * params.get('page'); // → '2'
- * ```
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useUrlSearchParams } from '@ariefsn/svelte-use';
- *
- *   // Keep a search box in the URL, one history entry per pause in typing
- *   const params = useUrlSearchParams('history', { write: 'push', debounce: 400 });
- *   const query = $derived((params.get('q') as string) ?? '');
- * </script>
- *
- * <input value={query} oninput={(e) => params.set('q', e.currentTarget.value)} />
- * ```
+ * Reads and writes URL parameters reactively. Tracks `popstate` and `hashchange`, so back/forward
+ * navigation and external URL edits flow back into the parameters.
  */
 export function useUrlSearchParams(
 	mode: UrlSearchParamsMode = 'history',
@@ -184,9 +143,8 @@ export function useUrlSearchParams(
 	let params = $state<UrlSearchParamsRecord>(readFromUrl());
 
 	/**
-	 * The serialised string this composable last wrote. A plain variable, not
-	 * `$state` — nothing should re-run when it changes. It exists purely so the
-	 * navigation listener can tell its own echo from a real navigation.
+	 * The serialised string this composable last wrote. A plain variable, not `$state` — nothing
+	 * should re-run when it changes.
 	 */
 	let lastWritten: string | null = null;
 

@@ -8,12 +8,8 @@ declare global {
 		// interface Locals {}
 		interface PageData {
 			/**
-			 * Per-page SEO overrides, merged into the layout defaults by the
-			 * single `<Seo />` in `+layout.svelte`.
-			 *
-			 * Declaring it here is what makes `page.data.seo` typed at the use
-			 * site; without it the whole thing is `any` exactly where the
-			 * typing matters.
+			 * Per-page SEO overrides, merged into the layout defaults by the single `<Seo />` in
+			 * `+layout.svelte`.
 			 */
 			seo?: SeoData;
 		}

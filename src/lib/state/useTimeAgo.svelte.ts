@@ -16,28 +16,8 @@ function formatTimeAgo(diffMs: number): string {
 }
 
 /**
- * Returns a reactive getter that yields a human-readable relative time string,
- * updated periodically.
- *
- * Supported formats: `"just now"`, `"x seconds ago"`, `"x minutes ago"`,
- * `"x hours ago"`, `"x days ago"`.
- *
- * SSR-safe: no interval is set up until the effect runs in the browser. The
- * interval is properly cleaned up on teardown.
- *
- * @param date - Reactive getter returning the reference `Date` or Unix timestamp (ms)
- * @param options.interval - How often (ms) to refresh the output (default: `30_000`)
- * @returns A getter function returning the formatted relative-time string
- *
- * @example
- * ```ts
- * let ts = $state(Date.now() - 90_000);
- * const ago = useTimeAgo(() => ts);
- * // ago() → "1 minutes ago"
- *
- * ts = Date.now() - 3 * 3600 * 1000;
- * // ago() → "3 hours ago"
- * ```
+ * Returns a reactive human-readable relative time string (e.g. "3 minutes ago") that updates
+ * automatically.
  */
 export function useTimeAgo(
 	date: () => Date | number,

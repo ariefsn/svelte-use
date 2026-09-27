@@ -1,27 +1,6 @@
 /**
- * Converts a reactive `string`, `ArrayBuffer`, or `Blob` to its Base64
- * representation.
- *
- * - `string` values are encoded via `btoa` (UTF-8 safe via `TextEncoder`).
- * - `ArrayBuffer` values are encoded directly.
- * - `Blob` values are read asynchronously via `FileReader`.
- * - Returns `undefined` while an async Blob conversion is in-flight, or when
- *   the input is `undefined`, or in a non-browser environment (SSR safe).
- *
- * The returned getter is updated reactively whenever the input changes.
- *
- * @param input - Reactive getter returning a `string`, `ArrayBuffer`, `Blob`, or `undefined`
- * @returns A getter function returning the Base64-encoded string, or `undefined`
- *
- * @example
- * ```ts
- * let data = $state<string | undefined>('hello');
- * const b64 = useBase64(() => data);
- * // b64() → 'aGVsbG8='
- *
- * data = undefined;
- * // b64() → undefined
- * ```
+ * Reactively converts a `string`, `ArrayBuffer`, or `Blob` to its Base64 representation. Returns
+ * `undefined` while an async Blob conversion is in-flight or on the server.
  */
 export function useBase64(
 	input: () => string | ArrayBuffer | Blob | undefined

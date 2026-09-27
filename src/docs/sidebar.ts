@@ -1,21 +1,10 @@
-/**
- * The release whose additions are badged "new" in the sidebar.
- *
- * Bumping this on each release retires the previous badges automatically,
- * rather than needing every `since` field swept by hand.
- */
+/** The release whose additions are badged "new" in the sidebar. */
 export const NEW_IN_VERSION = '1.2.0';
 
 export interface SidebarItem {
 	label: string;
 	slug: string;
-	/**
-	 * Version this util shipped in, e.g. `'1.2.0'`.
-	 *
-	 * Required, so a new util cannot be added without recording when it
-	 * landed — the docs page renders this as a badge, and a missing one used
-	 * to show nothing at all. `coverage.test.ts` enforces the format.
-	 */
+	/** Version this util shipped in, e.g. `'1.2.0'`. */
 	since: string;
 }
 
@@ -29,12 +18,7 @@ export function isNew(item: SidebarItem): boolean {
 	return item.since === NEW_IN_VERSION;
 }
 
-/**
- * Whether a group contains any newly added item.
- *
- * Lets a collapsed group show that something new is hidden inside it —
- * otherwise the only signal lives on children the user cannot see.
- */
+/** Whether a group contains any newly added item. */
 export function groupHasNew(group: SidebarGroup): boolean {
 	return group.items.some(isNew);
 }
@@ -268,13 +252,7 @@ const groups: SidebarGroup[] = [
 	}
 ];
 
-/**
- * The rendered group order: alphabetical by title.
- *
- * This is also the reading order — `allSlugs` drives the prev/next links at
- * the foot of each doc page, so the sidebar and that navigation cannot drift
- * apart. Items within a group keep their authored order.
- */
+/** The rendered group order: alphabetical by title. */
 export const sidebar: SidebarGroup[] = [...groups].sort((a, b) => a.title.localeCompare(b.title));
 
 export const allSlugs = sidebar.flatMap((g) => g.items.map((i) => i.slug));

@@ -13,17 +13,7 @@ export interface UseDeviceMotionReturn {
 	interval: () => number;
 }
 
-/**
- * Reactive wrapper around the DeviceMotion API.
- *
- * @returns Object with `isSupported`, `acceleration`, `accelerationIncludingGravity`, `rotationRate`, `interval`
- *
- * @example
- * ```ts
- * const { isSupported, acceleration } = useDeviceMotion();
- * // acceleration()?.x, acceleration()?.y, acceleration()?.z
- * ```
- */
+/** Reactive wrapper around the DeviceMotion API for tracking device acceleration and rotation. */
 export function useDeviceMotion(): UseDeviceMotionReturn {
 	const isSupported = useSupported(() => 'DeviceMotionEvent' in window);
 

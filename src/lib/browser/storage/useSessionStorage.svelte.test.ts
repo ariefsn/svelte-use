@@ -211,10 +211,6 @@ describe('useSessionStorage', () => {
 		const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
 
 		// Simulate SSR by patching typeof window check via the isBrowser flag.
-		// We verify that sessionStorage is never touched when the composable is
-		// constructed outside a browser context by ensuring no read/write occurs
-		// when the key is absent and no effect fires.
-		// In the browser test environment we can at least ensure it reads correctly.
 		const cleanup = $effect.root(() => {
 			const store = useSessionStorage('ssr-key', 'ssr-initial');
 			expect(store.value).toBe('ssr-initial');

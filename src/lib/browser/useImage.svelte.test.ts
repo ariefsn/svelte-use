@@ -3,8 +3,8 @@ import { describe, expect, test, vi } from 'vitest';
 import { useImage } from './useImage.svelte.js';
 
 /**
- * Real images, loaded from data URLs — no network, no stubbing, and the
- * browser's own decode path is what runs.
+ * Real images, loaded from data URLs — no network, no stubbing, and the browser's own decode path
+ * is what runs.
  */
 
 /** A valid 1×1 transparent PNG. */

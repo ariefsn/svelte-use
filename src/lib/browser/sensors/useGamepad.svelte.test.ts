@@ -3,9 +3,8 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useGamepad } from './useGamepad.svelte.js';
 
 /**
- * Headless Chromium has no controller attached and the Gamepad API cannot be
- * driven without CDP, so `navigator.getGamepads` is stubbed. `useSupported`
- * evaluates its probe immediately, so the stub goes in before construction.
+ * Headless Chromium has no controller attached and the Gamepad API cannot be driven without CDP, so
+ * `navigator.getGamepads` is stubbed.
  */
 
 function pad(index: number, id = `Pad ${index}`): Gamepad {

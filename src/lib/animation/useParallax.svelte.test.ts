@@ -2,9 +2,7 @@ import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { flushSync } from 'svelte';
 import { useParallax } from './useParallax.svelte.js';
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function createMockElement(rect: Partial<DOMRect> = {}): HTMLElement {
 	const defaultRect: DOMRect = {
@@ -29,9 +27,7 @@ function fireMouseMove(clientX: number, clientY: number) {
 	window.dispatchEvent(event);
 }
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('useParallax', () => {
 	beforeEach(() => {
@@ -174,10 +170,7 @@ describe('useParallax', () => {
 	});
 
 	test('SSR safe — does not throw when window is undefined', () => {
-		// In a real browser environment `window` is non-configurable and cannot
-		// be stubbed or deleted. We verify the SSR guard indirectly: passing a
-		// null target (which triggers the same early-return path) must not throw
-		// and must leave x/y at 0.
+		// In a real browser environment `window` is non-configurable and cannot be stubbed or deleted.
 		expect(() => {
 			const cleanup = $effect.root(() => {
 				const { x, y } = useParallax(() => null);

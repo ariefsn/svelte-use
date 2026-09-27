@@ -10,17 +10,11 @@ import {
 
 /** Options for `useDevicesList`. */
 export interface UseDevicesListOptions {
-	/**
-	 * Ask for device access on init so labels are populated immediately.
-	 *
-	 * This shows a permission prompt, so leave it off unless the component
-	 * only renders after a user action.
-	 * @default false
-	 */
+	/** Ask for device access on init so labels are populated immediately. Default `false`. */
 	requestPermissions?: boolean;
 	/**
-	 * Constraints for the throwaway stream used to reveal labels.
-	 * @default { audio: true, video: true }
+	 * Constraints for the throwaway stream used to reveal labels. Default `{ audio: true, video: true
+	 * }`.
 	 */
 	constraints?: MediaStreamConstraints;
 }
@@ -45,41 +39,7 @@ export interface UseDevicesListReturn {
 	update: () => Promise<void>;
 }
 
-/**
- * The list of media input and output devices, kept current.
- *
- * `enumerateDevices()` always resolves, but until the user grants access every
- * entry has an empty `label` — so a device picker built on it shows a list of
- * blanks. `permissionGranted()` reports that state and `ensurePermissions()`
- * resolves it by opening a stream purely to reveal the labels and stopping it
- * again immediately.
- *
- * The list is refreshed on `devicechange`, so plugging in a headset updates it
- * without a reload.
- *
- * SSR: `isSupported()` is `false` and the lists are empty.
- *
- * @param options - Permission behaviour for the initial enumeration
- * @returns The grouped device lists plus `update` and `ensurePermissions`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useDevicesList } from '@ariefsn/svelte-use';
- *
- *   const devices = useDevicesList();
- * </script>
- *
- * {#if !devices.permissionGranted()}
- *   <button onclick={devices.ensurePermissions}>Show device names</button>
- * {/if}
- * <ul>
- *   {#each devices.videoInputs() as camera (camera.deviceId)}
- *     <li>{camera.label || 'Camera'}</li>
- *   {/each}
- * </ul>
- * ```
- */
+/** The list of media input and output devices, grouped by kind and refreshed on `devicechange`. */
 export function useDevicesList(options: UseDevicesListOptions = {}): UseDevicesListReturn {
 	const { requestPermissions = false, constraints = { audio: true, video: true } } = options;
 

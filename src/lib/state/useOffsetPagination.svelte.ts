@@ -14,9 +14,9 @@ export interface PaginationState {
 export interface UseOffsetPaginationOptions {
 	/** Total number of items. A getter keeps it reactive. */
 	total: MaybeGetter<number>;
-	/** Items per page. @default 10 */
+	/** Items per page. Default `10`. */
 	pageSize?: MaybeGetter<number>;
-	/** Page to start on, 1-based. @default 1 */
+	/** Page to start on, 1-based. Default `1`. */
 	page?: number;
 	/** Called when the resolved page changes — not on the initial render. */
 	onPageChange?: (state: PaginationState) => void;
@@ -49,44 +49,8 @@ export interface UseOffsetPaginationReturn {
 }
 
 /**
- * Offset-based pagination state.
- *
- * The current page is **derived**, never stored clamped. That is what makes it
- * correct when `total` shrinks underneath it: showing page 9 of a list that
- * just dropped to 3 pages resolves to page 3 immediately, with no effect and
- * no intermediate wrong render.
- *
- * Clamping in an `$effect` instead — the obvious implementation — reads and
- * writes the same state and re-triggers itself. It is also invisible to
- * `scripts/check-effects.mjs`, which only matches `++`, `--` and compound
- * assignment, so `page = Math.min(page, pageCount)` would pass lint and fail
- * at runtime.
- *
- * Pure state with no DOM or timers, so it renders on the server.
- *
- * @param options - Total, page size and the starting page
- * @returns Pagination state plus navigation
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useOffsetPagination } from '@ariefsn/svelte-use';
- *
- *   let items = $state<Item[]>([]);
- *   const pagination = useOffsetPagination({
- *     total: () => items.length,
- *     pageSize: 20
- *   });
- *
- *   const visible = $derived(
- *     items.slice(pagination.offset(), pagination.offset() + pagination.pageSize())
- *   );
- * </script>
- *
- * <button onclick={pagination.prev} disabled={pagination.isFirstPage()}>Previous</button>
- * <span>{pagination.page()} / {pagination.pageCount()}</span>
- * <button onclick={pagination.next} disabled={pagination.isLastPage()}>Next</button>
- * ```
+ * Offset-based pagination state. The current page is **derived**, never stored clamped, so it
+ * corrects itself the moment `total` shrinks underneath it.
  */
 export function useOffsetPagination(
 	options: UseOffsetPaginationOptions
@@ -106,9 +70,7 @@ export function useOffsetPagination(
 	const page = $derived(Math.min(Math.max(1, Math.floor(requested)), pageCount));
 
 	if (onPageChange) {
-		// Plain `let`, not `$state`, so recording the baseline does not itself
-		// invalidate the effect. The effect only *reads* `page` and calls out —
-		// it writes no state, so it cannot re-trigger itself.
+		// Plain `let`, not `$state`, so recording the baseline does not itself invalidate the effect.
 		let previous = page;
 
 		$effect(() => {

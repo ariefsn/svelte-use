@@ -9,19 +9,7 @@ export interface UseVibrateReturn {
 	stop: () => void;
 }
 
-/**
- * Reactive wrapper around the Vibration API.
- *
- * @param pattern - Default vibration pattern in ms (default: `200`)
- * @returns Object with `isSupported`, `vibrate`, and `stop`
- *
- * @example
- * ```ts
- * const { isSupported, vibrate, stop } = useVibrate();
- * vibrate([200, 100, 200]); // vibrate-pause-vibrate
- * stop();
- * ```
- */
+/** Reactive wrapper around the Vibration API. */
 export function useVibrate(pattern: VibratePattern = 200): UseVibrateReturn {
 	const isSupported = useSupported(() => 'vibrate' in navigator);
 

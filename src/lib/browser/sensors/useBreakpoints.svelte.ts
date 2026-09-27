@@ -1,44 +1,19 @@
 import { useMediaQuery } from './useMediaQuery.svelte.js';
 
-/**
- * Shape of the return value from {@link useBreakpoints}.
- */
+/** Shape of the return value from {@link useBreakpoints}. */
 export interface UseBreakpointsReturn {
 	/**
-	 * Getter that returns an array of keys whose associated min-width media
-	 * query is currently matched (i.e. viewport width ≥ breakpoint value).
+	 * Getter that returns an array of keys whose associated min-width media query is currently
+	 * matched (i.e. viewport width ≥ breakpoint value).
 	 */
 	active: () => string[];
-	/**
-	 * Returns `true` if the media query for the given breakpoint key is
-	 * currently matched.
-	 *
-	 * @param key - One of the keys supplied in the `breakpoints` map.
-	 */
+	/** Returns `true` if the media query for the given breakpoint key is currently matched. */
 	is: (key: string) => boolean;
 }
 
 /**
- * Reactive breakpoint matcher.
- *
- * Accepts a map of named breakpoints (key → min-width in pixels) and
- * tracks which ones currently match via `window.matchMedia`. The `active`
- * getter returns the list of matching keys; the `is` helper checks a
- * single key.
- *
- * All `MediaQueryList` listeners are removed when the reactive scope is
- * destroyed. Safe to call during SSR – `active` returns `[]` and `is`
- * returns `false`.
- *
- * @param breakpoints - Map of breakpoint names to their min-width pixel values.
- * @returns An object with an `active` getter and an `is` predicate.
- *
- * @example
- * ```ts
- * const bp = useBreakpoints({ sm: 640, md: 768, lg: 1024, xl: 1280 });
- * bp.active(); // ['sm', 'md'] on a 900px viewport
- * bp.is('lg'); // false
- * ```
+ * Reactive breakpoint matcher. Tracks which named min-width breakpoints are currently matched using
+ * `window.matchMedia`. Updates automatically when the viewport is resized.
  */
 export function useBreakpoints(breakpoints: Record<string, number>): UseBreakpointsReturn {
 	// One useMediaQuery per breakpoint; it owns the matchMedia listener and its

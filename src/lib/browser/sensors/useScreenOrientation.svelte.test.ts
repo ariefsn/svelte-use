@@ -3,9 +3,8 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useScreenOrientation } from './useScreenOrientation.svelte.js';
 
 /**
- * `screen.orientation` is real in Chromium and reports the desktop window's
- * orientation, so reads are genuine. `lock()` is not implemented on desktop at
- * all, which is itself worth asserting — it is the case consumers must handle.
+ * `screen.orientation` is real in Chromium and reports the desktop window's orientation, so reads
+ * are genuine.
  */
 
 afterEach(() => {
@@ -49,10 +48,8 @@ describe('useScreenOrientation', () => {
 	});
 
 	test('lock() rejects with NotSupportedError when the browser has no lock()', async () => {
-		// Firefox and Safari ship no `lock()` at all. Stubbed rather than
-		// branched on the host browser, so the assertion is deterministic —
-		// headless Chromium does implement it and resolves.
-		// A real EventTarget, because the composable subscribes to `change` on it.
+		// Firefox and Safari ship no `lock()` at all. Stubbed rather than branched on the host browser,
+		// so the assertion is deterministic — headless Chromium does implement it and resolves.
 		const orientationStub = Object.assign(new EventTarget(), {
 			type: 'portrait-primary',
 			angle: 0,

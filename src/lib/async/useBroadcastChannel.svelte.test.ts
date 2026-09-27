@@ -2,19 +2,9 @@ import { flushSync } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import { useBroadcastChannel } from './useBroadcastChannel.svelte.js';
 
-/**
- * `BroadcastChannel` is real in Chromium, so these use it directly. The
- * sending channel object never receives its own message, so a test needs two
- * instances on the same name — which is also how two tabs behave.
- */
+/** `BroadcastChannel` is real in Chromium, so these use it directly. */
 
-/**
- * Lets a posted message reach the other channel object.
- *
- * A single macrotask tick is not enough in this environment — delivery is
- * queued outside the page's task queue, so a real delay is needed. Verified:
- * with `setTimeout(0)` nothing arrives at all.
- */
+/** Lets a posted message reach the other channel object. */
 async function delivered() {
 	await new Promise((resolve) => setTimeout(resolve, 50));
 	flushSync();

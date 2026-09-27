@@ -5,12 +5,7 @@ import { useMediaStream, type UseMediaStreamReturn } from './internal/useMediaSt
 /** Options for `useDisplayMedia`. */
 export interface UseDisplayMediaOptions {
 	/**
-	 * Options passed to `getDisplayMedia`, or a getter for reactive ones.
-	 *
-	 * Unlike `useUserMedia`, changing these does **not** reacquire a live
-	 * stream: screen capture always opens a picker, and re-prompting on a
-	 * state change would be hostile. They apply to the next `start()`.
-	 * @default { video: true }
+	 * Options passed to `getDisplayMedia`, or a getter for reactive ones. Default `{ video: true }`.
 	 */
 	options?: MaybeGetter<DisplayMediaStreamOptions>;
 }
@@ -19,31 +14,8 @@ export interface UseDisplayMediaOptions {
 export type UseDisplayMediaReturn = UseMediaStreamReturn;
 
 /**
- * Screen, window or tab capture via `getDisplayMedia`.
- *
- * `start()` opens the browser's picker and must be called from a user
- * gesture. Ending capture from the browser's own "Stop sharing" control ends
- * the tracks without notifying the page, so this watches for that and clears
- * `stream()` — a naive wrapper reports a live stream forever afterwards.
- *
- * SSR: `isSupported()` is `false` and `start()` resolves `null`.
- *
- * @param options - Display capture options
- * @returns Stream state plus `start`, `stop` and `restart`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useDisplayMedia } from '@ariefsn/svelte-use';
- *
- *   const screen = useDisplayMedia({ options: { video: true, audio: false } });
- * </script>
- *
- * <button onclick={() => screen.start()}>Share screen</button>
- * {#if screen.isActive()}
- *   <button onclick={screen.stop}>Stop</button>
- * {/if}
- * ```
+ * Screen, window or tab capture via `getDisplayMedia`. Watches for the browser’s own “Stop sharing”
+ * control, which ends the tracks without notifying the page.
  */
 export function useDisplayMedia(options: UseDisplayMediaOptions = {}): UseDisplayMediaReturn {
 	const getOptions = toGetter(options.options ?? { video: true });

@@ -3,9 +3,8 @@
 
 	let box = $state<HTMLDivElement | null>(null);
 
-	// Token references rather than raw hex, so the swatches stay correct in
-	// both themes — and it shows that a custom property can hold any CSS
-	// value, including another variable.
+	// Token references rather than raw hex, so the swatches stay correct in both themes — and it
+	// shows that a custom property can hold any CSS value, including another variable.
 	const swatches = [
 		{ label: 'accent', value: 'var(--color-accent)' },
 		{ label: 'success', value: 'var(--color-success)' },

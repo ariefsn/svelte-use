@@ -9,19 +9,15 @@ export interface AcquireHeadElementOptions<K extends keyof HTMLElementTagNameMap
 	/** Container to search and append into. Defaults to `document.head`. */
 	parent?: HTMLElement | null;
 	/**
-	 * Selector tried before creating, for adopting an element that exists but
-	 * carries no library id — a favicon written into `app.html`, say. Searched
-	 * within `parent`.
+	 * Selector tried before creating, for adopting an element that exists but carries no library id —
+	 * a favicon written into `app.html`, say. Searched within `parent`.
 	 */
 	adoptSelector?: string;
 	/** Applied once, only when the element is created. Never re-applied on adopt. */
 	init?: (element: HTMLElementTagNameMap[K]) => void;
 	/**
-	 * Builds the payload shared by every consumer of this element. Runs once
-	 * per element, on first acquire — later consumers receive the same value.
-	 *
-	 * This is what lets `useScriptTag` share one load promise, and
-	 * `useFavicon` share one snapshot of the original href.
+	 * Builds the payload shared by every consumer of this element. Runs once per element, on first
+	 * acquire — later consumers receive the same value.
 	 */
 	createShared: (element: HTMLElementTagNameMap[K], origin: HeadElementOrigin) => S;
 }
@@ -36,12 +32,8 @@ export interface HeadElementHandle<E extends HTMLElement, S> {
 	/** The payload shared across every consumer of this element. */
 	shared: S;
 	/**
-	 * Drops this handle's reference.
-	 *
-	 * Idempotent — a second call is a no-op, so a manual `unload()` followed by
-	 * scope teardown cannot double-decrement. The element is detached only when
-	 * all three hold: `remove` is true, the refcount reached zero, and the
-	 * element was created rather than adopted.
+	 * Drops this handle's reference. Idempotent, so a manual unload plus teardown cannot
+	 * double-decrement. Detaches only if `remove` && refcount 0 && origin is 'created'.
 	 */
 	release: (remove: boolean) => void;
 }
@@ -54,12 +46,8 @@ interface Entry<S> {
 }
 
 /**
- * Live elements keyed by id. Module-level so two call sites in the same page
- * share one tag — `document.querySelector` alone would find it, but not the
- * refcount or the shared payload that make releasing it safe.
- *
- * The value type varies per entry, which no single type parameter can express;
- * `acquireHeadElement` is the only reader and it knows its own `S`.
+ * Live elements keyed by id. `Entry<never>` because the shared-payload type varies per entry;
+ * `acquireHeadElement` is the only reader and casts back to its own `S`.
  */
 const registry = new Map<string, Entry<never>>();
 
@@ -76,18 +64,8 @@ function findById(parent: HTMLElement, id: string): HTMLElement | null {
 }
 
 /**
- * Creates or adopts a `<head>` child, deduplicated by id and reference counted.
- *
- * Resolution order: the registry (a second consumer in the same page), then a
- * DOM lookup by id or `adoptSelector` (a tag from `app.html`, SSR output, or
- * another library), then creation.
- *
- * The distinction matters on teardown. An adopted element is never detached —
- * this library did not put it there and something else may depend on it. A
- * created element is detached only once every consumer has released it.
- *
- * @param options - Tag, id, container, and the shared-payload factory
- * @returns A handle, or `null` during SSR and in any non-DOM environment
+ * Creates or adopts a `<head>` child, deduplicated by id and reference counted. An adopted
+ * element is never detached on release — this library did not put it there.
  */
 export function acquireHeadElement<K extends keyof HTMLElementTagNameMap, S>(
 	options: AcquireHeadElementOptions<K, S>
@@ -138,9 +116,8 @@ export function acquireHeadElement<K extends keyof HTMLElementTagNameMap, S>(
 			entry.refs--;
 			if (entry.refs > 0) return;
 
-			// Only forget the entry when the element actually goes, so a later
-			// acquire still sees the original origin and shared payload rather
-			// than re-adopting an element this library created.
+			// Only forget the entry when the element actually goes, so a later acquire still sees the
+			// original origin and shared payload rather than re-adopting an element this library created.
 			if (remove && entry.origin === 'created') {
 				entry.element.remove();
 				registry.delete(id);

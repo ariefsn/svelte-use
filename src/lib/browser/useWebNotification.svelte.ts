@@ -18,14 +18,7 @@ export interface UseWebNotificationReturn {
 	isPermissionGranted: () => boolean;
 	/** The active Notification instance, or null */
 	notification: () => Notification | null;
-	/**
-	 * Last error from `show()`, or `null`.
-	 *
-	 * Note that a `null` error with a non-null {@link notification} means the
-	 * notification was constructed successfully — if nothing appeared on
-	 * screen the operating system suppressed it (macOS Focus mode, or the
-	 * browser disabled in System Settings → Notifications).
-	 */
+	/** Last error from `show()`, or `null`. */
 	error: () => Error | null;
 	/** Shows a notification with optional overrides */
 	show: (overrides?: Partial<UseWebNotificationOptions>) => Promise<Notification | null>;
@@ -33,21 +26,7 @@ export interface UseWebNotificationReturn {
 	close: () => void;
 }
 
-/**
- * Reactive wrapper around the Web Notifications API.
- *
- * @param options - Default notification options
- * @returns Object with `isSupported`, `isPermissionGranted`, `show`, `close`, `notification`
- *
- * @example
- * ```ts
- * const { isSupported, show, close } = useWebNotification({
- *   title: 'Hello!',
- *   body: 'This is a notification'
- * });
- * await show();
- * ```
- */
+/** Reactive wrapper around the Web Notifications API for desktop notifications. */
 export function useWebNotification(
 	options: UseWebNotificationOptions = {}
 ): UseWebNotificationReturn {

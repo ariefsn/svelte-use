@@ -17,44 +17,7 @@ export interface UseStorageReturn<T> {
 /** Which Web Storage area to read and write. */
 export type StorageArea = 'local' | 'session';
 
-/**
- * Reactive Web Storage utility with SSR safety and cross-tab sync.
- *
- * The shared implementation behind {@link useLocalStorage} and
- * {@link useSessionStorage}; use those unless the area needs to be chosen at
- * runtime.
- *
- * Reads the stored value on initialisation and persists changes back. On the
- * server the `initial` value is used and writes are skipped. A `storage` event
- * listener keeps the value in sync with other tabs on the same origin.
- *
- * Storage access is wrapped throughout: quota errors, disabled cookies and
- * private-mode restrictions degrade to the in-memory value rather than
- * throwing.
- *
- * @param key - Storage key
- * @param initial - Fallback used when the key is absent, unreadable, or in SSR
- * @param area - `'local'` (default) or `'session'`
- * @param options - Optional custom serialiser / deserialiser pair
- * @returns Object with reactive `value`, `set`, and `remove`
- *
- * @example
- * ```ts
- * const theme = useStorage('theme', 'light');
- * theme.set('dark');
- * theme.value;    // 'dark'
- * theme.remove(); // back to 'light'
- * ```
- *
- * @example
- * ```ts
- * // Non-JSON values
- * const seen = useStorage('last-seen', new Date(), 'session', {
- *   serializer: (d) => d.toISOString(),
- *   deserializer: (raw) => new Date(raw)
- * });
- * ```
- */
+/** Reactive Web Storage utility with SSR safety and cross-tab sync. */
 export function useStorage<T>(
 	key: string,
 	initial: T,
@@ -67,8 +30,8 @@ export function useStorage<T>(
 	const deserialize = options.deserializer ?? ((raw: string) => JSON.parse(raw) as T);
 
 	/**
-	 * Resolved lazily rather than captured once: touching `localStorage` can
-	 * throw when cookies are blocked, and that must not happen at import time.
+	 * Resolved lazily rather than captured once: touching `localStorage` can throw when cookies are
+	 * blocked, and that must not happen at import time.
 	 */
 	function getStore(): Storage | null {
 		if (!isBrowser) return null;
@@ -121,9 +84,8 @@ export function useStorage<T>(
 	});
 
 	$effect(() => {
-		// Reads `value` deliberately: this effect exists to mirror it into
-		// storage on every change. It never writes `value`, so there is no
-		// self-triggering cycle.
+		// Reads `value` deliberately: this effect exists to mirror it into storage on every change. It
+		// never writes `value`, so there is no self-triggering cycle.
 		const current = value;
 		if (removed) return;
 

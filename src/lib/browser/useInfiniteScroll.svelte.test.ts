@@ -3,9 +3,8 @@ import { describe, expect, test, vi } from 'vitest';
 import { useInfiniteScroll } from './useInfiniteScroll.svelte.js';
 
 /**
- * Builds a scroll container with controllable metrics. jsdom-style layout is
- * not computed in a headless browser for detached sizes, so the three scroll
- * properties are defined directly.
+ * Builds a scroll container with controllable metrics. jsdom-style layout is not computed in a
+ * headless browser for detached sizes, so the three scroll properties are defined directly.
  */
 function container(opts: {
 	scrollTop?: number;

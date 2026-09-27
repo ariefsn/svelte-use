@@ -3,19 +3,13 @@ import { parseMessageData } from './internal/parseMessageData.js';
 export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSED';
 
 export interface UseWebSocketOptions {
-	/**
-	 * WebSocket sub-protocol(s) passed to the `WebSocket` constructor.
-	 */
+	/** WebSocket sub-protocol(s) passed to the `WebSocket` constructor. */
 	protocols?: string | string[];
-	/**
-	 * Automatically attempt to reconnect when the socket closes unexpectedly.
-	 * Default: `false`.
-	 */
+	/** Automatically attempt to reconnect when the socket closes unexpectedly. Default: `false`. */
 	autoReconnect?: boolean;
 	/**
-	 * Milliseconds to wait before a reconnection attempt.
-	 * Only relevant when `autoReconnect` is `true`.
-	 * Default: `1000`.
+	 * Milliseconds to wait before a reconnection attempt. Only relevant when `autoReconnect` is
+	 * `true`. Default: `1000`.
 	 */
 	reconnectInterval?: number;
 }
@@ -27,45 +21,15 @@ export interface UseWebSocketReturn<T> {
 	status: () => WebSocketStatus;
 	/** Reactive getter returning the last connection error event, or `null` when no error has occurred. */
 	error: () => Event | null;
-	/**
-	 * Send data through the WebSocket. No-ops when the socket is not `OPEN`.
-	 *
-	 * @param data - The data to transmit.
-	 */
+	/** Send data through the WebSocket. No-ops when the socket is not `OPEN`. */
 	send: (data: string | ArrayBufferLike | Blob | ArrayBufferView) => void;
 	/** Close the WebSocket connection and disable auto-reconnect for the current URL. */
 	close: () => void;
 }
 
 /**
- * Reactive WebSocket utility with optional auto-reconnect, reactive URL
- * changes, and full SSR safety.
- *
- * The socket is opened when the composable enters a reactive scope and the
- * `url` getter returns a non-`undefined` value. It is automatically closed
- * and cleaned up when the reactive scope is destroyed.
- *
- * @template T - The expected type of parsed incoming messages. Messages are
- *   attempted to be parsed as JSON; if parsing fails the raw string value is
- *   used instead.
- *
- * @param url - Reactive getter returning the WebSocket URL, or `undefined` to
- *   stay disconnected.
- * @param options - Optional configuration.
- * @param options.protocols - WebSocket sub-protocol(s).
- * @param options.autoReconnect - Enable automatic reconnection (default: `false`).
- * @param options.reconnectInterval - Delay in ms between reconnect attempts (default: `1000`).
- * @returns Reactive state object with `data`, `status`, `error`, `send`, and `close`.
- *
- * @example
- * ```ts
- * let endpoint = $state('wss://example.com/chat');
- * const { data, status, send, close } = useWebSocket<ChatMessage>(
- *   () => endpoint,
- *   { autoReconnect: true, reconnectInterval: 2000 }
- * );
- * send(JSON.stringify({ text: 'hello' }));
- * ```
+ * Reactive WebSocket with optional auto-reconnect, reactive URL changes and SSR safety.
+ * Opens when a URL is provided and closes when the component is destroyed.
  */
 export function useWebSocket<T = unknown>(
 	url: () => string | undefined,

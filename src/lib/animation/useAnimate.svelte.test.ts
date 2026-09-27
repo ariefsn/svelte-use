@@ -2,9 +2,7 @@ import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { flushSync } from 'svelte';
 import { useAnimate } from './useAnimate.svelte.js';
 
-// ---------------------------------------------------------------------------
 // Mock helpers
-// ---------------------------------------------------------------------------
 
 type PlayState = 'idle' | 'running' | 'paused' | 'finished';
 
@@ -40,9 +38,7 @@ function createMockElement() {
 	return { el, anim };
 }
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('useAnimate', () => {
 	beforeEach(() => {

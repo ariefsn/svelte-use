@@ -1,8 +1,7 @@
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 
-// `$app/navigation` is SvelteKit-only and unavailable in unit tests, so the two
-// functions useNavigationGuard depends on are stubbed. `beforeNavigate` records
-// the callback so tests can drive navigation attempts directly.
+// `$app/navigation` is SvelteKit-only and unavailable in unit tests, so the two functions
+// useNavigationGuard depends on are stubbed.
 const mocks = vi.hoisted(() => ({
 	navCallback: null as ((nav: unknown) => void) | null,
 	goto: vi.fn(() => Promise.resolve())
@@ -75,9 +74,8 @@ describe('useNavigationGuard', () => {
 	});
 
 	test('confirm() lets the retried navigation through while shouldBlock is still true', () => {
-		// Regression: confirm() re-enters the guard via goto(). Without a
-		// one-shot bypass the retry is cancelled again and confirm() can never
-		// actually navigate.
+		// Regression: confirm() re-enters the guard via goto(). Without a one-shot bypass the retry is
+		// cancelled again and confirm() can never actually navigate.
 		const onBlock = vi.fn();
 		const { confirm } = useNavigationGuard({ shouldBlock: () => true, onBlock });
 

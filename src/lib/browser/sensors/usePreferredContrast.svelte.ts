@@ -3,34 +3,7 @@ import { useFirstMatchingQuery } from './internal/useFirstMatchingQuery.svelte.j
 /** Resolved OS contrast preference. */
 export type PreferredContrast = 'more' | 'less' | 'custom' | 'no-preference';
 
-/**
- * Reactively tracks the OS contrast preference.
- *
- * Combines three media queries. `'custom'` means the user has set a specific
- * colour palette — Windows High Contrast, or forced colours — rather than
- * asking for more or less contrast in general.
- *
- * Order matters: a forced-colours mode often matches `custom` *and* `more`
- * simultaneously, so `custom` is checked last and the more actionable answer
- * wins.
- *
- * Returns `'no-preference'` during SSR.
- *
- * @returns A getter returning `'more'`, `'less'`, `'custom'`, or `'no-preference'`
- *
- * @example
- * ```ts
- * const contrast = usePreferredContrast();
- * contrast(); // → 'more' | 'less' | 'custom' | 'no-preference'
- * ```
- *
- * @example
- * ```ts
- * // Thicken borders when the user asked for more contrast
- * const contrast = usePreferredContrast();
- * const borderWidth = $derived(contrast() === 'more' ? 2 : 1);
- * ```
- */
+/** Reactively tracks the OS contrast preference as `more`, `less`, `custom` or `no-preference`. */
 export function usePreferredContrast(): () => PreferredContrast {
 	return useFirstMatchingQuery(
 		[

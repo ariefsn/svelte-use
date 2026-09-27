@@ -1,16 +1,13 @@
 /* eslint-disable svelte/prefer-svelte-reactivity --
- * The Set/Map here are module-scoped bookkeeping shared by every caller, not
- * reactive state: reactivity is driven by the `pressed` $state each instance
- * owns, updated through subscriber callbacks. Making them SvelteSet/SvelteMap
- * would add reactive state at module scope, which on the server is shared
- * across concurrent requests.
+ * Module-scoped bookkeeping, not reactive state — reactivity comes from each instance's own
+ * `pressed` $state. A SvelteSet/Map here would share reactive state across SSR requests.
  */
 /** Modifier key names supported by `useKeyModifier`. */
 export type KeyModifier = 'ctrl' | 'shift' | 'alt' | 'meta';
 
 /**
- * Maps a `KeyModifier` alias to the canonical `KeyboardEvent.key` value
- * emitted by the browser so both can be tracked.
+ * Maps a `KeyModifier` alias to the canonical `KeyboardEvent.key` value emitted by the browser so
+ * both can be tracked.
  */
 const MODIFIER_ALIASES: Record<KeyModifier, string[]> = {
 	ctrl: ['control', 'ctrl'],
@@ -20,12 +17,8 @@ const MODIFIER_ALIASES: Record<KeyModifier, string[]> = {
 };
 
 /**
- * Shared listener registry — one pair of `keydown`/`keyup` handlers on
- * `window` is reused across all `useKeyModifier` calls, avoiding duplicate
- * global listeners.
- *
- * Each entry maps to a `Set` of callbacks that want to be notified when the
- * modifier state changes.
+ * Shared listener registry — one pair of `keydown`/`keyup` handlers on `window` is reused across
+ * all `useKeyModifier` calls, avoiding duplicate global listeners.
  */
 let listenerCount = 0;
 
@@ -72,32 +65,7 @@ function unregisterGlobal() {
 	}
 }
 
-/**
- * Reactive modifier-key state utility.
- *
- * Returns a getter function `() => boolean` that is `true` while the
- * specified modifier key (`'ctrl'`, `'shift'`, `'alt'`, or `'meta'`) is
- * held down.
- *
- * All `useKeyModifier` calls share a single pair of `keydown`/`keyup`
- * listeners on `window` — no matter how many times this function is
- * called, at most one global listener is registered at a time.
- *
- * Listeners are removed when the owning reactive scope is destroyed. Safe
- * to call in SSR environments — nothing is registered outside the browser.
- *
- * @param modifier - The modifier key to track
- * @returns Getter that returns `true` while the modifier is pressed
- *
- * @example
- * ```ts
- * const isCtrlPressed = useKeyModifier('ctrl');
- *
- * $effect(() => {
- *   if (isCtrlPressed()) doSomething();
- * });
- * ```
- */
+/** Tracks whether a specific modifier key (Ctrl, Shift, Alt, Meta) is currently held. */
 export function useKeyModifier(modifier: KeyModifier): () => boolean {
 	let pressed = $state(false);
 

@@ -1,18 +1,6 @@
 <!--
-@component
-The sticky "On this page" rail, shared by the docs pages and the homepage.
-
-Renders two forms and lets CSS pick: a sticky side rail from `xl`, and a
-collapsed disclosure below it. Place this **before** the content column in the
-flex row — the disclosure then sits above the content on a phone, while the
-rail takes `order-last` to sit beside it on a wide screen.
-
-Both are chosen with CSS rather than `{#if}`: a media-query check returns
-`false` during SSR, so either form would be missing from the prerendered HTML
-and pop in after hydration.
-
-The caller owns the section ids — this only links to them, and highlights
-whichever has most recently crossed the spy line.
+	@component
+	The sticky "On this page" rail, shared by the docs pages and the homepage.
 -->
 <script lang="ts">
 	import { useEventListener } from '$lib';
@@ -30,9 +18,8 @@ whichever has most recently crossed the spy line.
 	let disclosureEl = $state<HTMLDetailsElement | null>(null);
 
 	/*
-	 * These are same-page anchors, so tapping one navigates nowhere and the
-	 * disclosure would stay open — covering the very section it just jumped to.
-	 * Only the compact form needs this; the desktop rail is never open or closed.
+	 * These are same-page anchors, so tapping one navigates nowhere and the disclosure would stay
+	 * open — covering the very section it just jumped to.
 	 */
 	function closeDisclosure() {
 		if (disclosureEl) disclosureEl.open = false;
@@ -43,9 +30,8 @@ whichever has most recently crossed the spy line.
 
 	function syncActive() {
 		/*
-		 * The rail is `display: none` below `xl`, which makes `offsetParent`
-		 * null — so phones and tablets skip the measuring loop entirely and the
-		 * scroll listener costs one property read.
+		 * The rail is `display: none` below `xl`, which makes `offsetParent` null — so phones and
+		 * tablets skip the measuring loop entirely and the scroll listener costs one property read.
 		 */
 		if (!railEl || railEl.offsetParent === null) return;
 
@@ -63,9 +49,8 @@ whichever has most recently crossed the spy line.
 			window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
 		if (atBottom) current = ids.at(-1) ?? current;
 
-		// Deliberately never *reads* `activeId`: assigning an unchanged value is
-		// a no-op in Svelte 5, and a `current !== activeId` guard would make the
-		// effect below depend on the state it writes.
+		// Deliberately never *reads* `activeId`: assigning an unchanged value is a no-op in Svelte 5,
+		// and a `current !== activeId` guard would make the effect below depend on the state it writes.
 		activeId = current;
 	}
 
@@ -73,9 +58,8 @@ whichever has most recently crossed the spy line.
 	// which happens during SSR too, where the identifier would throw.
 	useEventListener(() => globalThis.window, ['scroll', 'resize'], syncActive, { passive: true });
 
-	// First paint, and a resync when the entry list itself changes — that is,
-	// on navigation to another page. `syncActive` reads `entries` and `railEl`,
-	// so both dependencies register without a marker read.
+	// First paint, and a resync when the entry list itself changes — that is, on navigation to
+	// another page.
 	$effect(() => {
 		syncActive();
 	});
@@ -102,26 +86,17 @@ whichever has most recently crossed the spy line.
 {/snippet}
 
 <!--
-	Below `xl`. A native <details> rather than a scripted dropdown: it works
-	without JavaScript, is keyboard accessible for free, and starts collapsed so
-	it costs one line of vertical space on a phone.
+	Below `xl`. A native <details>, not a scripted dropdown: it works without JavaScript,
+	is keyboard accessible for free, and starts collapsed to cost one line on a phone.
 -->
 <!--
 	Sticky below the fixed mobile top bar, which measures 53px.
-
-	The sticky box is this wrapper rather than the card, so its `pt-2` can sit
-	*between* the bar and the card: the padding is page-coloured, so the gap
-	stays clean instead of letting article text slide through it. `bg-bg` is
-	required for the same reason — sticky content scrolls underneath. `z-50`
-	keeps it above the article while staying below the drawer (z-200) and its
-	scrim (z-150).
 -->
 <div class="bg-bg sticky top-[53px] z-50 mb-2 pt-2 pb-1 xl:hidden">
 	<details bind:this={disclosureEl} class="group border-border rounded-lg border px-4 py-2">
 		<!--
 			`list-none` hides the marker in Chrome and Firefox; Safari needs the
-			`::-webkit-details-marker` rule as well. A chevron replaces it so the
-			row still reads as expandable.
+			`::-webkit-details-marker` rule as well.
 		-->
 		<summary
 			class="text-text-muted hover:text-text flex cursor-pointer list-none items-center justify-between gap-2 text-[0.78rem] font-semibold tracking-[0.08em] uppercase [&::-webkit-details-marker]:hidden"
@@ -149,9 +124,8 @@ whichever has most recently crossed the spy line.
 	class="sticky top-12 hidden max-h-[calc(100vh-7rem)] w-[208px] shrink-0 self-start overflow-y-auto xl:order-last xl:block"
 >
 	<!--
-		A <p>, not a heading: the page's real h2s are the section titles, and an
-		"On this page" heading would inject navigation into the document outline.
-		The <nav> carries the accessible name instead.
+		A <p>, not a heading: the page's real h2s are the section titles, and an "On this page"
+		heading would inject navigation into the document outline.
 	-->
 	<p class="text-text-faint m-0 mb-3 text-[0.72rem] font-semibold tracking-[0.08em] uppercase">
 		On this page

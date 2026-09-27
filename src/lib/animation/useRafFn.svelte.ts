@@ -24,32 +24,8 @@ export interface UseRafFnReturn {
 }
 
 /**
- * Runs a callback on every animation frame.
- *
- * The callback receives the frame `timestamp` and the `delta` since the
- * previous invocation, which is what animation and FPS measurement need.
- * Optionally throttled with `fpsLimit`.
- *
- * Safe during SSR: no frame is ever requested and `isActive()` stays `false`.
- * The loop is cancelled when the owning reactive scope is destroyed.
- *
- * @param fn - Called once per frame with `{ delta, timestamp }`
- * @param options - `immediate` and `fpsLimit`
- * @returns Object with `isActive`, `pause`, and `resume`
- *
- * @example
- * ```ts
- * const { pause, resume, isActive } = useRafFn(({ delta }) => {
- *   position += velocity * delta;
- * });
- * ```
- *
- * @example
- * ```ts
- * // Throttled to 30fps, started manually
- * const raf = useRafFn(draw, { immediate: false, fpsLimit: 30 });
- * raf.resume();
- * ```
+ * Runs a callback on every animation frame, passing the frame `timestamp` and the `delta` since the
+ * previous invocation. Optionally throttled with `fpsLimit`.
  */
 export function useRafFn(
 	fn: (args: UseRafFnCallbackArgs) => void,
@@ -95,9 +71,8 @@ export function useRafFn(
 	}
 
 	$effect(() => {
-		// `resume()` reads `active`, so it must be untracked — otherwise this
-		// effect depends on state it writes, re-runs on resume, and its own
-		// teardown cancels the frame that was just requested.
+		// `resume()` reads `active`, so it must be untracked — otherwise this effect depends on state
+		// it writes, re-runs on resume, and its own teardown cancels the frame that was just requested.
 		if (immediate) untrack(resume);
 
 		return () => {

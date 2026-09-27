@@ -5,9 +5,8 @@
 	const hasLeft = usePageLeave();
 	let leaveCount = $state(0);
 
-	// `leaveCount++` reads and writes the same $state, so it must be untracked —
-	// otherwise the effect depends on what it writes and loops until Svelte
-	// throws effect_update_depth_exceeded.
+	// `leaveCount++` reads and writes the same $state, so it must be untracked — otherwise the effect
+	// depends on what it writes and loops until Svelte throws effect_update_depth_exceeded.
 	$effect(() => {
 		if (hasLeft()) {
 			untrack(() => {

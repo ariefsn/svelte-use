@@ -9,19 +9,7 @@ export interface UseEyeDropperReturn {
 	open: (options?: { signal?: AbortSignal }) => Promise<string | undefined>;
 }
 
-/**
- * Reactive wrapper around the EyeDropper API for picking colors from the screen.
- *
- * @param options - Optional initial color value
- * @returns Object with `isSupported`, `current`, and `open`
- *
- * @example
- * ```ts
- * const { isSupported, current, open } = useEyeDropper();
- * const color = await open();
- * // current() → '#ff0000'
- * ```
- */
+/** Reactive wrapper around the EyeDropper API for picking colors from the screen. */
 export function useEyeDropper(options?: { initialValue?: string }): UseEyeDropperReturn {
 	const isSupported = useSupported(() => 'EyeDropper' in window);
 

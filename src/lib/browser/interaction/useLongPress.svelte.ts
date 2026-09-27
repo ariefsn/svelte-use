@@ -5,22 +5,7 @@ export interface UseLongPressOptions {
 	distanceThreshold?: number;
 }
 
-/**
- * Detects long press gestures on an element.
- *
- * @param target - A getter returning the target element
- * @param handler - Callback fired on long press
- * @param options - Configuration for delay and distance threshold
- * @returns A cleanup function
- *
- * @example
- * ```ts
- * let el: HTMLElement;
- * useLongPress(() => el, (e) => {
- *   console.log('long pressed!', e);
- * }, { delay: 800 });
- * ```
- */
+/** Detects long press gestures on an element using pointer events. */
 export function useLongPress(
 	target: () => HTMLElement | null | undefined,
 	handler: (e: PointerEvent) => void,

@@ -278,11 +278,6 @@
 
 	/*
 	 * The single source of truth for which sections this page has.
-	 *
-	 * Both the rail and the `{#if}` around each <section> read this, so the
-	 * rail can never link to an anchor that was not rendered. That matters
-	 * because `prerender.handleMissingId` is 'warn': a mismatch would surface
-	 * only as build noise and a dead link, never as a failure.
 	 */
 	const tocEntries = $derived(
 		(
@@ -305,15 +300,13 @@
 	const hasSection = $derived(new Set(tocEntries.map((entry) => entry.id)));
 
 	/*
-	 * 112px clears the mobile stack: the 53px fixed top bar plus the sticky
-	 * "On this page" disclosure docked beneath it, which ends at 102px.
-	 * Measured, not guessed — an anchor landing behind the TOC is invisible.
+	 * 112px clears the mobile stack: the 53px fixed top bar plus the sticky "On this page" disclosure
+	 * docked beneath it, which ends at 102px.
 	 */
 	const sectionClass = 'mb-10 scroll-mt-24 max-md:scroll-mt-[112px]';
 
-	// `since` lives on the sidebar entry, so it is read from there rather than
-	// duplicated into pages.ts. Utils predating version tracking have none, and
-	// correctly show no badge.
+	// `since` lives on the sidebar entry, so it is read from there rather than duplicated into
+	// pages.ts. Utils predating version tracking have none, and correctly show no badge.
 	const entry = $derived(findItem(page.slug));
 	const since = $derived(entry?.since);
 	const isNewInThisRelease = $derived(entry ? isNew(entry) : false);
@@ -326,9 +319,8 @@
 	// Meta tags take the marker-free form — markup would leak into search
 	// results and link previews.
 
-	// ── Shared class strings ──────────────────────────────────────────────────
-	// Repeated across several sections; named here rather than pasted inline so
-	// a change lands in one place.
+	// ── Shared class strings ────────────────────────────────────────────────── Repeated across
+	// several sections; named here rather than pasted inline so a change lands in one place.
 	const sectionHeading =
 		'text-text-dim border-border m-0 mb-3.5 border-b pb-1.5 text-[1.05rem] font-semibold tracking-tight';
 	const codeBlock = 'bg-bg-sunken border-border m-0 overflow-x-auto rounded-lg border px-5 py-4.5';
@@ -346,9 +338,8 @@
 </script>
 
 <!--
-	The measure sits on this row, not the article: below `xl` the row *is* the
-	780px column, and at `xl` it widens by exactly rail + gap, so the article
-	keeps its own width and the rail fills what used to be dead space.
+	The measure sits on this row, not the article: below `xl` the row *is* the 780px column;
+	at `xl` it widens by exactly rail + gap, so the article keeps its width.
 -->
 <div class="mx-auto flex w-full max-w-[780px] flex-col gap-8 xl:max-w-[1020px] xl:flex-row">
 	<TableOfContents entries={tocEntries} />
@@ -362,10 +353,9 @@
 				</h1>
 				{#if since}
 					<!--
-					Outside the <h1> on purpose: the heading text is what feeds the
-					document outline, and "useColorMode v1.2.0" would read oddly there.
-					The title attribute carries the same information for a pointer user.
-				-->
+						Outside the <h1> on purpose: the heading text is what feeds the document outline, and
+						"useColorMode v1.2.0" would read oddly there.
+					-->
 					<span
 						class="shrink-0 rounded-full border px-2.5 py-1 font-sans text-[0.7rem] leading-none font-semibold tracking-wide {isNewInThisRelease
 							? 'text-accent-strong bg-accent-bg border-accent-border'

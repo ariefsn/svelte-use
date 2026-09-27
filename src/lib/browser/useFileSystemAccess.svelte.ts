@@ -1,10 +1,8 @@
 import { useSupported } from './useSupported.svelte.js';
 
 /*
- * TypeScript's `lib.dom` declares `FileSystemFileHandle` and
- * `createWritable()`, but not the two picker methods that hand one out. These
- * are module-local — never `declare global` — following the
- * `useSpeechRecognition` precedent, so nothing leaks into a consumer's types.
+ * TypeScript's `lib.dom` declares `FileSystemFileHandle` and `createWritable()`, but not the two
+ * picker methods that hand one out.
  */
 
 /** A file type offered in a picker's filter dropdown. */
@@ -77,42 +75,7 @@ export interface UseFileSystemAccessReturn {
 	close: () => void;
 }
 
-/**
- * Reading and **writing** real files, via the File System Access API.
- *
- * This is the piece `useFileDialog` and `useDropZone` cannot do: both acquire
- * a `File`, which is a read-only snapshot. Here you get a
- * `FileSystemFileHandle`, so `save()` writes back to the same file the user
- * opened — no re-download, no second picker.
- *
- * Both pickers must be called from a user gesture, and the user can dismiss
- * them, which surfaces as an `AbortError` in `error()` rather than a throw.
- *
- * Support is narrow: Chromium-based browsers only, and not in a cross-origin
- * iframe. Firefox and Safari have neither picker, so `isSupported()` is
- * `false` there and a download fallback is still needed.
- *
- * SSR: `isSupported()` is `false` and `open()` resolves `null`.
- *
- * @param options - File type filters and the suggested save name
- * @returns File state plus `open`, `save`, `saveAs` and `close`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useFileSystemAccess } from '@ariefsn/svelte-use';
- *
- *   const fs = useFileSystemAccess({
- *     types: [{ description: 'Text', accept: { 'text/plain': ['.txt', '.md'] } }],
- *     suggestedName: 'notes.txt'
- *   });
- * </script>
- *
- * <button onclick={fs.open}>Open</button>
- * <button onclick={() => fs.save(draft)} disabled={!fs.fileHandle()}>Save</button>
- * <p>{fs.fileName() ?? 'No file open'}</p>
- * ```
- */
+/** Reading and **writing** real files. */
 export function useFileSystemAccess(
 	options: UseFileSystemAccessOptions = {}
 ): UseFileSystemAccessReturn {
@@ -135,12 +98,7 @@ export function useFileSystemAccess(
 
 	const pickerOptions = (): FilePickerOptions => ({ types, excludeAcceptAllOption, id });
 
-	/**
-	 * Records a failure, treating a dismissed picker as ordinary.
-	 *
-	 * Generic rather than `unknown`, so TypeScript's own narrowing types each
-	 * branch — a `DOMException` stays one instead of being widened away.
-	 */
+	/** Records a failure, treating a dismissed picker as ordinary. */
 	function capture<V>(cause: V): null {
 		error = cause instanceof DOMException ? cause : new DOMException(String(cause), 'UnknownError');
 		return null;

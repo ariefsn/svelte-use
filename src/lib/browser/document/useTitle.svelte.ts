@@ -4,21 +4,18 @@ import { useRestoreOnDestroy } from './internal/useRestoreOnDestroy.svelte.js';
 /** Options for `useTitle`. */
 export interface UseTitleOptions {
 	/**
-	 * Restore the title present when this composable initialised, once the
-	 * owning scope is destroyed. Ignored in read-only mode, which never writes.
-	 * @default true
+	 * Restore the title present when this composable initialised, once the owning scope is destroyed.
+	 * Ignored in read-only mode, which never writes. Default `true`.
 	 */
 	restoreOnDestroy?: boolean;
 	/**
-	 * Wraps the value before writing, e.g. ``(t) => `${t} — Acme` ``. Applied
-	 * to `set()` calls too, so callers never pre-format.
-	 * @default (title) => title
+	 * Wraps the value before writing, e.g. ``(t) => `${t} — Acme` ``. Applied to `set()` calls too,
+	 * so callers never pre-format. Default `(title) => title`.
 	 */
 	template?: (title: string) => string;
 	/**
-	 * Track external writes to `document.title` with a `MutationObserver`.
-	 * Costs an observer, and is only useful in read-only mode.
-	 * @default false
+	 * Track external writes to `document.title` with a `MutationObserver`. Costs an observer, and is
+	 * only useful in read-only mode. Default `false`.
 	 */
 	observe?: boolean;
 }
@@ -32,37 +29,8 @@ export interface UseTitleReturn {
 }
 
 /**
- * Reads and writes `document.title`.
- *
- * Called with no argument it is **read-only**: it reports the current title and
- * never writes one. Called with a string or getter it owns the title, writing
- * on every change to the source.
- *
- * SSR: `current()` returns the resolved value so server-rendered UI that
- * displays the title is correct, but nothing is written — there is no
- * document. This does **not** set the server-rendered `<title>` element; use
- * `<svelte:head>` for that.
- *
- * @param title - Title to apply, or a getter for a reactive one. Omit for read-only.
- * @param options - Restore, template and observation behaviour
- * @returns Object with reactive `current` getter and `set` function
- *
- * @example
- * ```ts
- * const title = useTitle('Dashboard');
- * title.set('Dashboard — 3 alerts');
- * ```
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useTitle } from '@ariefsn/svelte-use';
- *
- *   let unread = $state(0);
- *   // Live counter in the tab, restored when the component unmounts
- *   useTitle(() => (unread > 0 ? `(${unread}) Inbox` : 'Inbox'));
- * </script>
- * ```
+ * Reads and writes `document.title`. Called with no argument it is read-only and never writes;
+ * called with a value it owns the title and restores the previous one on destroy.
  */
 export function useTitle(
 	title?: MaybeGetter<string>,

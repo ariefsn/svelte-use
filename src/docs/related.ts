@@ -42,9 +42,7 @@ function searchableText(page: DocPage): string {
 }
 
 /*
- * Indexes are built once at module load. This module is imported only by
- * `+page.server.ts`, so that happens once per build process rather than per
- * page — and `pages.ts` is 260KB, so it must never reach the client bundle.
+ * Indexes are built once at module load.
  */
 
 const slugMeta = new Map<string, SlugMeta>();
@@ -63,15 +61,7 @@ for (const group of sidebar) {
 const slugByLabel = new Map<string, string>();
 for (const [slug, meta] of slugMeta) slugByLabel.set(meta.label, slug);
 
-/**
- * Whether `text` names `label` as a code span.
- *
- * Delimiters are load-bearing: five labels are prefixes of others
- * (`useTimeout`/`useTimeoutFn`, `useMouse`/`useMouseInElement`,
- * `useScroll`/`useScrollLock`, `useInterval`/`useIntervalFn`,
- * `useDebounce`/`useDebounceFn`), so a bare `includes(label)` would report
- * relationships that do not exist.
- */
+/** Whether `text` names `label` as a code span. */
 function mentions(text: string, label: string): boolean {
 	return text.includes(`\`${label}\``) || text.includes(`\`${label}(`);
 }
@@ -107,26 +97,15 @@ function siblings(slug: string): string[] {
 	return group.items.map((item) => item.slug).filter((candidate) => candidate !== slug);
 }
 
-/**
- * Related utilities for a page, best first.
- *
- * Ranked: an explicit `related` override, then utilities this page's own prose
- * points at, then ones that point back at it, then same-group siblings. The
- * prose signal comes first because it reflects a relationship someone actually
- * wrote down — and it often crosses groups, which a sibling list cannot.
- *
- * @param slug - The page to find links for
- * @returns Up to four links, or fewer when the library genuinely has no more
- */
+/** Related utilities for a page, best first. */
 export function relatedFor(slug: string): RelatedLink[] {
 	const page = pages[slug];
 	if (!page) return [];
 
 	const explicit = (page.related ?? []).filter((candidate) => slugMeta.has(candidate));
 
-	// Prev/next already sit in the footer nav, so a sibling that is also a
-	// neighbour is kept but sorted last — excluding it outright would empty the
-	// block for a middle item of a small group.
+	// Prev/next already sit in the footer nav, so a sibling that is also a neighbour is kept but
+	// sorted last — excluding it outright would empty the block for a middle item of a small group.
 	const index = allSlugs.indexOf(slug);
 	const neighbours = new Set([allSlugs[index - 1], allSlugs[index + 1]].filter(Boolean));
 	const ranked = siblings(slug).sort(

@@ -2,9 +2,7 @@ import { flushSync } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import { useMousePressed } from './useMousePressed.svelte.js';
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function fireMouseDown(): void {
 	window.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
@@ -14,9 +12,7 @@ function fireMouseUp(): void {
 	window.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
 }
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('useMousePressed', () => {
 	test('returns false initially', () => {

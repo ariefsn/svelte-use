@@ -1,25 +1,15 @@
 /** Options for `useTextareaAutosize`. */
 export interface UseTextareaAutosizeOptions {
 	/**
-	 * Reactive getter for the textarea's current value. Needed because a
-	 * programmatic value change fires no `input` event.
+	 * Reactive getter for the textarea's current value. Needed because a programmatic value change
+	 * fires no `input` event.
 	 */
 	value?: () => string;
-	/**
-	 * Smallest height in rows. Below this the textarea keeps its natural
-	 * height.
-	 */
+	/** Smallest height in rows. Below this the textarea keeps its natural height. */
 	minRows?: number;
 	/** Largest height in rows. Past this the textarea scrolls instead. */
 	maxRows?: number;
-	/**
-	 * Which CSS property to drive.
-	 *
-	 * `'height'` resizes immediately; `'minHeight'` lets the textarea grow but
-	 * never shrink below what the user has dragged it to.
-	 *
-	 * @default 'height'
-	 */
+	/** Which CSS property to drive. Default `'height'`. */
 	styleProp?: 'height' | 'minHeight';
 }
 
@@ -31,37 +21,7 @@ export interface UseTextareaAutosizeReturn {
 	height: () => number;
 }
 
-/**
- * Grows a textarea to fit its content.
- *
- * Resizing works by collapsing the height, reading `scrollHeight`, then
- * applying it — the collapse is required, because `scrollHeight` never reports
- * less than the current height.
- *
- * Recalculates on `input`, on window resize (wrapping changes with width), and
- * whenever the reactive `value` getter changes — the last case covers
- * programmatic edits, which fire no `input` event.
- *
- * SSR safe: nothing is measured or styled until the effect runs.
- *
- * @param target - Reactive getter returning the textarea, or `null`
- * @param options - Optional configuration
- * @returns Object with a manual `resize` and the applied `height`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useTextareaAutosize } from '@ariefsn/svelte-use';
- *
- *   let el = $state<HTMLTextAreaElement | null>(null);
- *   let text = $state('');
- *
- *   useTextareaAutosize(() => el, { value: () => text, maxRows: 10 });
- * </script>
- *
- * <textarea bind:this={el} bind:value={text} rows="1"></textarea>
- * ```
- */
+/** Grows a textarea to fit its content. */
 export function useTextareaAutosize(
 	target: () => HTMLTextAreaElement | null | undefined,
 	options: UseTextareaAutosizeOptions = {}

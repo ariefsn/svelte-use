@@ -1,6 +1,4 @@
-/**
- * Shape of the return value from {@link useBrowserLocation}.
- */
+/** Shape of the return value from {@link useBrowserLocation}. */
 export interface UseBrowserLocationReturn {
 	/** Getter for the full URL string (`window.location.href`). */
 	href: () => string;
@@ -13,22 +11,8 @@ export interface UseBrowserLocationReturn {
 }
 
 /**
- * Reactive browser `location` snapshot.
- *
- * Reads `window.location` on initialisation and re-reads it whenever
- * the browser fires a `popstate` or `hashchange` event, keeping all
- * properties in sync with navigation. Returns empty strings during SSR.
- *
- * Event listeners are removed when the reactive scope is destroyed.
- *
- * @returns An object of getter functions for `href`, `pathname`, `search`, and `hash`.
- *
- * @example
- * ```ts
- * const { pathname, hash } = useBrowserLocation();
- * pathname(); // '/about'
- * hash();     // '#section-1'
- * ```
+ * Reactive snapshot of `window.location`. Updates on `popstate` and `hashchange` events, keeping
+ * `href`, `pathname`, `search`, and `hash` in sync with navigation.
  */
 export function useBrowserLocation(): UseBrowserLocationReturn {
 	const isBrowser = typeof window !== 'undefined';

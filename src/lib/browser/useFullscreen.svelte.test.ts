@@ -3,11 +3,8 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useFullscreen } from './useFullscreen.svelte.js';
 
 /**
- * Real fullscreen needs a user gesture, which headless Chromium will not
- * grant, so `requestFullscreen` / `exitFullscreen` are stubbed and
- * `document.fullscreenElement` is faked. What is actually under test is the
- * bookkeeping: which element is considered fullscreen, and that the state
- * follows the `fullscreenchange` event rather than what we last called.
+ * Real fullscreen needs a user gesture, which headless Chromium will not grant, so
+ * `requestFullscreen` / `exitFullscreen` are stubbed and `document.fullscreenElement` is faked.
  */
 
 /** Points `document.fullscreenElement` at `element`, as the browser would. */

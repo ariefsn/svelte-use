@@ -20,16 +20,12 @@ export const load: PageServerLoad = ({ params }) => {
 	return {
 		page,
 		/*
-		 * Derived server-side on purpose. `related.ts` imports `pages.ts`, which
-		 * is 260KB — deriving this in the component would pull all of it into the
-		 * client bundle for the sake of four links.
+		 * Derived server-side on purpose. `related.ts` imports `pages.ts`, which is 260KB — deriving
+		 * this in the component would pull all of it into the client bundle for the sake of four links.
 		 */
 		related: relatedFor(params.slug),
 		/*
 		 * Merged into the layout defaults by the single `<Seo />` there.
-		 * `stripInline` is what keeps the doc copy's backticks and asterisks
-		 * out of the meta description — markup leaking into SEO tags was the
-		 * original reason that helper exists.
 		 */
 		seo: {
 			title: page.title,

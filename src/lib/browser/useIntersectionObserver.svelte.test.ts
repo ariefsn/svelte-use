@@ -2,9 +2,7 @@ import { flushSync } from 'svelte';
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { useIntersectionObserver } from './useIntersectionObserver.svelte.js';
 
-// ---------------------------------------------------------------------------
 // Mock IntersectionObserver
-// ---------------------------------------------------------------------------
 
 type IntersectionCallback = (entries: IntersectionObserverEntry[]) => void;
 
@@ -50,9 +48,7 @@ class MockIntersectionObserver {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // Setup / teardown
-// ---------------------------------------------------------------------------
 
 beforeEach(() => {
 	MockIntersectionObserver.instances = [];
@@ -63,9 +59,7 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('useIntersectionObserver', () => {
 	test('isIntersecting starts as false', () => {

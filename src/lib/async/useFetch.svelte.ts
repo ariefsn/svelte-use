@@ -1,12 +1,10 @@
 export interface UseFetchOptions {
 	/**
-	 * Whether to execute the fetch immediately when the composable is created,
-	 * and whenever the `url` changes. Default: `true`.
+	 * Whether to execute the fetch immediately when the composable is created, and whenever the `url`
+	 * changes. Default: `true`.
 	 */
 	immediate?: boolean;
-	/**
-	 * Optional `RequestInit` options forwarded to every `fetch` call.
-	 */
+	/** Optional `RequestInit` options forwarded to every `fetch` call. */
 	init?: RequestInit;
 }
 
@@ -22,29 +20,8 @@ export interface UseFetchReturn<T> {
 }
 
 /**
- * Reactive fetch utility with automatic re-execution when the URL changes,
- * in-flight request abortion via `AbortController`, and full SSR safety.
- *
- * @template T - The expected shape of the parsed JSON response body.
- *
- * @param url - Reactive getter returning the URL to fetch, or `undefined` to
- *   skip fetching.
- * @param options - Optional configuration.
- * @param options.immediate - Auto-execute on mount and on URL change (default: `true`).
- * @param options.init - `RequestInit` options forwarded to every `fetch` call.
- * @returns Reactive state object with `data`, `error`, `isFetching`, and `execute`.
- *
- * @example
- * ```ts
- * let id = $state(1);
- * const { data, error, isFetching, execute } = useFetch<User>(
- *   () => `/api/users/${id}`
- * );
- * // Refetch by changing the URL:
- * id = 2; // triggers re-fetch automatically
- * // Or trigger manually:
- * await execute();
- * ```
+ * Reactive fetch utility with automatic re-execution when the URL changes, in-flight request
+ * abortion via `AbortController`, and full SSR safety.
  */
 export function useFetch<T>(
 	url: () => string | undefined,

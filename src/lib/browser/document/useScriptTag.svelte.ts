@@ -14,74 +14,33 @@ const LOADED_ATTRIBUTE = 'data-svelte-use-loaded';
 /** Options for `useScriptTag`. */
 export interface UseScriptTagOptions {
 	/**
-	 * Element id, and the dedupe key. Defaults to a value derived from `src`,
-	 * so two components loading the same SDK share one tag automatically.
-	 * @default derived from `src`
+	 * Element id, and the dedupe key. Defaults to a value derived from `src`, so two components
+	 * loading the same SDK share one tag automatically. Default `derived from `src``.
 	 */
 	id?: string;
-	/**
-	 * `async` attribute.
-	 * @default true
-	 */
+	/** `async` attribute. Default `true`. */
 	async?: boolean;
-	/**
-	 * `defer` attribute.
-	 * @default false
-	 */
+	/** `defer` attribute. Default `false`. */
 	defer?: boolean;
-	/**
-	 * `type` attribute.
-	 * @default 'text/javascript'
-	 */
+	/** `type` attribute. Default `'text/javascript'`. */
 	type?: string;
-	/**
-	 * `crossorigin` attribute.
-	 * @default undefined
-	 */
+	/** `crossorigin` attribute. Default `undefined`. */
 	crossOrigin?: 'anonymous' | 'use-credentials';
-	/**
-	 * `referrerpolicy` attribute.
-	 * @default undefined
-	 */
+	/** `referrerpolicy` attribute. Default `undefined`. */
 	referrerPolicy?: ReferrerPolicy;
-	/**
-	 * Subresource integrity hash.
-	 * @default undefined
-	 */
+	/** Subresource integrity hash. Default `undefined`. */
 	integrity?: string;
-	/**
-	 * `nomodule` attribute.
-	 * @default false
-	 */
+	/** `nomodule` attribute. Default `false`. */
 	noModule?: boolean;
-	/**
-	 * Append as soon as the composable initialises.
-	 * @default true
-	 */
+	/** Append as soon as the composable initialises. Default `true`. */
 	immediate?: boolean;
-	/**
-	 * Detach the tag once the last consumer's scope is destroyed.
-	 *
-	 * Defaults **off**, unlike `useStyleTag`: removing a `<script>` does not
-	 * undo what it did — every global it defined, listener it bound and timer
-	 * it started stays — while re-adding it runs all of that a second time.
-	 * @default false
-	 */
+	/** Detach the tag once the last consumer's scope is destroyed. Default `false`. */
 	removeOnDestroy?: boolean;
-	/**
-	 * Container to append into.
-	 * @default () => document.head
-	 */
+	/** Container to append into. Default `() => document.head`. */
 	parent?: () => HTMLElement | null | undefined;
-	/**
-	 * Called once the script has executed.
-	 * @default undefined
-	 */
+	/** Called once the script has executed. Default `undefined`. */
 	onLoaded?: (element: HTMLScriptElement) => void;
-	/**
-	 * Called when the script fails to load.
-	 * @default undefined
-	 */
+	/** Called when the script fails to load. Default `undefined`. */
 	onError?: (event: Event) => void;
 }
 
@@ -97,24 +56,13 @@ export interface UseScriptTagReturn {
 	isLoaded: () => boolean;
 	/** The failure event, or `null`. */
 	error: () => Event | null;
-	/**
-	 * Appends the tag if absent and resolves once it has executed.
-	 *
-	 * Repeat calls return the same promise, and a second consumer of an
-	 * already-loaded script resolves immediately.
-	 */
+	/** Appends the tag if absent and resolves once it has executed. */
 	load: () => Promise<HTMLScriptElement>;
 	/** Drops this consumer's reference. Idempotent. */
 	unload: () => void;
 }
 
-/**
- * The promise shared by every consumer of one script element.
- *
- * Stored per element rather than per composable: a second consumer attaching
- * its own `load` listener after the event already fired would wait forever,
- * so it has to settle from the first consumer's promise instead.
- */
+/** The promise shared by every consumer of one script element. */
 function createLoadPromise(
 	element: HTMLScriptElement,
 	origin: HeadElementOrigin
@@ -147,42 +95,7 @@ function idFromSrc(src: string): string {
 	return `svelte-use-script-${(hash >>> 0).toString(36)}`;
 }
 
-/**
- * Loads an external script, deduplicated across every call site.
- *
- * Two components asking for the same URL share one `<script>` element and one
- * load promise, so the second resolves as soon as the first has executed
- * rather than waiting on an event that already fired. A tag already present in
- * `app.html` is adopted rather than duplicated.
- *
- * SSR safe: nothing is appended, `status()` stays `'idle'`, and `load()`
- * returns a promise that never settles — awaiting it on the server would be a
- * bug in the caller either way.
- *
- * @param src - Script URL, or a getter
- * @param options - Attributes and lifecycle behaviour
- * @returns Object with `id`, reactive status getters, and `load` / `unload`
- *
- * @example
- * ```ts
- * const script = useScriptTag('https://cdn.example.com/sdk.js');
- * await script.load();
- * script.isLoaded(); // → true
- * ```
- *
- * @example
- * ```ts
- * // Defer loading until the user actually needs it
- * const script = useScriptTag('https://cdn.example.com/player.js', {
- *   immediate: false
- * });
- *
- * async function play() {
- *   await script.load();
- *   // the SDK's globals are available here
- * }
- * ```
- */
+/** Loads an external script, deduplicated across every call site. */
 export function useScriptTag(
 	src: MaybeGetter<string>,
 	options: UseScriptTagOptions = {}

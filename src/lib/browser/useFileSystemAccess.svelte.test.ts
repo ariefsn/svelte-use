@@ -3,9 +3,7 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useFileSystemAccess } from './useFileSystemAccess.svelte.js';
 
 /**
- * The File System Access API needs a user gesture and a real picker, so both
- * pickers are stubbed. `useSupported` evaluates immediately, so every stub is
- * installed before the composable is constructed.
+ * The File System Access API needs a user gesture and a real picker, so both pickers are stubbed.
  */
 
 /** A writable stream that records what was written and when it closed. */
@@ -27,10 +25,8 @@ function makeWritable() {
 }
 
 /**
- * A class, not an object literal, because `$state` deep-proxies plain objects
- * — a literal would come back from `fileHandle()` as a Proxy and fail identity
- * checks. A real `FileSystemFileHandle` is a class instance and is never
- * proxied, so this keeps the fake faithful to what ships.
+ * A class, not an object literal, because `$state` deep-proxies plain objects — a literal would
+ * come back from `fileHandle()` as a Proxy and fail identity checks.
  */
 class FakeFileHandle {
 	readonly kind = 'file' as const;

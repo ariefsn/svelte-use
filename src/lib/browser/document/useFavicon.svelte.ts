@@ -4,27 +4,14 @@ import { acquireHeadElement, type HeadElementHandle } from './internal/headEleme
 /** Options for `useFavicon`. */
 export interface UseFaviconOptions {
 	/**
-	 * `rel` of the managed link, and the selector used to adopt an existing one.
-	 * @default 'icon'
+	 * `rel` of the managed link, and the selector used to adopt an existing one. Default `'icon'`.
 	 */
 	rel?: string;
-	/**
-	 * Set the link's `type` from the href's file extension.
-	 * @default true
-	 */
+	/** Set the link's `type` from the href's file extension. Default `true`. */
 	inferType?: boolean;
-	/**
-	 * Restore the href present at initialisation when the scope is destroyed.
-	 *
-	 * Applies only to an *adopted* link — one this composable created is
-	 * removed instead, since there is no earlier state to return to.
-	 * @default true
-	 */
+	/** Restore the href present at initialisation when the scope is destroyed. Default `true`. */
 	restoreOnDestroy?: boolean;
-	/**
-	 * Container to search and append into.
-	 * @default () => document.head
-	 */
+	/** Container to search and append into. Default `() => document.head`. */
 	parent?: () => HTMLElement | null | undefined;
 }
 
@@ -60,33 +47,8 @@ function mimeFor(href: string): string | null {
 }
 
 /**
- * Reads and writes the document favicon.
- *
- * Adopts an existing `<link rel="icon">` rather than appending a second one,
- * because browsers choose unpredictably among duplicates. When none exists a
- * link is created, and removed again on destroy.
- *
- * SSR safe: no DOM is touched and `current()` still reports the resolved href.
- *
- * @param href - Favicon URL, or a getter. Omit for read-only use.
- * @param options - rel, type inference, restore and container behaviour
- * @returns Object with reactive `current` getter and `set` function
- *
- * @example
- * ```ts
- * useFavicon('/icons/alert.svg');
- * ```
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useFavicon } from '@ariefsn/svelte-use';
- *
- *   let unread = $state(0);
- *   // Swap the icon while messages are waiting
- *   useFavicon(() => (unread > 0 ? '/icons/unread.svg' : '/icons/idle.svg'));
- * </script>
- * ```
+ * Reads and writes the document favicon. Adopts an existing `link rel="icon"` rather than appending
+ * a second one, because browsers choose unpredictably among duplicates.
  */
 export function useFavicon(
 	href?: MaybeGetter<string | null | undefined>,

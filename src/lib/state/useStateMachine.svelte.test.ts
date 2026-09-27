@@ -221,9 +221,8 @@ describe('useStateMachine', () => {
 		cleanup();
 	});
 
-	// The type-level guarantees are the main claim this util makes, so they are
-	// pinned here: an unused `@ts-expect-error` fails `bun run check`, so a
-	// later loosening of the signature breaks the build.
+	// The type-level guarantees are this util's main claim, so they are pinned here: an unused
+	// `@ts-expect-error` fails `bun run check`, so a later loosening breaks the build.
 	test('rejects unknown actions, states and transition targets at compile time', () => {
 		const cleanup = $effect.root(() => {
 			const machine = fetchMachine();

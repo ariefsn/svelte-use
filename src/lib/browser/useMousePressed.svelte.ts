@@ -1,25 +1,4 @@
-/**
- * Reactive mouse-pressed state tracker.
- *
- * Returns a getter function that is `true` while any mouse button is held
- * down anywhere in the document. State is driven by `mousedown` and `mouseup`
- * events on `window`.
- *
- * Listeners are registered inside a `$effect` and cleaned up automatically
- * when the reactive scope is destroyed. Safe to call in SSR environments —
- * no listeners are registered outside the browser.
- *
- * @returns Getter that returns `true` while a mouse button is pressed
- *
- * @example
- * ```ts
- * const isPressed = useMousePressed();
- *
- * $effect(() => {
- *   if (isPressed()) startDrag();
- * });
- * ```
- */
+/** Tracks whether any mouse button is currently pressed anywhere in the document. */
 export function useMousePressed(): () => boolean {
 	let pressed = $state(false);
 

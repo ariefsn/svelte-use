@@ -4,13 +4,8 @@ import { describe, expect, it } from 'vitest';
 import { colorModeScript } from '../lib/browser/document/colorModeScript.js';
 
 /**
- * `app.html` carries a hand-pasted copy of the pre-paint script, because it is
- * a static file with no build step to generate one.
- *
- * That copy can silently drift from `colorModeScript()` — and the failure mode
- * is nasty: the site keeps working, but the theme flashes on every load, or
- * the script writes an attribute the composable does not read. These checks
- * make the drift a build failure instead.
+ * `app.html` carries a hand-pasted copy of the pre-paint script, because it is a static file with
+ * no build step to generate one.
  */
 describe('pre-paint colour mode script', () => {
 	const appHtml = readFileSync(join(process.cwd(), 'src/app.html'), 'utf8');

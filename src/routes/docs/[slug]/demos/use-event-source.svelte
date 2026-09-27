@@ -10,9 +10,8 @@
 		events: ['ping']
 	});
 
-	// `data()` is the latest frame, not an accumulation, so a token stream has
-	// to be appended by the consumer. `story += chunk` reads and writes the
-	// same state, so it must be untracked or the effect re-triggers forever.
+	// `data()` is the latest frame, not an accumulation, so a token stream has to be appended by the
+	// consumer.
 	let story = $state('');
 	$effect(() => {
 		const chunk = stream.data();

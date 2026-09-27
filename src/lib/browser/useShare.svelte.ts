@@ -14,19 +14,7 @@ export interface UseShareReturn {
 	share: (data?: UseShareData) => Promise<boolean>;
 }
 
-/**
- * Reactive wrapper around the Web Share API.
- *
- * The `share` action must be triggered by a user gesture (e.g., button click).
- *
- * @returns Object with `isSupported` and `share`
- *
- * @example
- * ```ts
- * const { isSupported, share } = useShare();
- * await share({ title: 'Check this out', url: location.href });
- * ```
- */
+/** Reactive wrapper around the Web Share API for native sharing. */
 export function useShare(): UseShareReturn {
 	const isSupported = useSupported(() => 'share' in navigator);
 

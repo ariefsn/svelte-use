@@ -2,12 +2,8 @@
 	import { useColorMode } from '$lib';
 
 	/*
-	 * Deliberately the site's own colour mode — same default storage key, same
-	 * target — rather than a sandboxed copy. Changing it here moves the whole
-	 * page, and the toggle in the sidebar follows instantly, which is the
-	 * same-page sync channel doing its job: the `storage` event does not fire
-	 * in the tab that caused the write, so two instances would otherwise
-	 * disagree.
+	 * Deliberately the site's own colour mode — same default storage key, same target — rather than a
+	 * sandboxed copy.
 	 */
 	const theme = useColorMode({ initialValue: 'dark' });
 

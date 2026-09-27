@@ -7,9 +7,8 @@ describe('parseMessageData', () => {
 	});
 
 	it('parses JSON scalars, including ones that are falsy', () => {
-		// `0`, `false` and `null` are valid JSON documents. An implementation
-		// that treated a falsy parse result as failure would hand back the
-		// string '0' instead of the number.
+		// `0`, `false` and `null` are valid JSON documents. An implementation that treated a falsy
+		// parse result as failure would hand back the string '0' instead of the number.
 		expect(parseMessageData<number>('0')).toBe(0);
 		expect(parseMessageData<boolean>('false')).toBe(false);
 		expect(parseMessageData<null>('null')).toBeNull();

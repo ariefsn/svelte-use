@@ -29,9 +29,8 @@ class MockMediaQueryList {
 }
 
 /**
- * useMediaQuery calls matchMedia twice per query — once for the synchronous
- * initial read and once in the effect that subscribes. Only the latter carries
- * a listener, so assertions target those.
+ * useMediaQuery calls matchMedia twice per query — once for the synchronous initial read and once
+ * in the effect that subscribes. Only the latter carries a listener, so assertions target those.
  */
 function listening(): MockMediaQueryList[] {
 	return MockMediaQueryList.instances.filter((i) => i.addEventListener.mock.calls.length > 0);
@@ -76,9 +75,8 @@ describe('useMediaQuery', () => {
 	});
 
 	test('reads the initial match synchronously, before any effect runs', () => {
-		// Consumers such as useBreakpoints rely on this: deferring to the
-		// effect would make them flash their non-matching branch on first
-		// render.
+		// Consumers such as useBreakpoints rely on this: deferring to the effect would make them flash
+		// their non-matching branch on first render.
 		window.matchMedia = vi.fn((q: string) => {
 			const mql = new MockMediaQueryList(q);
 			mql.matches = true;

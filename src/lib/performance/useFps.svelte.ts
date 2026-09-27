@@ -1,20 +1,8 @@
 import { useRafFn } from '../animation/useRafFn.svelte.js';
 
 /**
- * Measures the current frames-per-second rate using `requestAnimationFrame`.
- *
- * Starts a lightweight RAF loop on mount and samples the elapsed time between
- * successive frames to compute a rolling FPS value. The loop is cancelled when
- * the reactive scope is destroyed. Returns `0` during SSR where
- * `requestAnimationFrame` is unavailable.
- *
- * @returns A getter function returning the current FPS as a number.
- *
- * @example
- * ```ts
- * const fps = useFps();
- * fps(); // e.g. 60
- * ```
+ * Tracks the current frames-per-second rate of the browser rendering loop using
+ * `requestAnimationFrame`.
  */
 export function useFps(): () => number {
 	let fps = $state<number>(0);

@@ -12,30 +12,13 @@ export interface AsyncQueueTask<T> {
 
 /** Options for `useAsyncQueue`. */
 export interface UseAsyncQueueOptions<T> {
-	/**
-	 * How many tasks may run at once.
-	 *
-	 * `1` runs them strictly in series, which is the point when each task
-	 * depends on the one before.
-	 * @default 1
-	 */
+	/** How many tasks may run at once. Default `1`. */
 	concurrency?: number;
-	/**
-	 * Stop the queue when a task rejects, marking the rest `aborted`.
-	 *
-	 * Leave it on for a dependent sequence; turn it off to run everything and
-	 * collect the failures.
-	 * @default true
-	 */
+	/** Stop the queue when a task rejects, marking the rest `aborted`. Default `true`. */
 	abortOnError?: boolean;
 	/** Called once every task has settled. */
 	onFinished?: () => void;
-	/**
-	 * Called when a task resolves, with its index in the original array.
-	 *
-	 * The counterpart to `onError`: together they let a per-row UI update as
-	 * each task lands, rather than only once the whole queue is done.
-	 */
+	/** Called when a task resolves, with its index in the original array. */
 	onSuccess?: (data: T, index: number) => void;
 	/** Called when a task rejects, with its index in the original array. */
 	onError?: (error: Error, index: number) => void;
@@ -56,40 +39,8 @@ export interface UseAsyncQueueReturn<T> {
 }
 
 /**
- * Runs a list of async tasks with bounded concurrency, tracking each one.
- *
- * `useAsyncState` covers a single execution; this covers a batch where you
- * need per-task status — uploading ten files and showing which succeeded,
- * or a dependent sequence that should stop at the first failure.
- *
- * Tasks start as soon as the composable is created. Already-running tasks
- * cannot be cancelled by `abort()` — a `Promise` has no cancellation — so it
- * stops *starting* new ones and marks the unsettled as aborted. Give each task
- * an `AbortSignal` of your own if the work itself must stop.
- *
- * @template T - What the tasks resolve to
- * @param tasks - The functions to run, each returning a promise
- * @param options - Concurrency and failure behaviour
- * @returns Per-task state plus `abort`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useAsyncQueue } from '@ariefsn/svelte-use';
- *
- *   let { files }: { files: File[] } = $props();
- *
- *   const queue = useAsyncQueue(
- *     files.map((file) => () => upload(file)),
- *     { concurrency: 3, abortOnError: false }
- *   );
- * </script>
- *
- * <progress value={queue.settled()} max={queue.tasks().length}></progress>
- * {#each queue.tasks() as task, i (i)}
- *   <li>{files[i].name} — {task.status}</li>
- * {/each}
- * ```
+ * Runs a list of async tasks with bounded concurrency, tracking each one. `useAsyncState` covers a
+ * single execution; this covers a batch where you need per-task status.
  */
 export function useAsyncQueue<T>(
 	tasks: readonly (() => Promise<T>)[],

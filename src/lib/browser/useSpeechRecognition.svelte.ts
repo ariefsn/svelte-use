@@ -51,9 +51,7 @@ function getSpeechRecognition(): SpeechRecognitionConstructor | null {
 	return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
-/**
- * Options for {@link useSpeechRecognition}.
- */
+/** Options for {@link useSpeechRecognition}. */
 export interface UseSpeechRecognitionOptions {
 	/** BCP 47 language tag, e.g. `'en-US'`. Defaults to the document language. */
 	lang?: string;
@@ -63,9 +61,7 @@ export interface UseSpeechRecognitionOptions {
 	interimResults?: boolean;
 }
 
-/**
- * Return value of {@link useSpeechRecognition}.
- */
+/** Return value of {@link useSpeechRecognition}. */
 export interface UseSpeechRecognitionReturn {
 	/** Getter returning the latest recognised transcript. */
 	result: () => string;
@@ -73,14 +69,7 @@ export interface UseSpeechRecognitionReturn {
 	isListening: () => boolean;
 	/** Getter returning `true` when the Web Speech API is available. */
 	isSupported: () => boolean;
-	/**
-	 * Getter returning the last error code, or `null`.
-	 *
-	 * Common values: `not-allowed` (microphone permission denied),
-	 * `network` (the browser's speech service is unreachable — frequent on
-	 * Chromium forks that lack Google's speech API keys), `no-speech`,
-	 * `aborted`, `service-not-allowed`.
-	 */
+	/** Getter returning the last error code, or `null`. */
 	error: () => string | null;
 	/** Starts the speech recognition session. No-op when unsupported. */
 	start: () => void;
@@ -89,28 +78,8 @@ export interface UseSpeechRecognitionReturn {
 }
 
 /**
- * Reactive Web Speech API wrapper.
- *
- * Exposes `start` and `stop` controls and a reactive `result` getter that
- * updates as the browser transcribes speech. Uses the vendor-prefixed
- * `webkitSpeechRecognition` as a fallback for Safari/Chrome compatibility.
- *
- * When the Speech Recognition API is unavailable (SSR, unsupported browser)
- * `start` and `stop` are no-ops, `result` returns `''`, and `isListening`
- * returns `false`.
- *
- * The recogniser is stopped and cleaned up when the reactive scope is
- * destroyed.
- *
- * @returns An object with `result`, `isListening`, `start`, and `stop`.
- *
- * @example
- * ```ts
- * const { result, isListening, start, stop } = useSpeechRecognition();
- * start();
- * isListening(); // true
- * result();      // live transcript
- * ```
+ * Reactive speech-to-text using the Web Speech API. Returns a live transcript that updates as the
+ * user speaks.
  */
 export function useSpeechRecognition(
 	options: UseSpeechRecognitionOptions = {}
@@ -141,9 +110,8 @@ export function useSpeechRecognition(
 			isListening = false;
 		};
 
-		// Capture the error code rather than discarding it — without this every
-		// failure (denied microphone, unreachable speech service, no speech)
-		// looks identical to a normal stop.
+		// Capture the error code rather than discarding it — without this every failure (denied
+		// microphone, unreachable speech service, no speech) looks identical to a normal stop.
 		recognition.onerror = (event: Event) => {
 			error = (event as SpeechRecognitionErrorEvent).error ?? 'unknown';
 			isListening = false;
@@ -158,9 +126,8 @@ export function useSpeechRecognition(
 		try {
 			recognition.start();
 		} catch (err) {
-			// Calling start() while a previous session is still winding down
-			// throws InvalidStateError; surface it instead of leaving the UI
-			// stuck in a listening state that never began.
+			// Calling start() while a previous session is still winding down throws InvalidStateError;
+			// surface it instead of leaving the UI stuck in a listening state that never began.
 			error = err instanceof Error ? err.name : 'start-failed';
 			isListening = false;
 		}

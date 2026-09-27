@@ -1,9 +1,4 @@
-/**
- * Open Graph metadata, used by link unfurlers.
- *
- * Anything omitted falls back to the top-level equivalent, so a page that only
- * sets `title` and `description` still produces a complete card.
- */
+/** Open Graph metadata, used by link unfurlers. */
 export interface SeoOpenGraph {
 	/** Falls back to the resolved `title`. */
 	title?: string;
@@ -14,22 +9,13 @@ export interface SeoOpenGraph {
 	/** Falls back to `canonical`. */
 	url?: string;
 	/**
-	 * The preview image. Must be absolute once rendered — a relative value is
-	 * resolved against `baseUrl`.
-	 *
-	 * Use a **raster** format: Facebook, X, LinkedIn and WhatsApp do not render
-	 * SVG previews, so an `.svg` here shows as a card with no image at all.
+	 * The preview image. Must be absolute once rendered — a relative value is resolved against
+	 * `baseUrl`.
 	 */
 	image?: string;
 	/** Alternative text for the image. */
 	imageAlt?: string;
-	/**
-	 * Image width in pixels.
-	 *
-	 * Worth setting: without dimensions Facebook and LinkedIn have to fetch and
-	 * measure the image before they can lay the card out, so the *first* share
-	 * of a URL often previews with no image at all. 1200×630 is the usual size.
-	 */
+	/** Image width in pixels. */
 	imageWidth?: number;
 	/** Image height in pixels. See {@link SeoOpenGraph.imageWidth}. */
 	imageHeight?: number;
@@ -42,8 +28,8 @@ export interface SeoOpenGraph {
 }
 
 /**
- * Article metadata, read by Facebook and LinkedIn when `og.type` is
- * `'article'`. Ignored for other types.
+ * Article metadata, read by Facebook and LinkedIn when `og.type` is `'article'`. Ignored for other
+ * types.
  */
 export interface SeoArticle {
 	/** ISO 8601 publication time, e.g. `'2026-09-28T10:00:00Z'`. */
@@ -76,38 +62,17 @@ export interface SeoTwitter {
 	imageAlt?: string;
 }
 
-/**
- * The metadata for a page.
- *
- * **Every value must be plain, serialisable data.** A page's override usually
- * arrives through `page.data.seo` from a server `load`, which crosses devalue
- * serialisation — so a function would not survive the trip. That is why
- * `titleTemplate` is a string with a `%s` placeholder rather than a callback,
- * which is the one place this diverges from `useTitle`.
- */
+/** The metadata for a page. */
 export interface SeoData {
 	/** The page title. */
 	title?: string;
-	/**
-	 * Wraps `title`, with `%s` replaced by it — e.g. `'%s — Svelte Use'`.
-	 *
-	 * Ignored when there is no `title`, so a layout default does not produce a
-	 * stray `' — Svelte Use'` on a page that sets none.
-	 */
+	/** Wraps `title`, with `%s` replaced by it — e.g. `'%s — Svelte Use'`. */
 	titleTemplate?: string;
 	/** The page description. */
 	description?: string;
 	/** Canonical URL. Relative values are resolved against `baseUrl`. */
 	canonical?: string;
-	/**
-	 * Absolute site origin, e.g. `'https://example.com'`.
-	 *
-	 * Required for correct output when prerendering: SvelteKit reports
-	 * `page.url.origin` as `http://sveltekit-prerender` during a build, so
-	 * anything derived from it leaks that placeholder into the shipped HTML.
-	 * Open Graph images in particular **must** be absolute or unfurlers ignore
-	 * them.
-	 */
+	/** Absolute site origin, e.g. `'https://example.com'`. */
 	baseUrl?: string;
 	/** Keywords. Rendered as a single comma-separated tag. */
 	keywords?: readonly string[];
@@ -116,21 +81,15 @@ export interface SeoData {
 	/** Open Graph section. */
 	og?: SeoOpenGraph;
 	/**
-	 * Article metadata. Only meaningful when `og.type` is `'article'`, and
-	 * skipped entirely otherwise rather than emitting tags nothing reads.
+	 * Article metadata. Only meaningful when `og.type` is `'article'`, and skipped entirely otherwise
+	 * rather than emitting tags nothing reads.
 	 */
 	article?: SeoArticle;
 	/** Twitter card section. */
 	twitter?: SeoTwitter;
 }
 
-/**
- * One rendered tag.
- *
- * `key` is both the `{#each}` key and the merge identity, which is what makes
- * "exactly one `<meta name="description">`" a property the tag builder can be
- * tested for rather than something to hope about.
- */
+/** One rendered tag. */
 export interface SeoTag {
 	/** Stable identity, e.g. `'description'` or `'og:image'`. */
 	readonly key: string;

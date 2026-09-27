@@ -5,9 +5,8 @@
 
 	const { play, pause, cancel, finish, isRunning } = useAnimate(
 		() => el,
-		// Concrete colours rather than `var(--color-accent)`: the Web Animations
-		// API interpolates between colour *values*, and browsers do not reliably
-		// resolve a custom property inside a keyframe.
+		// Concrete colours rather than `var(--color-accent)`: the Web Animations API
+		// interpolates between colour *values* and will not resolve a custom property.
 		() => [
 			{ transform: 'translateX(0px)', background: '#a78bfa' },
 			{ transform: 'translateX(160px)', background: '#7c3aed' }

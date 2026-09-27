@@ -219,9 +219,7 @@ describe('useElementBounding', () => {
 	});
 
 	test('does not notice the element moving without resizing', () => {
-		// The documented reason update() exists. ResizeObserver watches only the
-		// element's own size, and moving it fires no scroll or resize event, so
-		// the tracked position goes stale until update() is called.
+		// The documented reason update() exists.
 		const el = document.createElement('div');
 		document.body.appendChild(el);
 		place(el, { x: 0, y: 100, width: 50, height: 50 });

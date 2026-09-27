@@ -31,37 +31,8 @@ export interface UseImageReturn {
 }
 
 /**
- * Preloads an image and tracks its state.
- *
- * Loading happens on a detached `Image`, so the browser has the bytes cached
- * before the `<img>` that shows it is ever rendered — which is how you avoid a
- * layout jump or a flash of empty space.
- *
- * A reactive source reloads automatically, and a result arriving for a source
- * that is no longer current is discarded rather than overwriting fresher state.
- *
- * SSR: nothing loads, `isLoading()` is `false` and `image()` is `null`.
- *
- * @param source - The image to load, or a getter for a reactive one
- * @returns Load state plus `refresh`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useImage } from '@ariefsn/svelte-use';
- *
- *   let id = $state(1);
- *   const avatar = useImage(() => ({ src: `/avatars/${id}.png`, alt: 'Avatar' }));
- * </script>
- *
- * {#if avatar.isLoading()}
- *   <div class="skeleton"></div>
- * {:else if avatar.error()}
- *   <img src="/avatars/fallback.png" alt="Avatar" />
- * {:else}
- *   <img src={avatar.image()?.src} alt="Avatar" />
- * {/if}
- * ```
+ * Preloads an image and tracks its state. Loading happens on a detached `Image`, so the browser has
+ * the bytes before the `<img>` that shows it renders — which is how you avoid a layout jump.
  */
 export function useImage(source: MaybeGetter<UseImageSource>): UseImageReturn {
 	const getSource = toGetter(source);
@@ -116,9 +87,8 @@ export function useImage(source: MaybeGetter<UseImageSource>): UseImageReturn {
 
 	$effect(() => {
 		const config = getSource();
-		// A deliberate dependency, not the "fake dep so teardown registers"
-		// anti-pattern: re-running on demand is exactly what `refresh()` means,
-		// and this effect writes none of the state it reads.
+		// A deliberate dependency, not the "fake dep so teardown registers" anti-pattern: re-running on
+		// demand is exactly what `refresh()` means, and this effect writes none of the state it reads.
 		void reloadKey;
 		load(config);
 	});

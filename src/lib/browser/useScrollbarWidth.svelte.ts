@@ -5,19 +5,7 @@ export interface UseScrollbarWidthReturn {
 	y: () => number;
 }
 
-/**
- * Measures the scrollbar width of an element.
- *
- * @param target - A getter returning the target element, or null
- * @returns Object with `x` (horizontal) and `y` (vertical) scrollbar widths
- *
- * @example
- * ```ts
- * let el: HTMLElement;
- * const { x, y } = useScrollbarWidth(() => el);
- * // y() → 15 (typical scrollbar width in pixels)
- * ```
- */
+/** Measures the scrollbar width of an element. */
 export function useScrollbarWidth(
 	target: () => HTMLElement | null | undefined
 ): UseScrollbarWidthReturn {

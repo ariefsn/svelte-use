@@ -10,21 +10,9 @@ export interface DocPage {
 	title: string;
 	description: string;
 	usage: string;
-	/**
-	 * Slugs to surface in "Related" ahead of the automatic picks.
-	 *
-	 * Expected to stay near-empty: `related.ts` derives links from backticked
-	 * cross-references in the doc copy and falls back to same-group siblings.
-	 * This is for the few pages where that finds too little — `use-virtual-list`
-	 * is alone in its group, for instance.
-	 */
+	/** Slugs to surface in "Related" ahead of the automatic picks. */
 	related?: string[];
-	/**
-	 * Component props, rendered as a "Props" table.
-	 *
-	 * Only a component page has these — a component has no params, options or
-	 * returns — so this is purely additive and no existing entry changes.
-	 */
+	/** Component props, rendered as a "Props" table. */
 	props?: ApiRow[];
 	params?: ApiRow[];
 	options?: ApiRow[];
@@ -34,7 +22,7 @@ export interface DocPage {
 }
 
 export const pages: Record<string, DocPage> = {
-	// --------------------------------------------------- Browser – Document
+	// Browser – Document
 	'use-title': {
 		slug: 'use-title',
 		title: 'useTitle',
@@ -376,7 +364,7 @@ script.isLoaded(); // → true`,
 			'`src` is assigned last when creating the element, since setting it is what starts the fetch.'
 		]
 	},
-	// ------------------------------------------------- Browser – Navigation
+	// Browser – Navigation
 	'use-url-search-params': {
 		slug: 'use-url-search-params',
 		title: 'useUrlSearchParams',
@@ -477,7 +465,7 @@ params.get('page'); // → '2'`,
 			'`useBrowserLocation` does not observe `pushState`/`replaceState`, because neither fires an event — so a sibling `useBrowserLocation` goes stale after a write here.'
 		]
 	},
-	// ------------------------------------------------------------ Head & SEO
+	// Head & SEO
 	'use-seo': {
 		slug: 'use-seo',
 		title: 'useSeo',
@@ -608,7 +596,7 @@ export const load = ({ params }) => ({
 			"This is the only Svelte component this library ships; everything else is a composable. Import it from the package root — `import { Seo } from '@ariefsn/svelte-use'`."
 		]
 	},
-	// ------------------------------------------------------ Utilities & state
+	// Utilities & state
 	'use-state-machine': {
 		slug: 'use-state-machine',
 		title: 'useStateMachine',
@@ -1166,7 +1154,7 @@ const queue = useAsyncQueue(
 			'A non-`Error` rejection is wrapped in one, so `error.message` is always safe to read.'
 		]
 	},
-	// ------------------------------------------------- Web APIs – Device & UI
+	// Web APIs – Device & UI
 	'use-fullscreen': {
 		slug: 'use-fullscreen',
 		title: 'useFullscreen',
@@ -1629,7 +1617,7 @@ await fs.save('edited'); // writes back to the same file`,
 			'SSR safe: `isSupported()` is `false` and `open()` resolves `null`.'
 		]
 	},
-	// ----------------------------------------------- Async – Streams & Workers
+	// Async – Streams & Workers
 	'use-event-source': {
 		slug: 'use-event-source',
 		title: 'useEventSource',
@@ -1906,7 +1894,7 @@ const sorted = await sorter.run([5, 1, 4]);`,
 			'SSR safe: `isSupported()` is `false` and `run()` rejects.'
 		]
 	},
-	// ------------------------------------------------------ Browser – Media
+	// Browser – Media
 	'use-user-media': {
 		slug: 'use-user-media',
 		title: 'useUserMedia',
@@ -2191,7 +2179,7 @@ devices.videoInputs(); // → readonly MediaDeviceInfo[]`,
 			'SSR safe: `isSupported()` is `false` and every list is empty.'
 		]
 	},
-	// ------------------------------------------------- Browser – Appearance
+	// Browser – Appearance
 	'use-color-mode': {
 		slug: 'use-color-mode',
 		title: 'useColorMode',
@@ -2503,7 +2491,7 @@ accent.current(); // → 'tomato'`,
 			'Values are trimmed, because custom properties preserve leading whitespace and the raw value would not compare equal to what was written.'
 		]
 	},
-	// -------------------------------------------------- Element & viewport
+	// Element & viewport
 	'use-window-size': {
 		slug: 'use-window-size',
 		title: 'useWindowSize',
@@ -2899,7 +2887,7 @@ useTextareaAutosize(() => el, { value: () => text, maxRows: 10 });`,
 		]
 	},
 
-	// ----------------------------------------------- Foundational primitives
+	// Foundational primitives
 	'use-supported': {
 		slug: 'use-supported',
 		title: 'useSupported',
@@ -3232,7 +3220,7 @@ theme.remove(); // back to 'light'`,
 		]
 	},
 
-	// ------------------------------------------------------------------ State
+	// State
 	'use-sorted': {
 		slug: 'use-sorted',
 		title: 'useSorted',
@@ -3446,7 +3434,7 @@ const live = useTimeAgo(() => someDate, { interval: 10_000 }); // refresh every 
 		]
 	},
 
-	// ------------------------------------------------ Browser – Keyboard & Scroll
+	// Browser – Keyboard & Scroll
 	'use-magic-keys': {
 		slug: 'use-magic-keys',
 		title: 'useMagicKeys',
@@ -3653,7 +3641,7 @@ scroll.scrollTo({ top: 0 }); // imperative scroll`,
 		]
 	},
 
-	// ------------------------------------------------ Browser – Pointer & Drag
+	// Browser – Pointer & Drag
 	'use-mouse': {
 		slug: 'use-mouse',
 		title: 'useMouse',
@@ -3850,7 +3838,7 @@ drag.style()     // → "transform: translate(100px, 0px);"`,
 		]
 	},
 
-	// ------------------------------------------------ Browser – Observers
+	// Browser – Observers
 	'use-element-size': {
 		slug: 'use-element-size',
 		title: 'useElementSize',
@@ -4097,7 +4085,7 @@ stop(); // disconnect manually`,
 		]
 	},
 
-	// ------------------------------------------------ Browser – Sensors
+	// Browser – Sensors
 	'use-idle': {
 		slug: 'use-idle',
 		title: 'useIdle',
@@ -4248,7 +4236,6 @@ geo.error()            // → GeolocationPositionError | null`,
 		]
 	},
 
-	// ──────────────────────────────────────────── Performance
 	'use-fps': {
 		slug: 'use-fps',
 		title: 'useFps',
@@ -4383,7 +4370,6 @@ search('svelte'); // ← this one fires`,
 		]
 	},
 
-	// ──────────────────────────────────────────── Virtualization
 	'use-virtual-list': {
 		slug: 'use-virtual-list',
 		// The only page the automatic picks cannot serve: it is alone in the
@@ -4401,10 +4387,8 @@ const { list, containerProps, wrapperProps } = useVirtualList(
   { itemHeight: 40, overscan: 5 }
 );
 
-// list()             → VirtualItem<T>[] — only visible items
-// list()[0].data     → the source item
-// list()[0].style    → "position: absolute; top: Npx; height: 40px;"
-// list()[0].index    → original index in source array`,
+// list() → VirtualItem<T>[] — only visible items list()[0].data → the source item list()[0].style →
+// "position: absolute; top: Npx; height: 40px;" list()[0].index → original index in source array`,
 		params: [
 			{
 				name: 'list',
@@ -4475,7 +4459,6 @@ const { list, containerProps, wrapperProps } = useVirtualList(
 		]
 	},
 
-	// ──────────────────────────────────────────── Web APIs
 	'use-clipboard': {
 		slug: 'use-clipboard',
 		title: 'useClipboard',
@@ -4615,7 +4598,7 @@ speech.stop();`,
 		]
 	},
 
-	// ------------------------------------------------------------------ State (continued)
+	// State (continued)
 	'use-toggle': {
 		slug: 'use-toggle',
 		title: 'useToggle',
@@ -4774,7 +4757,7 @@ prev()  // → 1`,
 		]
 	},
 
-	// ------------------------------------------------------------------ Reactivity
+	// Reactivity
 	'use-debounce': {
 		slug: 'use-debounce',
 		title: 'useDebounce',
@@ -4829,7 +4812,7 @@ const debounced = useDebounce(() => query, 300);
 		]
 	},
 
-	// --------------------------------------------------------------- Browser – Storage
+	// Browser – Storage
 	'use-base64': {
 		slug: 'use-base64',
 		title: 'useBase64',
@@ -4989,7 +4972,7 @@ const obj = useSessionStorage('my-obj', {}, {
 		]
 	},
 
-	// --------------------------------------------------------------- Browser – Storage (legacy)
+	// Browser – Storage (legacy)
 	'use-local-storage': {
 		slug: 'use-local-storage',
 		title: 'useLocalStorage',
@@ -5032,7 +5015,7 @@ theme.value;       // 'dark'`,
 		]
 	},
 
-	// --------------------------------------------------------------- Browser – Storage (legacy)
+	// Browser – Storage (legacy)
 	'use-indexed-db': {
 		slug: 'use-indexed-db',
 		title: 'useIndexedDB',
@@ -5144,7 +5127,7 @@ const pending = await db.query((n) => !n.done); // Note[]`,
 		]
 	},
 
-	// --------------------------------------------------------------- Browser – Interaction
+	// Browser – Interaction
 	'use-click-outside': {
 		slug: 'use-click-outside',
 		title: 'useClickOutside',
@@ -5351,7 +5334,7 @@ focused() // → true while input has focus`,
 		]
 	},
 
-	// --------------------------------------------------------------- Browser – Sensors
+	// Browser – Sensors
 	'use-breakpoints': {
 		slug: 'use-breakpoints',
 		title: 'useBreakpoints',
@@ -5541,7 +5524,7 @@ hasLeft() // → true when the cursor is outside the viewport`,
 		]
 	},
 
-	// ------------------------------------------------------------ Animation
+	// Animation
 	'use-animate': {
 		slug: 'use-animate',
 		title: 'useAnimate',
@@ -5768,7 +5751,7 @@ const displayed = useTransition(() => target, { duration: 500 });
 		]
 	},
 
-	// ------------------------------------------------------------- Async
+	// Async
 	'use-fetch': {
 		slug: 'use-fetch',
 		title: 'useFetch',
@@ -5970,7 +5953,7 @@ const { data, status, send, close } = useWebSocket(
 		]
 	},
 
-	// -------------------------------------------------------------- Time
+	// Time
 	'use-interval': {
 		slug: 'use-interval',
 		title: 'useInterval',
@@ -6405,8 +6388,8 @@ precise() // updates every 100ms`,
 		]
 	},
 
-	// --------------------------------------------------------------- Browser
-	// --------------------------------------------------------------- New v1.1.0 State
+	// Browser
+	// New v1.1.0 State
 	'use-auto-reset-state': {
 		slug: 'use-auto-reset-state',
 		title: 'useAutoResetState',
@@ -6575,7 +6558,7 @@ counter.undo(); // counter.value → 0`,
 		notes: ['Combines `$state` with `useTrackHistory` for convenience.']
 	},
 
-	// --------------------------------------------------------------- New v1.1.0 Reactivity
+	// New v1.1.0 Reactivity
 	'use-watch': {
 		slug: 'use-watch',
 		title: 'useWatch',
@@ -6702,7 +6685,7 @@ const { current, isLoading, error } = useAsyncState(
 		]
 	},
 
-	// --------------------------------------------------------------- New v1.1.0 Web APIs
+	// New v1.1.0 Web APIs
 	'use-eye-dropper': {
 		slug: 'use-eye-dropper',
 		title: 'useEyeDropper',
@@ -6996,7 +6979,7 @@ const { text, rects, ranges } = useTextSelection();`,
 		notes: ['Listens to `selectionchange` event.', 'SSR-safe.']
 	},
 
-	// --------------------------------------------------------------- New v1.1.0 Sensors
+	// New v1.1.0 Sensors
 	'use-document-visibility': {
 		slug: 'use-document-visibility',
 		title: 'useDocumentVisibility',
@@ -7137,7 +7120,7 @@ const { x, y } = useScrollbarWidth(() => el);`,
 		notes: ['Uses ResizeObserver to update on size changes.']
 	},
 
-	// --------------------------------------------------------------- New v1.1.0 Interaction
+	// New v1.1.0 Interaction
 	'use-active-element': {
 		slug: 'use-active-element',
 		title: 'useActiveElement',

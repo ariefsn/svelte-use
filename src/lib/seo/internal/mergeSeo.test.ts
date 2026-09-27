@@ -16,9 +16,8 @@ describe('mergeSeo', () => {
 	});
 
 	it('merges og per key rather than replacing the section', () => {
-		// The bug this exists to prevent: a page setting only og.type must not
-		// wipe the layout's siteName and image, which would silently produce a
-		// worse link preview than the defaults alone.
+		// The bug this exists to prevent: a page setting only og.type must not wipe the
+		// layout's siteName and image, silently producing a worse preview than the defaults.
 		const merged = mergeSeo([
 			{ og: { siteName: 'Svelte Use', image: '/logo.svg', type: 'website' } },
 			{ og: { type: 'article' } }

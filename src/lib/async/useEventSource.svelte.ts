@@ -5,23 +5,11 @@ export type EventSourceStatus = 'CONNECTING' | 'OPEN' | 'CLOSED';
 
 /** Options for `useEventSource`. */
 export interface UseEventSourceOptions {
-	/**
-	 * Send cookies and HTTP auth to a cross-origin endpoint.
-	 * @default false
-	 */
+	/** Send cookies and HTTP auth to a cross-origin endpoint. Default `false`. */
 	withCredentials?: boolean;
-	/**
-	 * Named events to subscribe to, in addition to the default unnamed one.
-	 *
-	 * A server sending `event: ping` delivers to `'ping'` and **not** to the
-	 * default handler, so a named event not listed here is silently dropped.
-	 * @default []
-	 */
+	/** Named events to subscribe to, in addition to the default unnamed one. Default `[]`. */
 	events?: readonly string[];
-	/**
-	 * Connect as soon as the URL resolves. Set `false` to wait for `open()`.
-	 * @default true
-	 */
+	/** Connect as soon as the URL resolves. Set `false` to wait for `open()`. Default `true`. */
 	immediate?: boolean;
 }
 
@@ -46,35 +34,8 @@ export interface UseEventSourceReturn<T> {
 }
 
 /**
- * Server-sent events with reactive state.
- *
- * Unlike a WebSocket this is one-way and text-only, and the **browser**
- * reconnects on its own when a connection drops — so there is deliberately no
- * `autoReconnect` option here. What the browser does not recover from is an
- * HTTP-level failure (a 404, or a response that is not `text/event-stream`):
- * that closes the stream for good, which surfaces as `status() === 'CLOSED'`
- * with a non-null `error()`.
- *
- * A server sending named events (`event: ping`) does **not** deliver them to
- * the default handler, so list the names in `events` or they are dropped.
- *
- * SSR: nothing connects, `status()` is `'CLOSED'`.
- *
- * @template T - Expected shape of a parsed message
- * @param url - Getter for the endpoint, or `undefined` to stay disconnected
- * @param options - Credentials, named events and connect-on-init behaviour
- * @returns Reactive stream state plus `open` and `close`
- *
- * @example
- * ```ts
- * const stream = useEventSource<{ price: number }>(() => '/api/ticker', {
- *   events: ['price', 'heartbeat']
- * });
- *
- * stream.status(); // → 'CONNECTING' | 'OPEN' | 'CLOSED'
- * stream.data();   // → { price: 42 } | null
- * stream.event();  // → 'price'
- * ```
+ * Server-sent events with reactive state. One-way and text-only, and the **browser** reconnects on
+ * its own — so there is deliberately no `autoReconnect` option.
  */
 export function useEventSource<T = unknown>(
 	url: () => string | undefined,

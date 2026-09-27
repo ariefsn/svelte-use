@@ -1,12 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { useWebWorkerFn } from './useWebWorkerFn.svelte.js';
 
-/**
- * These use **real** workers rather than a stub. The whole mechanism is
- * `fn.toString()` into a Blob, so a stubbed `Worker` would test nothing that
- * can actually break — in particular it would not catch a function that fails
- * to serialise.
- */
+/** These use **real** workers rather than a stub. */
 
 describe('useWebWorkerFn', () => {
 	test('runs a function off the main thread and resolves its result', async () => {
@@ -42,11 +37,8 @@ describe('useWebWorkerFn', () => {
 	});
 
 	test('awaits an async function inside the worker', async () => {
-		// Load-bearing: this file is a `.svelte.test.ts`, so the Svelte compiler
-		// rewrites the `await` below to `(await $.track_reactivity_loss(p))()`.
-		// Without the shim injected into the worker scope this fails with
-		// "$ is not defined" — which is what a consumer writing an async worker
-		// function inside a .svelte component would hit.
+		// Load-bearing: this file is a `.svelte.test.ts`, so the Svelte compiler rewrites the `await`
+		// below to `(await $.track_reactivity_loss(p))()`.
 		let worker!: ReturnType<typeof useWebWorkerFn<[number], number>>;
 		const cleanup = $effect.root(() => {
 			worker = useWebWorkerFn(async (value: number) => {
@@ -75,9 +67,8 @@ describe('useWebWorkerFn', () => {
 	});
 
 	test('a function referencing its enclosing scope fails at runtime, not at the call site', async () => {
-		// This is the documented constraint, pinned as a test. `outside` is not
-		// serialised with the function, so the worker throws a ReferenceError.
-		// TypeScript cannot catch this, which is why it is in the docs.
+		// This is the documented constraint, pinned as a test. `outside` is not serialised with the
+		// function, so the worker throws a ReferenceError.
 		const outside = 42;
 
 		let worker!: ReturnType<typeof useWebWorkerFn<[], number>>;

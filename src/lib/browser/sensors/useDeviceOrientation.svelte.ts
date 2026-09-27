@@ -13,17 +13,7 @@ export interface UseDeviceOrientationReturn {
 	gamma: () => number | null;
 }
 
-/**
- * Reactive wrapper around the DeviceOrientation API.
- *
- * @returns Object with `isSupported`, `isAbsolute`, `alpha`, `beta`, `gamma`
- *
- * @example
- * ```ts
- * const { isSupported, alpha, beta, gamma } = useDeviceOrientation();
- * // alpha() → rotation around z-axis
- * ```
- */
+/** Reactive wrapper around the DeviceOrientation API for tracking physical device orientation. */
 export function useDeviceOrientation(): UseDeviceOrientationReturn {
 	const isSupported = useSupported(() => 'DeviceOrientationEvent' in window);
 

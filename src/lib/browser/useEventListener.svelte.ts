@@ -1,19 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any --
- * `any` appears only in the overload implementation signature. The four
- * public overloads above resolve every supported target to its exact event
- * map, so callers always get a precisely typed event object.
+ * `any` appears only in the overload implementation signature. The four public overloads
+ * above resolve every supported target to its exact event map.
  */
 
-/**
- * The DOM event map for an arbitrary event target.
- *
- * Window/Document/HTMLElement already have dedicated overloads; this covers
- * the targets the library needs beyond them — media devices and streams,
- * message transports, workers and the speech APIs. The fallback arm is
- * `Event` rather than a top type: an unknown target still gets the one thing
- * every listener is guaranteed to receive, and no `unknown` reaches a public
- * signature.
- */
+/** The DOM event map for an arbitrary event target. */
 export type EventTargetEventMap<T> = T extends Window
 	? WindowEventMap
 	: T extends Document
@@ -41,34 +31,7 @@ export type EventTargetEventMap<T> = T extends Window
 												: T extends HTMLElement
 													? HTMLElementEventMap
 													: Record<string, Event>;
-/**
- * Registers an event listener with automatic cleanup on component destroy.
- *
- * @param target - The event target, or a getter returning one
- *
- * Prefer the getter form for `window` and `document` in code that renders on
- * the server: a bare `window` is evaluated during SSR and throws a
- * `ReferenceError`, while a getter is only called inside the effect, which
- * never runs there.
- * @param event - Event name or array of event names
- * @param handler - Event handler function
- * @param options - Standard addEventListener options
- * @returns A cleanup function to manually remove the listener
- *
- * @example
- * ```ts
- * // Single event
- * useEventListener(window, 'resize', (e) => console.log(e));
- *
- * // SSR-safe: the getter is only called once the effect runs
- * useEventListener(() => window, 'resize', (e) => console.log(e));
- *
- * // Multiple events
- * useEventListener(document, ['mousedown', 'touchstart'], (e) => {
- *   console.log('interaction', e);
- * });
- * ```
- */
+/** Generic event listener utility with automatic cleanup on component destroy. */
 export function useEventListener<K extends keyof WindowEventMap>(
 	target: Window | (() => Window | null | undefined),
 	event: K | K[],
@@ -87,12 +50,7 @@ export function useEventListener<K extends keyof HTMLElementEventMap>(
 	handler: (ev: HTMLElementEventMap[K]) => void,
 	options?: boolean | AddEventListenerOptions
 ): () => void;
-/**
- * Any other event target — `navigator.mediaDevices`, an `EventSource`, a
- * `BroadcastChannel`, `screen.orientation`, a `Worker`, a `MediaStreamTrack`
- * and so on. Declared last so the three overloads above keep resolving
- * exactly as they did before.
- */
+/** Generic event listener utility with automatic cleanup on component destroy. */
 export function useEventListener<
 	T extends EventTarget,
 	K extends keyof EventTargetEventMap<T> & string

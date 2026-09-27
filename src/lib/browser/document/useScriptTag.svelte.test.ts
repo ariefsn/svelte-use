@@ -10,9 +10,8 @@ function scriptById(id: string): HTMLScriptElement | null {
 }
 
 /**
- * Scripts are never allowed to actually fetch here: `src` is assigned inside
- * `init`, so the element is stubbed before it reaches the document by
- * intercepting createElement.
+ * Scripts are never allowed to actually fetch here: `src` is assigned inside `init`, so the element
+ * is stubbed before it reaches the document by intercepting createElement.
  */
 function stubScripts() {
 	const original = document.createElement.bind(document);

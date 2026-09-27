@@ -3,8 +3,8 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useTextareaAutosize } from './useTextareaAutosize.svelte.js';
 
 /**
- * Creates a textarea whose scrollHeight is driven by its value, standing in
- * for real text layout: 20px per line plus 10px of padding.
+ * Creates a textarea whose scrollHeight is driven by its value, standing in for real text layout:
+ * 20px per line plus 10px of padding.
  */
 function textarea(): HTMLTextAreaElement {
 	const el = document.createElement('textarea');

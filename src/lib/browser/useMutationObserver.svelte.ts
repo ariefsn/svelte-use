@@ -5,38 +5,8 @@ export interface UseMutationObserverReturn {
 }
 
 /**
- * Reactive `MutationObserver` wrapper.
- *
- * Observes the node returned by `target` for DOM mutations and invokes
- * `callback` whenever changes matching the given `options` occur. The
- * observer is registered inside a `$effect` and disconnected automatically
- * when the reactive scope is destroyed or the target changes. Manual cleanup
- * is also available via `stop`.
- *
- * SSR safe — `MutationObserver` is only accessed in the browser.
- *
- * @param target - Reactive getter returning the DOM node to observe, or `null`
- * @param callback - Standard `MutationCallback` invoked with each batch of `MutationRecord`s
- * @param options - Standard `MutationObserverInit` configuration (childList, attributes, etc.)
- * @returns Object with a `stop` function for manual cleanup
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useMutationObserver } from 'svelte-use';
- *
- *   let el = $state<HTMLElement | null>(null);
- *   const { stop } = useMutationObserver(
- *     () => el,
- *     (mutations) => {
- *       for (const m of mutations) console.info(m.type);
- *     },
- *     { childList: true, subtree: true }
- *   );
- * </script>
- *
- * <div bind:this={el} />
- * ```
+ * Watches for DOM mutations (child additions, attribute changes, subtree modifications) on a target
+ * node using `MutationObserver`.
  */
 export function useMutationObserver(
 	target: () => Node | null,

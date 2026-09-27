@@ -1,14 +1,8 @@
 /** Options for `useMouseInElement`. */
 export interface UseMouseInElementOptions {
-	/**
-	 * Treat the pointer as outside when it leaves the window entirely.
-	 * @default true
-	 */
+	/** Treat the pointer as outside when it leaves the window entirely. Default `true`. */
 	handleOutside?: boolean;
-	/**
-	 * Also track `touchmove`, reporting the first touch point.
-	 * @default true
-	 */
+	/** Also track `touchmove`, reporting the first touch point. Default `true`. */
 	touch?: boolean;
 }
 
@@ -34,39 +28,7 @@ export interface UseMouseInElementReturn {
 	isOutside: () => boolean;
 }
 
-/**
- * Reactive pointer position relative to an element.
- *
- * Where `useMouse` gives viewport coordinates and `useElementHover` gives a
- * boolean, this gives the offset *within* an element — what spotlight effects,
- * tilt cards, custom sliders and magnifiers need.
- *
- * `elementX`/`elementY` are measured from the element's top-left corner and
- * may fall outside `0..width`/`0..height` when the pointer is beyond it; check
- * `isOutside` rather than assuming they are clamped.
- *
- * SSR safe: every value is `0` and `isOutside` is `true` until the effect runs.
- *
- * @param target - Reactive getter returning the element to measure against
- * @param options - Optional configuration
- * @returns Object with reactive pointer and element getters
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useMouseInElement } from '@ariefsn/svelte-use';
- *
- *   let el = $state<HTMLDivElement | null>(null);
- *   const { elementX, elementY, isOutside } = useMouseInElement(() => el);
- * </script>
- *
- * <div bind:this={el} class="card">
- *   {#if !isOutside()}
- *     <div class="spotlight" style="left: {elementX()}px; top: {elementY()}px"></div>
- *   {/if}
- * </div>
- * ```
- */
+/** Reactive pointer position relative to an element. */
 export function useMouseInElement(
 	target: () => Element | null | undefined,
 	options: UseMouseInElementOptions = {}

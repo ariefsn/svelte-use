@@ -347,9 +347,8 @@ describe('useColorMode', () => {
 	});
 
 	test('does not observe the attribute it owns', () => {
-		// Deliberately unlike useTextDirection: an observer here would fire on
-		// this composable's own writes and two instances would mutually
-		// re-trigger. External attribute edits are therefore not adopted.
+		// Deliberately unlike useTextDirection: an observer here would fire on this composable's own
+		// writes and two instances would mutually re-trigger.
 		const cleanup = $effect.root(() => {
 			const theme = useColorMode({ storageKey: KEY, target: () => target });
 			theme.set('light');

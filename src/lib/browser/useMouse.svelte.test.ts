@@ -2,9 +2,7 @@ import { flushSync } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import { useMouse } from './useMouse.svelte.js';
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 function fireMouseMove(x: number, y: number): void {
 	window.dispatchEvent(new MouseEvent('mousemove', { clientX: x, clientY: y, bubbles: true }));
@@ -15,9 +13,7 @@ function fireTouchMove(x: number, y: number): void {
 	window.dispatchEvent(new TouchEvent('touchmove', { touches: [touch], bubbles: true }));
 }
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('useMouse', () => {
 	describe('initial state', () => {

@@ -5,35 +5,8 @@ export interface UseResizeObserverReturn {
 }
 
 /**
- * Lightweight reactive `ResizeObserver` wrapper.
- *
- * Observes the element returned by `target` and invokes `callback` with each
- * `ResizeObserverEntry` whenever the element's size changes. The observer is
- * registered inside a `$effect` and disconnected automatically when the
- * reactive scope is destroyed. Manual cleanup is also available via `stop`.
- *
- * SSR safe — `ResizeObserver` is only accessed in the browser.
- *
- * @param target - Reactive getter returning the element to observe, or `null`
- * @param callback - Called with each `ResizeObserverEntry` on size change
- * @returns Object with a `stop` function for manual cleanup
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useResizeObserver } from 'svelte-use';
- *
- *   let el = $state<HTMLElement | null>(null);
- *   const { stop } = useResizeObserver(
- *     () => el,
- *     (entry) => {
- *       console.info('new size', entry.contentRect.width, entry.contentRect.height);
- *     }
- *   );
- * </script>
- *
- * <div bind:this={el} />
- * ```
+ * Low-level `ResizeObserver` wrapper. Calls your callback with a `ResizeObserverEntry` whenever the
+ * target element changes size.
  */
 export function useResizeObserver(
 	target: () => Element | null,

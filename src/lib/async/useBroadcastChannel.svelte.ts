@@ -2,10 +2,7 @@ import { useSupported } from '../browser/useSupported.svelte.js';
 
 /** Options for `useBroadcastChannel`. */
 export interface UseBroadcastChannelOptions {
-	/**
-	 * Channel name. Every context using the same name on the same origin
-	 * shares the channel.
-	 */
+	/** Channel name. Every context using the same name on the same origin shares the channel. */
 	name: string;
 }
 
@@ -25,43 +22,7 @@ export interface UseBroadcastChannelReturn<T> {
 	close: () => void;
 }
 
-/**
- * Cross-tab messaging over `BroadcastChannel`.
- *
- * Every tab, worker and iframe on the same origin that opens a channel with
- * the same name receives what the others post. The sender does **not** receive
- * its own message, which is the usual source of confusion when testing with a
- * single tab.
- *
- * Payloads travel by **structured clone**, not JSON: objects, `Map`, `Set`,
- * `Date`, `ArrayBuffer` and so on survive the trip, and a string arrives as
- * the string it was. That is why this deliberately does not run the JSON
- * parsing that `useWebSocket` and `useEventSource` share — doing so would
- * corrupt a payload that happens to look like JSON. Functions, DOM nodes and
- * class identity do not survive; posting one throws a `DataCloneError`.
- *
- * SSR: `isSupported()` is `false` and `post()` is a no-op.
- *
- * @template T - The message payload type
- * @param options - The channel name
- * @returns Reactive channel state plus `post` and `close`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useBroadcastChannel } from '@ariefsn/svelte-use';
- *
- *   const channel = useBroadcastChannel<{ userId: string }>({ name: 'auth' });
- *
- *   // Another tab signing out reaches this one
- *   $effect(() => {
- *     if (channel.data()?.userId === null) goto('/login');
- *   });
- * </script>
- *
- * <button onclick={() => channel.post({ userId: 'u1' })}>Broadcast</button>
- * ```
- */
+/** Cross-tab messaging over `BroadcastChannel`. */
 export function useBroadcastChannel<T = unknown>(
 	options: UseBroadcastChannelOptions
 ): UseBroadcastChannelReturn<T> {

@@ -1,19 +1,5 @@
 /**
- * Tracks whether `target` currently holds keyboard focus.
- *
- * Attaches `focus` and `blur` listeners to the element returned by `target`.
- * Returns `false` when `target` is nullish or when running in an SSR
- * environment. Listeners are removed on cleanup.
- *
- * @param target - Reactive getter that returns the element to observe
- * @returns Object with a `focused` getter that is `true` while the element has focus
- *
- * @example
- * ```ts
- * let input = $state<HTMLInputElement | null>(null);
- * const { focused } = useFocus(() => input);
- * // focused() → true while input is focused
- * ```
+ * Tracks whether a specific element currently holds keyboard focus via `focus` and `blur` events.
  */
 export function useFocus(target: () => HTMLElement | null | undefined): {
 	focused: () => boolean;

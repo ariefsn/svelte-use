@@ -8,13 +8,7 @@
 	let { children } = $props();
 
 	/*
-	 * Site-wide SEO defaults. `baseUrl` is not optional here: during
-	 * prerendering `page.url.origin` is `http://sveltekit-prerender`, so
-	 * deriving absolute URLs from the request would ship that placeholder.
-	 *
-	 * Deliberately not module-scoped — module-level mutable state is shared
-	 * across concurrent requests on the server, so one visitor's metadata
-	 * could leak into another's response.
+	 * Site-wide SEO defaults.
 	 */
 	const seoDefaults: SeoData = {
 		titleTemplate: '%s — Svelte Use',
@@ -23,10 +17,8 @@
 			'Svelte 5 runes-first utility composables. No stores, no external dependencies, SSR-safe and fully typed.',
 		og: {
 			siteName: 'Svelte Use',
-			// A raster image on purpose: Facebook, X, LinkedIn and WhatsApp do
-			// not render SVG previews, so the logo.svg used here previously
-			// meant every shared link showed a card with no image at all.
-			// Regenerate from scripts/og-image.svg — see the note in that file.
+			// A raster image on purpose: Facebook, X, LinkedIn and WhatsApp do not render SVG
+			// previews, so the logo.svg used here previously showed a card with no image.
 			image: '/og-image.png',
 			imageWidth: 1200,
 			imageHeight: 630,
@@ -38,10 +30,7 @@
 	};
 
 	/*
-	 * The single render site for metadata. Svelte concatenates <svelte:head>
-	 * blocks and does not deduplicate meta tags, so a second <Seo /> on a page
-	 * would emit two descriptions and crawlers would take the first — the
-	 * layout default. Merge here, render once.
+	 * The single render site for metadata.
 	 */
 	const seo = useSeo(
 		seoDefaults,
@@ -50,12 +39,7 @@
 	);
 
 	/*
-	 * Drives the `class` on <html>, which is what the token overrides in
-	 * app.css key off. `initialValue: 'dark'` is a hard default: a first-time
-	 * visitor on a light-mode OS still sees the site as it has always looked.
-	 *
-	 * The matching pre-paint script lives in app.html — this runs after
-	 * hydration, so it cannot prevent the first-paint flash on its own.
+	 * Drives the `class` on <html>, which is what the token overrides in app.css key off.
 	 */
 	const theme = useColorMode({ initialValue: 'dark' });
 	const themeOptions = ['auto', 'light', 'dark'] as const;
@@ -295,10 +279,8 @@
 					>
 						<span class="min-w-0 flex-1 truncate whitespace-nowrap">{group.title}</span>
 						<!--
-							The dot and chevron sit in a fixed-width trailing cluster rather
-							than inline after the title. Inline, the dot landed at a different
-							x for every group, because the title length varies. The slot is
-							rendered even when empty so the chevron never shifts either.
+							The dot and chevron sit in a fixed-width trailing cluster rather than inline after
+							the title.
 						-->
 						<span class="ml-2 flex shrink-0 items-center gap-2">
 							<span class="flex h-1.5 w-1.5 items-center justify-center">
@@ -377,17 +359,6 @@
 	<main class="min-w-0 flex-1 px-10 py-12 max-md:px-5 max-md:pt-20 max-md:pb-8">
 		<!--
 			`main` is deliberately uncapped and the measure lives here instead.
-			Capping `main` without `mx-auto` was what piled every spare pixel on
-			the right of the page: the flex row packs both children left, so the
-			slack had nowhere else to go.
-
-			Wrapping the slot rather than each page means every route gets the
-			measure, including SvelteKit's built-in error page, which has no
-			wrapper of its own. Pages needing a narrower column cap themselves
-			inside this box; both are centred, so nesting the two lands the
-			inner one exactly where it would have been anyway — a docs page caps its
-			row at 1020, so this outer bound only ever matters to the homepage,
-			which is grids rather than prose and has no reading measure to protect.
 		-->
 		<div class="mx-auto w-full max-w-[1400px]">
 			{@render children()}

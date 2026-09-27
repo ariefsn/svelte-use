@@ -11,20 +11,7 @@ export interface UseWakeLockReturn {
 	release: () => Promise<void>;
 }
 
-/**
- * Reactive wrapper around the Screen Wake Lock API.
- *
- * Prevents the device screen from dimming or locking while the wake lock is active.
- *
- * @returns Object with `isSupported`, `isActive`, `request`, and `release`
- *
- * @example
- * ```ts
- * const { isSupported, isActive, request, release } = useWakeLock();
- * await request(); // screen stays on
- * await release(); // allow screen to dim
- * ```
- */
+/** Prevents the device screen from dimming or locking using the Screen Wake Lock API. */
 export function useWakeLock(): UseWakeLockReturn {
 	const isSupported = useSupported(() => 'wakeLock' in navigator);
 

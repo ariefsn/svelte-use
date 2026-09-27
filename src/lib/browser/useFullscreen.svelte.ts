@@ -3,10 +3,8 @@ import { useEventListener } from './useEventListener.svelte.js';
 import { useSupported } from './useSupported.svelte.js';
 
 /*
- * Safari still ships only the `webkit`-prefixed Fullscreen API, and TypeScript's
- * `lib.dom` declares none of it. These mirror the `useSpeechRecognition`
- * precedent: module-local interfaces plus a narrow cast, never `declare global`,
- * so nothing leaks into a consumer's type environment.
+ * Safari still ships only the `webkit`-prefixed Fullscreen API, and TypeScript's `lib.dom` declares
+ * none of it.
  */
 interface WebkitFullscreenElement {
 	webkitRequestFullscreen?: () => Promise<void> | void;
@@ -26,13 +24,7 @@ function fullscreenElement(): Element | null {
 
 /** Options for `useFullscreen`. */
 export interface UseFullscreenOptions {
-	/**
-	 * Leave fullscreen when the owning scope is destroyed.
-	 *
-	 * Without this, navigating away from a component that entered fullscreen
-	 * leaves the whole page stuck there.
-	 * @default true
-	 */
+	/** Leave fullscreen when the owning scope is destroyed. Default `true`. */
 	exitOnDestroy?: boolean;
 }
 
@@ -51,40 +43,8 @@ export interface UseFullscreenReturn {
 }
 
 /**
- * Displays an element fullscreen.
- *
- * `enter()` must be called from a user gesture — browsers reject a request
- * that is not, which surfaces as a rejected promise rather than a silent
- * no-op. The user can also leave fullscreen at any time with Escape, without
- * telling the page, so `isFullscreen()` is driven by the `fullscreenchange`
- * event rather than by what this composable last did.
- *
- * `isFullscreen()` is specifically about **this** target: another element
- * being fullscreen reports `false` here, which is what makes per-element
- * toggle buttons behave.
- *
- * SSR: `isSupported()` is `false` and `enter()` resolves without doing
- * anything.
- *
- * @param target - Element to display, or a getter. Defaults to the whole page.
- * @param options - Whether to exit when the scope is destroyed
- * @returns Fullscreen state plus `enter`, `exit` and `toggle`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useFullscreen } from '@ariefsn/svelte-use';
- *
- *   let player = $state<HTMLElement | null>(null);
- *   const fullscreen = useFullscreen(() => player);
- * </script>
- *
- * <div bind:this={player}>
- *   <button onclick={fullscreen.toggle}>
- *     {fullscreen.isFullscreen() ? 'Exit' : 'Go'} fullscreen
- *   </button>
- * </div>
- * ```
+ * Displays an element fullscreen. `isFullscreen()` is driven by the `fullscreenchange` event rather
+ * than by what was last called, because the user can leave with Escape without telling the page.
  */
 export function useFullscreen(
 	target?: MaybeGetter<HTMLElement | null | undefined>,
@@ -164,12 +124,8 @@ export function useFullscreen(
 			if (fullscreenElement() !== resolveTarget()) return;
 
 			/*
-			 * Swallowed deliberately, and only here. Teardown often runs while
-			 * the document is being torn down too, and `exitFullscreen()` then
-			 * rejects with "Document not active" — an unhandled rejection that
-			 * fails a test run even though every assertion passed. There is
-			 * also nobody left to report it to at this point. Callers who
-			 * invoke `exit()` themselves still get the rejection.
+			 * Swallowed deliberately: teardown often runs while the document is going
+			 * away, and `exitFullscreen()` then rejects with "Document not active".
 			 */
 			exit().catch(() => {});
 		});

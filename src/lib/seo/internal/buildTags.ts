@@ -1,18 +1,16 @@
 import type { SeoData, SeoTag } from '../types.js';
 
-/** Applies `titleTemplate` to `title`, if both are present. */
+/**
+ * Applies `titleTemplate` to `title`, if both are present.
+ * @internal
+ */
 export function resolveTitle(data: SeoData): string | undefined {
 	if (data.title === undefined) return undefined;
 	if (!data.titleTemplate) return data.title;
 	return data.titleTemplate.replace('%s', data.title);
 }
 
-/**
- * Makes a URL absolute against `baseUrl`.
- *
- * Open Graph images and canonical URLs must be absolute; a relative one is
- * either ignored by unfurlers or resolved against the wrong origin.
- */
+/** Makes a URL absolute against `baseUrl`. */
 function absolute(value: string | undefined, baseUrl: string | undefined): string | undefined {
 	if (!value) return value;
 	if (!baseUrl) return value;
@@ -20,19 +18,7 @@ function absolute(value: string | undefined, baseUrl: string | undefined): strin
 	return `${baseUrl.replace(/\/$/, '')}/${value.replace(/^\//, '')}`;
 }
 
-/**
- * Turns merged SEO data into the tags to render.
- *
- * Fallbacks run here rather than at the call site, so a page setting only
- * `title` and `description` still produces a complete Open Graph and Twitter
- * card. Each tag carries a stable `key`, and no key is emitted twice — which
- * is what makes "exactly one `<meta name='description'>`" testable.
- *
- * @param data - Already-merged SEO data
- * @returns The tags, in a stable order
- *
- * @internal
- */
+/** Turns merged SEO data into the tags to render. */
 export function buildTags(data: SeoData): readonly SeoTag[] {
 	const tags: SeoTag[] = [];
 	const seen = new Set<string>();
@@ -76,9 +62,7 @@ export function buildTags(data: SeoData): readonly SeoTag[] {
 	if (og.imageAlt) {
 		add({ key: 'og:image:alt', property: 'og:image:alt', content: og.imageAlt });
 	}
-	// Dimensions let Facebook and LinkedIn lay the card out immediately. Without
-	// them the crawler has to fetch and measure the image first, so the *first*
-	// share of a URL frequently previews with no image at all.
+	// Dimensions let Facebook and LinkedIn lay the card out immediately.
 	if (ogImage && og.imageWidth !== undefined) {
 		add({
 			key: 'og:image:width',
@@ -134,9 +118,8 @@ export function buildTags(data: SeoData): readonly SeoTag[] {
 		if (article.section) {
 			add({ key: 'article:section', property: 'article:section', content: article.section });
 		}
-		// Repeated deliberately — the spec expects one `article:tag` per tag,
-		// not a joined list. The index keeps each `key` unique so the duplicate
-		// guard above does not collapse them into one.
+		// Repeated deliberately — the spec expects one `article:tag` per tag, not a joined list. The
+		// index keeps each `key` unique so the duplicate guard above does not collapse them into one.
 		article.tags?.forEach((tag, index) => {
 			add({ key: `article:tag:${index}`, property: 'article:tag', content: tag });
 		});

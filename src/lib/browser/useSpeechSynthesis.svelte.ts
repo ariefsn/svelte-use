@@ -11,11 +11,11 @@ export interface UseSpeechSynthesisOptions {
 	lang?: MaybeGetter<string>;
 	/** Voice to speak with. Pick one from `voices()`. */
 	voice?: MaybeGetter<SpeechSynthesisVoice | null>;
-	/** Speed, `0.1`–`10`. @default 1 */
+	/** Speed, `0.1`–`10`. Default `1`. */
 	rate?: MaybeGetter<number>;
-	/** Pitch, `0`–`2`. @default 1 */
+	/** Pitch, `0`–`2`. Default `1`. */
 	pitch?: MaybeGetter<number>;
-	/** Volume, `0`–`1`. @default 1 */
+	/** Volume, `0`–`1`. Default `1`. */
 	volume?: MaybeGetter<number>;
 }
 
@@ -42,38 +42,8 @@ export interface UseSpeechSynthesisReturn {
 }
 
 /**
- * Text-to-speech via the Speech Synthesis API.
- *
- * Two behaviours of the underlying API are worth knowing, because both bite:
- *
- * - **`getVoices()` is empty on first call in Chrome.** Voices load
- *   asynchronously and announce themselves with a `voiceschanged` event, so
- *   reading once at init gives an empty list. This listens for that event, so
- *   `voices()` fills in on its own — but an empty list on the first render is
- *   normal.
- * - **The utterance queue belongs to the browser, not the page.** It keeps
- *   speaking after a component unmounts, and even after a client-side
- *   navigation. The teardown here calls `cancel()`, so leaving the page stops
- *   the voice.
- *
- * SSR: `isSupported()` is `false` and `speak()` does nothing.
- *
- * @param options - Voice, language and delivery settings
- * @returns Playback state plus `speak`, `pause`, `resume` and `stop`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useSpeechSynthesis } from '@ariefsn/svelte-use';
- *
- *   const speech = useSpeechSynthesis({ rate: 1.1 });
- * </script>
- *
- * <button onclick={() => speech.speak('Hello there')} disabled={!speech.isSupported()}>
- *   Speak
- * </button>
- * <button onclick={speech.stop} disabled={!speech.isSpeaking()}>Stop</button>
- * ```
+ * Text-to-speech via the Speech Synthesis API. Handles the two behaviours that bite: voices load
+ * asynchronously, and the utterance queue outlives the page.
  */
 export function useSpeechSynthesis(
 	options: UseSpeechSynthesisOptions = {}
@@ -156,9 +126,8 @@ export function useSpeechSynthesis(
 		status = 'idle';
 	}
 
-	// Chrome populates voices asynchronously; a one-shot read returns [].
-	// `speechSynthesis` is not a Window/Document/HTMLElement, so this uses the
-	// widened `useEventListener` overload.
+	// Chrome populates voices asynchronously; a one-shot read returns []. `speechSynthesis` is not a
+	// Window/Document/HTMLElement, so this uses the widened `useEventListener` overload.
 	useEventListener(
 		() => (typeof speechSynthesis === 'undefined' ? null : speechSynthesis),
 		'voiceschanged',

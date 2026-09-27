@@ -57,9 +57,8 @@ describe('useEventListener', () => {
 	});
 
 	test('accepts a getter for window, for SSR safety', () => {
-		// A bare `window` is evaluated at component init and throws during SSR.
-		// The getter form defers that to the effect, which never runs on the
-		// server — this is what the docs demos use.
+		// A bare `window` is evaluated at component init and throws during SSR. The getter form defers
+		// that to the effect, which never runs on the server — this is what the docs demos use.
 		const handler = vi.fn();
 
 		const cleanup = $effect.root(() => {
@@ -89,9 +88,7 @@ describe('useEventListener', () => {
 		cleanup();
 	});
 
-	// The fourth overload. Window/Document/HTMLElement have their own; these
-	// targets resolve through `EventTargetEventMap`, which is what lets the
-	// Web API composables listen without hand-rolling `addEventListener`.
+	// The fourth overload.
 	describe('arbitrary event targets', () => {
 		test('listens on a BroadcastChannel and cleans up', () => {
 			const channel = new BroadcastChannel('use-event-listener-test');
@@ -135,11 +132,8 @@ describe('useEventListener', () => {
 		});
 
 		test('rejects an event name the target does not emit', () => {
-			// The real assertion here is the `@ts-expect-error`: if the overload
-			// ever widened back to accepting any string, `bun run check` would
-			// fail on an unused directive. The runtime half only records that
-			// the guard is purely type-level and does not change behaviour —
-			// `requireAssertions` is on, so the test needs it either way.
+			// The real assertion is the `@ts-expect-error`: if the overload widened back to
+			// accepting any string, `bun run check` would fail on an unused directive.
 			const channel = new BroadcastChannel('use-event-listener-bad-name');
 			let stop!: () => void;
 

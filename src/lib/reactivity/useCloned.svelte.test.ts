@@ -115,9 +115,8 @@ describe('useCloned', () => {
 	});
 
 	test('clones a reactive $state object', () => {
-		// The primary use case, and the one that breaks without unwrapping:
-		// `$state` deep-proxies plain objects and `structuredClone` throws
-		// DataCloneError on a Proxy.
+		// The primary use case, and the one that breaks without unwrapping: `$state` deep-proxies plain
+		// objects and `structuredClone` throws DataCloneError on a Proxy.
 		const cleanup = $effect.root(() => {
 			const source = $state({ name: 'Ada', nested: { tags: ['a'] } });
 			const draft = useCloned(() => source);
@@ -132,9 +131,8 @@ describe('useCloned', () => {
 	});
 
 	test('mutating a field of the clone is reactive', () => {
-		// The primary way an edit buffer is used: `bind:value` writes to a
-		// field rather than replacing the object. This needs the clone to be
-		// deeply reactive, which a plain `$derived` value is not.
+		// The primary way an edit buffer is used: `bind:value` writes to a field rather than replacing
+		// the object.
 		const cleanup = $effect.root(() => {
 			const source = $state({ name: 'Ada', role: 'Engineer' });
 			const draft = useCloned(() => source, { manual: true });

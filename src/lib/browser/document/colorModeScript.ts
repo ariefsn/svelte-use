@@ -2,13 +2,13 @@ import { PREFERS_DARK_QUERY } from '../../internal/mediaQueries.js';
 
 /** Options for {@link colorModeScript}. All must match the composable's. */
 export interface ColorModeScriptOptions {
-	/** @default 'svelte-use-color-mode' */
+	/** Default `'svelte-use-color-mode'`. */
 	storageKey?: string;
-	/** @default 'class' */
+	/** Default `'class'`. */
 	attribute?: string;
-	/** @default { light: 'light', dark: 'dark' } */
+	/** Default `{ light: 'light', dark: 'dark' }`. */
 	modes?: Record<string, string>;
-	/** @default 'auto' */
+	/** Default `'auto'`. */
 	initialValue?: string;
 }
 
@@ -16,24 +16,8 @@ export interface ColorModeScriptOptions {
 export const DEFAULT_COLOR_MODE_STORAGE_KEY = 'svelte-use-color-mode';
 
 /**
- * Returns the source of a blocking script that applies the persisted colour
- * mode before first paint.
- *
- * A composable cannot do this: it runs after hydration, which is after first
- * paint, so a stored mode differing from the server-rendered one always
- * flashes. Putting this in `app.html` inside `<head>`, **above every
- * stylesheet**, is the only way to avoid it:
- *
- * ```html
- * <script>%colorModeScript%</script>
- * ```
- *
- * A plain function, not a composable — it touches no runes and is safe to call
- * at build time. Its defaults mirror `useColorMode`; pass the same options to
- * both or the script will apply the wrong attribute.
- *
- * @param options - Must match the `useColorMode` call it pairs with
- * @returns JavaScript source, ready to inline
+ * Returns the source of a blocking script that applies the persisted colour mode before first
+ * paint.
  */
 export function colorModeScript(options: ColorModeScriptOptions = {}): string {
 	const {
@@ -43,9 +27,8 @@ export function colorModeScript(options: ColorModeScriptOptions = {}): string {
 		initialValue = 'auto'
 	} = options;
 
-	// Minified by hand rather than generated: this string lands in the HTML of
-	// every page, and a build step to compress it would be more machinery than
-	// the few bytes are worth.
+	// Minified by hand rather than generated: this string lands in the HTML of every page, and a
+	// build step to compress it would be more machinery than the few bytes are worth.
 	return (
 		`(function(){try{` +
 		`var k=${JSON.stringify(storageKey)},a=${JSON.stringify(attribute)},` +

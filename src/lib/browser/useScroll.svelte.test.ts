@@ -2,9 +2,7 @@ import { flushSync } from 'svelte';
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { useScroll } from './useScroll.svelte.js';
 
-/**
- * Creates a scrollable `HTMLElement` stub with configurable scroll metrics.
- */
+/** Creates a scrollable `HTMLElement` stub with configurable scroll metrics. */
 function makeScrollable(
 	overrides: Partial<{
 		scrollLeft: number;

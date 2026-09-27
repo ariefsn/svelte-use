@@ -14,34 +14,11 @@ export interface UseNavigationGuardReturn {
 	cancel: () => void;
 }
 
-/**
- * Guards SvelteKit navigation with a confirm/cancel flow.
- *
- * When `shouldBlock` returns `true`, navigation is cancelled and the pending
- * URL is stored. Call `confirm()` to proceed or `cancel()` to stay.
- *
- * @param options - Guard options with `shouldBlock` check and optional `onBlock` callback
- * @returns Object with `confirm` and `cancel` functions
- *
- * @example
- * ```ts
- * let hasChanges = $state(false);
- * const { confirm, cancel } = useNavigationGuard({
- *   shouldBlock: () => hasChanges,
- *   onBlock: () => showDialog = true
- * });
- * // User tries to navigate away → onBlock fires
- * // confirm() → navigates to pending URL
- * // cancel() → stays on current page
- * ```
- */
+/** Guards SvelteKit navigation with a confirm/cancel flow for unsaved changes. */
 export function useNavigationGuard(options: UseNavigationGuardOptions): UseNavigationGuardReturn {
 	let pendingUrl: string | null = null;
 
 	// Set by confirm() so the guard lets exactly one navigation through.
-	// Without it confirm() is a no-op: its goto() re-enters this handler while
-	// shouldBlock() is still true, so the navigation is cancelled again and
-	// onBlock fires a second time.
 	let bypassOnce = false;
 
 	beforeNavigate((nav) => {

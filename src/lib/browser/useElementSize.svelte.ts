@@ -1,9 +1,6 @@
 /** Options for `useElementSize`. */
 export interface UseElementSizeOptions {
-	/**
-	 * Which CSS box model to measure.
-	 * @default 'content-box'
-	 */
+	/** Which CSS box model to measure. Default `'content-box'`. */
 	box?: 'content-box' | 'border-box';
 }
 
@@ -16,32 +13,8 @@ export interface UseElementSizeReturn {
 }
 
 /**
- * Reactive element size tracker backed by `ResizeObserver`.
- *
- * Observes the dimensions of the element returned by `target` and exposes
- * reactive `width` and `height` getters. The observer is created inside a
- * `$effect` and automatically disconnected when the reactive scope is
- * destroyed or the target changes.
- *
- * SSR safe — `ResizeObserver` is only accessed in the browser.
- *
- * @param target - Reactive getter returning the element to observe, or `null`
- * @param options - Optional configuration
- * @returns Object with reactive getters `width` and `height`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useElementSize } from 'svelte-use';
- *
- *   let el = $state<HTMLDivElement | null>(null);
- *   const { width, height } = useElementSize(() => el);
- * </script>
- *
- * <div bind:this={el}>
- *   {width()} × {height()}
- * </div>
- * ```
+ * Reactively tracks the dimensions of a DOM element using `ResizeObserver`. Updates whenever the
+ * element is resized.
  */
 export function useElementSize(
 	target: () => HTMLElement | null,

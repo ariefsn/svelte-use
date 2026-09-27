@@ -1,29 +1,4 @@
-/**
- * Cycles reactively through a fixed list, wrapping at both ends.
- *
- * The original list is never mutated. Attempting to set an out-of-bounds index
- * is silently ignored.
- *
- * @param list - Array of items to cycle through
- * @param initialIndex - Starting index (default: `0`); clamped to valid range
- * @returns Object containing reactive `state` getter, `index` getter, `next`,
- *   `prev`, and `setIndex` functions
- *
- * @example
- * ```ts
- * const { state, index, next, prev, setIndex } = useCycleList(['a', 'b', 'c']);
- * // state() → 'a', index() → 0
- * next();
- * // state() → 'b', index() → 1
- * next();
- * next();
- * // state() → 'a', index() → 0  (wrapped around)
- * prev();
- * // state() → 'c', index() → 2  (wrapped backward)
- * setIndex(1);
- * // state() → 'b', index() → 1
- * ```
- */
+/** Cycles through a list of items reactively. Wraps around at both ends. */
 export function useCycleList<T>(
 	list: T[],
 	initialIndex = 0

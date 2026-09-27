@@ -1,13 +1,7 @@
 import { useEventListener } from '../useEventListener.svelte.js';
 import { useSupported } from '../useSupported.svelte.js';
 
-/**
- * Orientations accepted by `ScreenOrientation.lock()`.
- *
- * TypeScript's `lib.dom` declares `unlock()` but neither `lock()` nor this
- * union, so both are supplied here and reached through a narrow cast — the
- * same approach `useSpeechRecognition` takes.
- */
+/** Orientations accepted by `ScreenOrientation.lock()`. */
 export type OrientationLockType =
 	| 'any'
 	| 'natural'
@@ -33,8 +27,8 @@ export interface UseScreenOrientationReturn {
 	/** Whether `lock()` is available — absent on desktop Safari and Firefox. */
 	isLockSupported: () => boolean;
 	/**
-	 * Locks the screen. Rejects unless the document is fullscreen, and is
-	 * unavailable on desktop entirely.
+	 * Locks the screen. Rejects unless the document is fullscreen, and is unavailable on desktop
+	 * entirely.
 	 */
 	lock: (orientation: OrientationLockType) => Promise<void>;
 	/** Releases a lock. */
@@ -42,30 +36,8 @@ export interface UseScreenOrientationReturn {
 }
 
 /**
- * Screen orientation and rotation angle.
- *
- * `orientation()` reports the four-way value (`portrait-primary` and so on)
- * and `angle()` the rotation in degrees. Both update on the `change` event.
- *
- * Locking is much less widely available than reading: it needs the document to
- * be **fullscreen**, and desktop browsers do not implement it at all. Check
- * `isLockSupported()` before offering it, and expect `lock()` to reject with a
- * `NotSupportedError` or `SecurityError` otherwise.
- *
- * SSR: `isSupported()` is `false`, `orientation()` is `null` and `angle()` is 0.
- *
- * @returns Orientation state plus `lock` and `unlock`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useScreenOrientation } from '@ariefsn/svelte-use';
- *
- *   const screen = useScreenOrientation();
- * </script>
- *
- * <p>{screen.orientation()} at {screen.angle()}°</p>
- * ```
+ * Screen orientation and rotation angle. Reading works everywhere the API exists; **locking** needs
+ * fullscreen and is unavailable on desktop entirely.
  */
 export function useScreenOrientation(): UseScreenOrientationReturn {
 	const isSupported = useSupported(

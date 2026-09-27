@@ -5,21 +5,16 @@ export type InfiniteScrollDirection = 'top' | 'bottom' | 'left' | 'right';
 
 /** Options for `useInfiniteScroll`. */
 export interface UseInfiniteScrollOptions {
-	/**
-	 * How close to the edge, in pixels, before loading is triggered.
-	 * @default 0
-	 */
+	/** How close to the edge, in pixels, before loading is triggered. Default `0`. */
 	distance?: number;
 	/**
-	 * Which edge to watch. `'top'` suits reverse-chronological feeds such as
-	 * chat transcripts.
-	 * @default 'bottom'
+	 * Which edge to watch. `'top'` suits reverse-chronological feeds such as chat transcripts.
+	 * Default `'bottom'`.
 	 */
 	direction?: InfiniteScrollDirection;
 	/**
-	 * Whether another page may be loaded. Return `false` once the last page
-	 * has arrived, otherwise the loader fires forever at the end of the list.
-	 * @default () => true
+	 * Whether another page may be loaded. Return `false` once the last page has arrived, otherwise
+	 * the loader fires forever at the end of the list. Default `() => true`.
 	 */
 	canLoadMore?: () => boolean;
 }
@@ -32,49 +27,7 @@ export interface UseInfiniteScrollReturn {
 	check: () => void;
 }
 
-/**
- * Loads more content as a scroll container nears its edge.
- *
- * Wraps the scroll bookkeeping around a loader callback: it fires once per
- * arrival, never overlaps calls, and re-checks after each load so a short
- * page that does not fill the container keeps loading until it does.
- *
- * `onLoadMore` may be async; the next load waits for it to settle. A rejected
- * promise stops the run rather than being swallowed — handle errors inside the
- * callback if you want loading to continue.
- *
- * SSR safe: no listener is attached and nothing loads until the effect runs.
- *
- * @param target - Reactive getter returning the scroll container, or `null` for the window
- * @param onLoadMore - Called when the edge comes within `distance`
- * @param options - Optional configuration
- * @returns Object with `isLoading` and a manual `check`
- *
- * @example
- * ```svelte
- * <script lang="ts">
- *   import { useInfiniteScroll } from '@ariefsn/svelte-use';
- *
- *   let el = $state<HTMLDivElement | null>(null);
- *   let items = $state<string[]>([]);
- *   let page = 0;
- *
- *   const { isLoading } = useInfiniteScroll(
- *     () => el,
- *     async () => {
- *       const next = await fetchPage(page++);
- *       items = [...items, ...next];
- *     },
- *     { distance: 100, canLoadMore: () => page < 10 }
- *   );
- * </script>
- *
- * <div bind:this={el} style="overflow-y: auto; height: 300px">
- *   {#each items as item (item)}<p>{item}</p>{/each}
- *   {#if isLoading()}<p>Loading…</p>{/if}
- * </div>
- * ```
- */
+/** Loads more content as a scroll container nears its edge. */
 export function useInfiniteScroll(
 	target: () => HTMLElement | null | undefined,
 	onLoadMore: () => void | Promise<void>,
@@ -119,9 +72,8 @@ export function useInfiniteScroll(
 
 		isLoading = true;
 		try {
-			// Keep loading while the content still does not overflow the
-			// container — one page of a short list would otherwise leave the
-			// scrollbar unusable and stall the sequence.
+			// Keep loading while the content still does not overflow the container — one page of a short
+			// list would otherwise leave the scrollbar unusable and stall the sequence.
 			do {
 				await onLoadMore();
 				if (!canLoadMore()) break;

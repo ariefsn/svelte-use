@@ -9,39 +9,18 @@ interface NavigatorWithBattery extends Navigator {
 	getBattery?: () => Promise<BatteryManager>;
 }
 
-/**
- * Return value of {@link useBattery}.
- */
+/** Return value of {@link useBattery}. */
 export interface UseBatteryReturn {
 	/** Getter returning `true` when the battery is currently charging. */
 	charging: () => boolean;
 	/**
-	 * Getter returning the battery charge level as a number between `0` and `1`.
-	 * Returns `1` when the Battery Status API is unsupported.
+	 * Getter returning the battery charge level as a number between `0` and `1`. Returns `1` when the
+	 * Battery Status API is unsupported.
 	 */
 	level: () => number;
 }
 
-/**
- * Reactive Battery Status API wrapper.
- *
- * Calls `navigator.getBattery()` and keeps `charging` and `level` up-to-date
- * by subscribing to the `chargingchange` and `levelchange` events on the
- * `BatteryManager` object. Both values default to `false` / `1` until the
- * promise resolves.
- *
- * Gracefully degrades when the Battery Status API is unavailable (returns
- * the default values and does not throw). Safe to call during SSR.
- *
- * @returns An object with `charging` and `level` getter functions.
- *
- * @example
- * ```ts
- * const { charging, level } = useBattery();
- * charging(); // true | false
- * level();    // 0.0 – 1.0
- * ```
- */
+/** Reactively tracks battery charging state and charge level via the Battery Status API. */
 export function useBattery(): UseBatteryReturn {
 	const isBrowser = typeof navigator !== 'undefined';
 

@@ -1,27 +1,7 @@
 #!/usr/bin/env node
 /**
- * Flags read-modify-write of reactive state directly in a `$effect` body.
- *
- * `count++` reads `count` and then writes it, so an effect containing it
- * depends on what it writes and re-triggers itself until Svelte throws
- * `effect_update_depth_exceeded`. This shipped twice in v1.1.0
- * (use-page-leave, use-document-visibility), which is why it has a check.
- *
- * Wrap the mutation in `untrack(() => { ... })` to silence it.
- *
- * Scope rules, and the reason they matter — mutations are only reported when
- * they run as part of the effect body itself. A mutation inside a *nested*
- * function is not a self-trigger, because that function runs later, outside
- * the tracking pass:
- *
- *   $effect(() => { count++; })                      // reported
- *   $effect(() => { el.onclick = () => count++; })   // fine, deferred
- *   $effect(() => { setInterval(() => count++, 1); })// fine, deferred
- *   $effect(() => { untrack(() => { count++; }); })  // fine, untracked
- *
- * This is a heuristic, not type-aware analysis: it does not resolve whether
- * an identifier is actually `$state`. eslint-plugin-svelte has no equivalent
- * rule, and a correct one would need scope and reactivity resolution.
+ * Flags read-modify-write of reactive state directly in a `$effect` body, which self-triggers
+ * until Svelte throws. Only the body itself counts; nested callbacks defer. Silence with `untrack`.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -168,9 +148,8 @@ function scan(file) {
 		const lastNested = stack.lastIndexOf('nested-func');
 		if (lastFuncScope === -1 || lastNested > lastFuncScope) continue;
 
-		// Anchored at the cursor, so regions already skipped (nested arrows,
-		// untracked blocks) are never examined. Testing the rest of the line
-		// instead would see straight past those boundaries.
+		// Anchored at the cursor, so regions already skipped (nested arrows, untracked blocks) are
+		// never examined.
 		const prev = i > 0 ? source[i - 1] : ' ';
 		if (/[\w$.]/.test(prev)) continue;
 

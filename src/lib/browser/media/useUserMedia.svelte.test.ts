@@ -4,9 +4,7 @@ import { useUserMedia } from './useUserMedia.svelte.js';
 
 /**
  * A real camera cannot be opened in headless Chromium, so these stub
- * `navigator.mediaDevices.getUserMedia`. `useSupported` evaluates its probe
- * immediately at construction, so every stub must be installed *before* the
- * composable is created.
+ * `navigator.mediaDevices.getUserMedia`.
  */
 
 class FakeTrack extends EventTarget {
@@ -23,10 +21,8 @@ class FakeTrack extends EventTarget {
 }
 
 /**
- * A class, not an object literal, because `$state` deep-proxies plain objects
- * — a literal would come back from `stream()` as a Proxy and fail identity
- * checks. A real `MediaStream` is a class instance and is never proxied, so
- * this keeps the fake faithful to what ships.
+ * A class, not an object literal, because `$state` deep-proxies plain objects — a literal would
+ * come back from `stream()` as a Proxy and fail identity checks.
  */
 class FakeStream {
 	constructor(private readonly tracks: FakeTrack[]) {}
@@ -48,9 +44,8 @@ describe('useUserMedia', () => {
 		const stream = makeStream();
 		vi.spyOn(navigator.mediaDevices, 'getUserMedia').mockResolvedValue(stream);
 
-		// `$effect.root` does not await an async callback, so the composable is
-		// created inside it and awaited outside — otherwise the assertions run
-		// detached and a failure would not fail the test.
+		// `$effect.root` does not await an async callback, so the composable is created inside
+		// it and awaited outside — otherwise assertions run detached and a failure is silent.
 		let media!: ReturnType<typeof useUserMedia>;
 		const cleanup = $effect.root(() => {
 			media = useUserMedia();

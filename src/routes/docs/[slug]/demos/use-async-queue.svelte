@@ -7,9 +7,8 @@
 	let failThird = $state(false);
 	let runId = $state(0);
 
-	// Filled by onSuccess. Completion order differs from array order once
-	// concurrency is above 1, so the index is the only reliable way to know
-	// which row just finished.
+	// Filled by onSuccess. Completion order differs from array order once concurrency is above 1, so
+	// the index is the only reliable way to know which row just finished.
 	let landed = $state<(number | null)[]>(LABELS.map(() => null));
 	let order = $state(0);
 

@@ -1,20 +1,4 @@
-/**
- * Detects when a user starts typing on non-editable elements.
- *
- * Fires the callback when a printable key is pressed while the active element
- * is not an input, textarea, or contentEditable element.
- *
- * @param callback - Function to call with the KeyboardEvent when typing starts
- * @returns A cleanup function
- *
- * @example
- * ```ts
- * useStartTyping((e) => {
- *   // Focus a search input when user starts typing
- *   searchInput.focus();
- * });
- * ```
- */
+/** Detects when a user starts typing on non-editable elements. */
 export function useStartTyping(callback: (e: KeyboardEvent) => void): () => void {
 	const isBrowser = typeof document !== 'undefined';
 

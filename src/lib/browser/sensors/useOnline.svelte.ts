@@ -1,17 +1,6 @@
 /**
- * Reactive online/offline network status.
- *
- * Tracks `navigator.onLine` and updates reactively on the browser's
- * `online` / `offline` events. Returns `true` during SSR so that
- * server-rendered content assumes connectivity.
- *
- * @returns A getter function that returns `true` when the browser is online.
- *
- * @example
- * ```ts
- * const isOnline = useOnline();
- * isOnline(); // true | false
- * ```
+ * Reactive online/offline network status. Tracks `navigator.onLine` and updates on the browser's
+ * `online` / `offline` events. Returns `true` during SSR.
  */
 export function useOnline(): () => boolean {
 	const isBrowser = typeof window !== 'undefined';

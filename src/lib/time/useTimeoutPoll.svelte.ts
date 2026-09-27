@@ -1,27 +1,6 @@
 /**
- * Polling utility that chains `setTimeout` calls to repeatedly invoke a
- * function at a given interval, avoiding drift issues inherent in `setInterval`.
- *
- * After each invocation of `fn`, a new timeout is scheduled for the next tick.
- * This means the interval represents the delay *between* the end of one
- * execution and the start of the next, preventing calls from stacking when
- * `fn` takes longer than the interval.
- *
- * The polling must be started manually via `start()`. It is also cleaned up
- * when the owning reactive scope is destroyed.
- *
- * @param fn - Function to invoke on each poll
- * @param interval - Delay in milliseconds between polls
- * @returns Object with `start`, `stop`, and `isActive` functions
- *
- * @example
- * ```ts
- * const { start, stop, isActive } = useTimeoutPoll(() => fetchData(), 5000);
- * start();    // begin polling every 5 seconds
- * isActive(); // → true
- * stop();     // stop polling
- * isActive(); // → false
- * ```
+ * Polls by chaining `setTimeout` calls, avoiding the drift inherent in `setInterval`.
+ * The interval is the delay *between* the end of one run and the start of the next.
  */
 export function useTimeoutPoll(fn: () => void, interval: number) {
 	let active = $state(false);

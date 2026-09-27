@@ -2,16 +2,11 @@ import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { flushSync } from 'svelte';
 import { useTransition, linear, cubicInOut } from './useTransition.svelte.js';
 
-// ---------------------------------------------------------------------------
 // rAF / performance mock helpers
-// ---------------------------------------------------------------------------
 
 /**
- * Install synchronous fake implementations of `requestAnimationFrame`,
- * `cancelAnimationFrame`, and `performance.now`.
- *
- * `advanceTime(ms)` runs all pending frames up to the specified elapsed time,
- * incrementing the fake clock and invoking each callback in order.
+ * Install synchronous fake implementations of `requestAnimationFrame`, `cancelAnimationFrame`, and
+ * `performance.now`.
  */
 function installFakeRAF() {
 	type Callback = (time: number) => void;
@@ -52,9 +47,7 @@ function installFakeRAF() {
 	return { advanceTime, reset };
 }
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('linear easing', () => {
 	test('returns the same value', () => {
@@ -152,10 +145,8 @@ describe('useTransition', () => {
 	});
 
 	test('completes on schedule when stepped frame by frame', () => {
-		// Regression: the effect read `current`, which the per-frame tick
-		// writes, so every frame re-ran the effect and restarted the tween
-		// with a fresh startTime. The single-jump tests above never caught it
-		// because they drain the whole duration in one frame.
+		// Regression: the effect read `current`, which the per-frame tick writes, so every frame re-ran
+		// the effect and restarted the tween with a fresh startTime.
 		let source = $state(0);
 		let result: ReturnType<typeof useTransition> | undefined;
 

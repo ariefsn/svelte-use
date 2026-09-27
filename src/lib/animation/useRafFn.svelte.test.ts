@@ -3,8 +3,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { useRafFn } from './useRafFn.svelte.js';
 
 /**
- * Drives requestAnimationFrame manually so frames can be stepped one at a
- * time. Real rAF never fires in a headless run with fake timers.
+ * Drives requestAnimationFrame manually so frames can be stepped one at a time. Real rAF never
+ * fires in a headless run with fake timers.
  */
 let queue: Array<(t: number) => void> = [];
 let now = 0;
@@ -88,9 +88,8 @@ describe('useRafFn', () => {
 	});
 
 	test('resume() actually starts ticking', () => {
-		// Regression guard for the useIntervalFn class of bug: if the cleanup
-		// effect tracked `active`, resume() would schedule a frame and the
-		// effect re-run would immediately cancel it.
+		// Regression guard for the useIntervalFn class of bug: if the cleanup effect tracked `active`,
+		// resume() would schedule a frame and the effect re-run would immediately cancel it.
 		const fn = vi.fn();
 		const cleanup = $effect.root(() => {
 			const { resume, isActive } = useRafFn(fn, { immediate: false });

@@ -6,9 +6,8 @@
 	let changes = $state(0);
 	let previous = current();
 
-	// The increment must be untracked (it reads `changes` too, which would make
-	// the effect re-trigger itself), and gated on an actual change so mounting
-	// doesn't count as one.
+	// The increment must be untracked (it reads `changes` too, which would make the effect re-trigger
+	// itself), and gated on an actual change so mounting doesn't count as one.
 	$effect(() => {
 		const now = current();
 		if (now === previous) return;

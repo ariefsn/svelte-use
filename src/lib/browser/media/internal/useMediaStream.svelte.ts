@@ -5,17 +5,15 @@ import { getMediaDevices, stopStream } from './mediaDevices.js';
 /** How a `useMediaStream` instance acquires its stream. */
 export interface UseMediaStreamConfig {
 	/**
-	 * Performs the acquisition — `getUserMedia(constraints)` or
-	 * `getDisplayMedia(options)`. Called lazily, only in a browser, and only
-	 * once per `start()`.
+	 * Performs the acquisition — `getUserMedia(constraints)` or `getDisplayMedia(options)`. Called
+	 * lazily, only in a browser, and only once per `start()`.
 	 */
 	request: (devices: MediaDevices) => Promise<MediaStream>;
 	/** Feature probe, evaluated once via `useSupported`. */
 	probe: () => boolean;
 	/**
-	 * A key describing the current request. When it changes while a stream is
-	 * live, the stream is stopped and reacquired. Omit to disable auto-restart
-	 * — screen capture cannot be silently re-prompted, so it does not use it.
+	 * A key describing the current request. When it changes while a stream is live, the stream is
+	 * stopped and reacquired.
 	 */
 	revision?: () => string;
 }
@@ -39,19 +37,8 @@ export interface UseMediaStreamReturn {
 }
 
 /**
- * The shared engine behind `useUserMedia` and `useDisplayMedia`.
- *
- * Those two differ only in which `MediaDevices` method they call; everything
- * that is easy to get wrong is here, once:
- *
- * - **A single in-flight request.** Two `start()` calls in the same tick must
- *   not open two streams, which on a camera also means two permission prompts.
- * - **A generation counter.** A request that resolves after `stop()` stops its
- *   own tracks instead of becoming the live stream — otherwise the camera
- *   light stays on with nothing referencing it.
- * - **`ended` tracking.** The browser's own "Stop sharing" control ends the
- *   tracks without telling the page, so `stream()` would stay non-null forever.
- *
+ * Shared engine behind `useUserMedia` and `useDisplayMedia`. Guards a single in-flight request,
+ * a generation counter (a late resolve stops its own tracks), and `ended` tracking.
  * @internal
  */
 export function useMediaStream(config: UseMediaStreamConfig): UseMediaStreamReturn {
@@ -117,9 +104,8 @@ export function useMediaStream(config: UseMediaStreamConfig): UseMediaStreamRetu
 		return start();
 	}
 
-	// Clear the stream when its tracks end on their own — the browser's
-	// "Stop sharing" button, or a device being unplugged. The write happens in
-	// an event callback, outside any tracking pass, so it cannot self-trigger.
+	// Clear the stream when its tracks end on their own — the browser's "Stop sharing" button, or a
+	// device being unplugged.
 	$effect(() => {
 		const current = stream;
 		if (!current) return;

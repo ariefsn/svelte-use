@@ -2,9 +2,7 @@ import { flushSync } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { useWebSocket } from './useWebSocket.svelte.js';
 
-// ---------------------------------------------------------------------------
 // Mock WebSocket
-// ---------------------------------------------------------------------------
 
 class MockWebSocket {
 	static readonly CONNECTING = 0;
@@ -75,9 +73,7 @@ class MockWebSocket {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // Setup / teardown
-// ---------------------------------------------------------------------------
 
 beforeEach(() => {
 	MockWebSocket.instances = [];
@@ -90,14 +86,10 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
 
 describe('useWebSocket', () => {
-	// -------------------------------------------------------------------------
 	// Default behavior
-	// -------------------------------------------------------------------------
 
 	test('initial state when url is undefined', () => {
 		const cleanup = $effect.root(() => {
@@ -131,9 +123,7 @@ describe('useWebSocket', () => {
 		cleanup();
 	});
 
-	// -------------------------------------------------------------------------
 	// Success case
-	// -------------------------------------------------------------------------
 
 	test('data is populated on message', () => {
 		const cleanup = $effect.root(() => {
@@ -179,9 +169,7 @@ describe('useWebSocket', () => {
 		cleanup();
 	});
 
-	// -------------------------------------------------------------------------
 	// Error case
-	// -------------------------------------------------------------------------
 
 	test('error is set when socket fires an error event', () => {
 		const cleanup = $effect.root(() => {
@@ -206,9 +194,7 @@ describe('useWebSocket', () => {
 		cleanup();
 	});
 
-	// -------------------------------------------------------------------------
 	// Reactive update case
-	// -------------------------------------------------------------------------
 
 	test('reconnects when url changes', () => {
 		let url = $state('wss://example.com/1');
@@ -265,9 +251,7 @@ describe('useWebSocket', () => {
 		cleanup();
 	});
 
-	// -------------------------------------------------------------------------
 	// Auto-reconnect
-	// -------------------------------------------------------------------------
 
 	test('auto-reconnects after unexpected close', async () => {
 		const cleanup = $effect.root(() => {
@@ -313,9 +297,7 @@ describe('useWebSocket', () => {
 		cleanup();
 	});
 
-	// -------------------------------------------------------------------------
 	// close() method
-	// -------------------------------------------------------------------------
 
 	test('close() transitions status to CLOSED', () => {
 		const cleanup = $effect.root(() => {
@@ -332,9 +314,7 @@ describe('useWebSocket', () => {
 		cleanup();
 	});
 
-	// -------------------------------------------------------------------------
 	// Cleanup behavior
-	// -------------------------------------------------------------------------
 
 	test('socket is closed when reactive scope is destroyed', () => {
 		const cleanup = $effect.root(() => {
@@ -389,9 +369,7 @@ describe('useWebSocket', () => {
 		expect(ws.onclose).toBeNull();
 	});
 
-	// -------------------------------------------------------------------------
 	// SSR safety
-	// -------------------------------------------------------------------------
 
 	test('does not throw when WebSocket is undefined (SSR)', () => {
 		vi.stubGlobal('WebSocket', undefined);
@@ -405,9 +383,7 @@ describe('useWebSocket', () => {
 		cleanup();
 	});
 
-	// -------------------------------------------------------------------------
 	// Raw (non-JSON) message handling
-	// -------------------------------------------------------------------------
 
 	test('falls back to raw string when message is not valid JSON', () => {
 		const cleanup = $effect.root(() => {
