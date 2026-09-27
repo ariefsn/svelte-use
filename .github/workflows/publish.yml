@@ -50,7 +50,9 @@ jobs:
 
       - run: bun run check
       - run: bun run lint
-      - run: bun run test:unit -- --run
+      # Runs the same suites as test:unit, plus the coverage thresholds in
+      # vite.config.ts. A drop below them fails the release rather than shipping it.
+      - run: bun run test:coverage
 
       - run: bun run prepack
       - run: npm publish --access public --provenance

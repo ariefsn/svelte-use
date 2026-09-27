@@ -164,8 +164,8 @@ describe('buildTags — image dimensions', () => {
 
 describe('buildTags — article metadata', () => {
 	const article = {
-		publishedTime: '2026-09-28T10:00:00Z',
-		modifiedTime: '2026-09-28T12:00:00Z',
+		publishedTime: '2026-09-27T10:00:00Z',
+		modifiedTime: '2026-09-27T12:00:00Z',
 		author: 'Ada Lovelace',
 		section: 'Documentation',
 		tags: ['svelte', 'runes']
@@ -174,8 +174,8 @@ describe('buildTags — article metadata', () => {
 	it('emits article tags when the type is article', () => {
 		const tags = buildTags({ og: { type: 'article' }, article });
 
-		expect(contentOf(tags, 'article:published_time')).toBe('2026-09-28T10:00:00Z');
-		expect(contentOf(tags, 'article:modified_time')).toBe('2026-09-28T12:00:00Z');
+		expect(contentOf(tags, 'article:published_time')).toBe('2026-09-27T10:00:00Z');
+		expect(contentOf(tags, 'article:modified_time')).toBe('2026-09-27T12:00:00Z');
 		expect(contentOf(tags, 'article:author')).toBe('Ada Lovelace');
 		expect(contentOf(tags, 'article:section')).toBe('Documentation');
 	});

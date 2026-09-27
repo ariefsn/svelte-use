@@ -35,6 +35,11 @@ export function useWebNotification(
 
 	let permissionGranted = $state(isSupported() ? Notification.permission === 'granted' : false);
 	let notification = $state<Notification | null>(null);
+	/*
+	 * Plain mirror of `notification`. The destroy teardown tracks nothing, and a
+	 * `$state` read from there observes a stale value, so it reads this instead.
+	 */
+	let active: Notification | null = null;
 	let error = $state<Error | null>(null);
 
 	/** Reads the live permission rather than the snapshot taken at init. */
@@ -87,6 +92,7 @@ export function useWebNotification(
 			});
 
 			notification = n;
+			active = n;
 			return n;
 		} catch (err) {
 			error = err instanceof Error ? err : new Error(String(err));
@@ -95,8 +101,9 @@ export function useWebNotification(
 	}
 
 	function close() {
-		if (notification) {
-			notification.close();
+		if (active) {
+			active.close();
+			active = null;
 			notification = null;
 		}
 	}

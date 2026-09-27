@@ -32,7 +32,7 @@ export interface SeoOpenGraph {
  * types.
  */
 export interface SeoArticle {
-	/** ISO 8601 publication time, e.g. `'2026-09-28T10:00:00Z'`. */
+	/** ISO 8601 publication time, e.g. `'2026-09-27T10:00:00Z'`. */
 	publishedTime?: string;
 	/** ISO 8601 time of the last substantive edit. */
 	modifiedTime?: string;

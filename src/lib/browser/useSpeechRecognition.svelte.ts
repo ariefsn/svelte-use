@@ -89,6 +89,11 @@ export function useSpeechRecognition(
 
 	let result = $state<string>('');
 	let isListening = $state<boolean>(false);
+	/*
+	 * Plain mirror of `isListening`. The destroy teardown tracks nothing, and a `$state`
+	 * read from there observes a stale value, so it reads this instead.
+	 */
+	let listening = false;
 	let error = $state<string | null>(null);
 	let recognition: SpeechRecognitionInstance | null = null;
 
@@ -108,6 +113,7 @@ export function useSpeechRecognition(
 
 		recognition.onend = () => {
 			isListening = false;
+			listening = false;
 		};
 
 		// Capture the error code rather than discarding it — without this every failure (denied
@@ -115,6 +121,7 @@ export function useSpeechRecognition(
 		recognition.onerror = (event: Event) => {
 			error = (event as SpeechRecognitionErrorEvent).error ?? 'unknown';
 			isListening = false;
+			listening = false;
 		};
 	}
 
@@ -123,6 +130,7 @@ export function useSpeechRecognition(
 		result = '';
 		error = null;
 		isListening = true;
+		listening = true;
 		try {
 			recognition.start();
 		} catch (err) {
@@ -130,6 +138,7 @@ export function useSpeechRecognition(
 			// surface it instead of leaving the UI stuck in a listening state that never began.
 			error = err instanceof Error ? err.name : 'start-failed';
 			isListening = false;
+			listening = false;
 		}
 	}
 
@@ -137,12 +146,14 @@ export function useSpeechRecognition(
 		if (!recognition) return;
 		recognition.stop();
 		isListening = false;
+		listening = false;
 	}
 
 	$effect(() => {
 		return () => {
-			if (recognition && isListening) {
+			if (recognition && listening) {
 				recognition.stop();
+				listening = false;
 			}
 		};
 	});

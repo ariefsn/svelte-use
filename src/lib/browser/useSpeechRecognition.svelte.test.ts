@@ -164,4 +164,60 @@ describe('useSpeechRecognition', () => {
 		});
 		cleanup();
 	});
+
+	test('scope destroy stops a live session', () => {
+		let api!: ReturnType<typeof useSpeechRecognition>;
+		const cleanup = $effect.root(() => {
+			api = useSpeechRecognition();
+		});
+		flushSync();
+
+		api.start();
+		expect(api.isListening()).toBe(true);
+
+		cleanup();
+		flushSync();
+		expect(mockInstance.stop).toHaveBeenCalledOnce();
+	});
+
+	test('an explicit stop is not repeated on destroy', () => {
+		let api!: ReturnType<typeof useSpeechRecognition>;
+		const cleanup = $effect.root(() => {
+			api = useSpeechRecognition();
+		});
+		flushSync();
+
+		api.start();
+		api.stop();
+		cleanup();
+		flushSync();
+		expect(mockInstance.stop).toHaveBeenCalledOnce();
+	});
+
+	test('nothing is stopped when no session was started', () => {
+		const cleanup = $effect.root(() => {
+			useSpeechRecognition();
+		});
+		flushSync();
+		cleanup();
+		flushSync();
+		expect(mockInstance.stop).not.toHaveBeenCalled();
+	});
+
+	test('a session ended by the recogniser is not stopped again on destroy', () => {
+		let api!: ReturnType<typeof useSpeechRecognition>;
+		const cleanup = $effect.root(() => {
+			api = useSpeechRecognition();
+		});
+		flushSync();
+
+		api.start();
+		mockInstance.onend?.();
+		flushSync();
+		expect(api.isListening()).toBe(false);
+
+		cleanup();
+		flushSync();
+		expect(mockInstance.stop).not.toHaveBeenCalled();
+	});
 });
