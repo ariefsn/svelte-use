@@ -3734,7 +3734,7 @@ const drag = useDraggable(() => el, {
 drag.x()         // → current X
 drag.y()         // → current Y
 drag.isDragging() // → true while dragging
-drag.style()     // → "transform: translate(100px, 0px);"`,
+drag.style()     // → "transform: translate(100px, 0px); touch-action: none;"`,
 		params: [
 			{
 				name: 'target',
@@ -3777,7 +3777,8 @@ drag.style()     // → "transform: translate(100px, 0px);"`,
 				name: 'pointerTypes',
 				type: 'DraggablePointerType[]',
 				default: 'all types',
-				description: "Limit to 'mouse', 'touch', 'pen'"
+				description:
+					"Limit to 'mouse', 'touch', 'pen'. When touch is allowed the handle gets inline `touch-action: none` so the browser doesn't turn the drag into a scroll"
 			},
 			{
 				name: 'preventDefault',
@@ -3815,7 +3816,8 @@ drag.style()     // → "transform: translate(100px, 0px);"`,
 			{
 				name: 'style',
 				type: '() => string',
-				description: 'Convenience CSS string: `transform: translate(Xpx, Ypx);`'
+				description:
+					'Convenience CSS string: `transform: translate(Xpx, Ypx);`, plus `touch-action: none;` when touch is allowed. Bind it with `style={drag.style()}` so the touch fix survives re-renders'
 			}
 		],
 		example: `<script lang="ts">
