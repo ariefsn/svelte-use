@@ -88,10 +88,11 @@ describe('docs coverage', () => {
 		expect(newer).toEqual([]);
 	});
 
-	it('NEW_IN_VERSION matches the version in package.json', () => {
-		// Otherwise the badges silently vanish (or linger) after a release bump.
+	it('NEW_IN_VERSION matches the minor version in package.json', () => {
+		// Otherwise the badges silently vanish (or linger) after a minor bump; patches keep them.
 		const pkg = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8'));
-		expect(NEW_IN_VERSION).toBe(pkg.version);
+		const minor = (version: string) => version.split('.').slice(0, 2).join('.');
+		expect(minor(NEW_IN_VERSION)).toBe(minor(pkg.version));
 	});
 
 	it('groupHasNew is true exactly for groups containing a new item', () => {
