@@ -1,6 +1,6 @@
 {
 	"name": "@ariefsn/svelte-use",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "Collection of reactive utility composables for Svelte 5 inspired by VueUse.",
 	"license": "MIT",
 	"repository": {

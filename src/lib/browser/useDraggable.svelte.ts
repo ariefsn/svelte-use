@@ -197,7 +197,15 @@ export function useDraggable(
 	let offsetX = 0;
 	let offsetY = 0;
 
-	const style = $derived(`transform: translate(${x}px, ${y}px);`);
+	// Pointer that owns the current drag; other pointers (a second finger) are ignored.
+	let activePointerId: number | null = null;
+
+	// Without touch-action: none the browser claims touch moves as a pan and fires pointercancel.
+	// It rides along in style() because `style={...}` bindings overwrite the whole inline style.
+	const allowsTouch = !pointerTypes?.length || pointerTypes.includes('touch');
+	const style = $derived(
+		`transform: translate(${x}px, ${y}px);${allowsTouch ? ' touch-action: none;' : ''}`
+	);
 
 	// Event handlers (defined outside $effect so they are stable refs)
 
@@ -222,6 +230,7 @@ export function useDraggable(
 
 	function onPointerDown(event: PointerEvent): void {
 		if (disabled) return;
+		if (isDragging) return;
 		if (event.button !== button) return;
 		if (pointerTypes && pointerTypes.length > 0) {
 			if (!pointerTypes.includes(event.pointerType as DraggablePointerType)) return;
@@ -239,6 +248,7 @@ export function useDraggable(
 		if (result === false) return;
 
 		isDragging = true;
+		activePointerId = event.pointerId;
 
 		// Use the draggingElement if provided, otherwise the target itself.
 		const movingEl = resolveElement(draggingElement) ?? resolveElement(target);
@@ -248,7 +258,7 @@ export function useDraggable(
 	}
 
 	function onPointerMove(event: PointerEvent): void {
-		if (!isDragging) return;
+		if (!isDragging || event.pointerId !== activePointerId) return;
 
 		applyEventOptions(event);
 
@@ -276,10 +286,11 @@ export function useDraggable(
 	}
 
 	function onPointerUp(event: PointerEvent): void {
-		if (!isDragging) return;
+		if (!isDragging || event.pointerId !== activePointerId) return;
 
 		applyEventOptions(event);
 		isDragging = false;
+		activePointerId = null;
 
 		onEnd?.({ x, y }, event);
 	}
@@ -296,6 +307,10 @@ export function useDraggable(
 		// The handle is the element that initiates the drag; defaults to target.
 		const handleEl = resolveElement(handle) ?? targetEl;
 
+		// Covers callers that don't bind style(); must be set before touchstart, not on pointerdown.
+		const prevTouchAction = handleEl.style.touchAction;
+		if (allowsTouch) handleEl.style.touchAction = 'none';
+
 		const listenerOpts: AddEventListenerOptions = { capture };
 
 		handleEl.addEventListener('pointerdown', onPointerDown, listenerOpts);
@@ -308,7 +323,9 @@ export function useDraggable(
 			targetEl.removeEventListener('pointermove', onPointerMove, listenerOpts);
 			targetEl.removeEventListener('pointerup', onPointerUp, listenerOpts);
 			targetEl.removeEventListener('pointercancel', onPointerUp, listenerOpts);
+			if (allowsTouch) handleEl.style.touchAction = prevTouchAction;
 			isDragging = false;
+			activePointerId = null;
 		};
 	});
 

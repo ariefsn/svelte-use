@@ -115,7 +115,7 @@ describe('useDraggable', () => {
 
 		test('style reflects initial position', () => {
 			const { drag, cleanup, el } = setupDraggable({ initialValue: { x: 10, y: 20 } });
-			expect(drag.style()).toBe('transform: translate(10px, 20px);');
+			expect(drag.style()).toBe('transform: translate(10px, 20px); touch-action: none;');
 			cleanup();
 			el.remove();
 		});
@@ -176,7 +176,7 @@ describe('useDraggable', () => {
 			firePointerDown(el, 0, 0);
 			firePointerMove(el, 120, 60);
 
-			expect(drag.style()).toBe('transform: translate(120px, 60px);');
+			expect(drag.style()).toBe('transform: translate(120px, 60px); touch-action: none;');
 
 			cleanup();
 			el.remove();
@@ -510,6 +510,82 @@ describe('useDraggable', () => {
 			el.dispatchEvent(event);
 
 			expect(stopSpy).toHaveBeenCalled();
+
+			cleanup();
+			el.remove();
+		});
+	});
+
+	describe('touch support', () => {
+		test('sets touch-action: none on the target and restores it on cleanup', () => {
+			const el = makeEl();
+			el.style.touchAction = 'pan-y';
+
+			const cleanup = $effect.root(() => {
+				useDraggable(el);
+			});
+			flushSync();
+
+			expect(el.style.touchAction).toBe('none');
+
+			cleanup();
+			expect(el.style.touchAction).toBe('pan-y');
+			el.remove();
+		});
+
+		test('sets touch-action on the handle, not the target', () => {
+			const el = makeEl();
+			const handle = makeEl();
+
+			const cleanup = $effect.root(() => {
+				useDraggable(el, { handle });
+			});
+			flushSync();
+
+			expect(handle.style.touchAction).toBe('none');
+			expect(el.style.touchAction).toBe('');
+
+			cleanup();
+			el.remove();
+			handle.remove();
+		});
+
+		test('style() keeps touch-action: none when a binding overwrites the inline style', () => {
+			const { el, drag, cleanup } = setupDraggable();
+
+			// Svelte's `style={...}` binding assigns cssText, wiping anything set directly.
+			firePointerDown(el, 0, 0);
+			firePointerMove(el, 10, 10);
+			el.style.cssText = `position: absolute; ${drag.style()}`;
+			expect(el.style.touchAction).toBe('none');
+
+			cleanup();
+			el.remove();
+		});
+
+		test('leaves touch-action alone when touch is not an allowed pointer type', () => {
+			const { el, drag, cleanup } = setupDraggable({ pointerTypes: ['mouse'] });
+			expect(el.style.touchAction).toBe('');
+			expect(drag.style()).toBe('transform: translate(0px, 0px);');
+			cleanup();
+			el.remove();
+		});
+
+		test('ignores moves and ups from a second pointer during a drag', () => {
+			const { el, drag, cleanup } = setupDraggable();
+
+			firePointerDown(el, 0, 0, { pointerId: 1, pointerType: 'touch' });
+			firePointerDown(el, 100, 100, { pointerId: 2, pointerType: 'touch' });
+			firePointerMove(el, 80, 90, { pointerId: 2, pointerType: 'touch' });
+			expect(drag.x()).toBe(0);
+			expect(drag.y()).toBe(0);
+
+			firePointerUp(el, 80, 90, { pointerId: 2, pointerType: 'touch' });
+			expect(drag.isDragging()).toBe(true);
+
+			firePointerMove(el, 30, 40, { pointerId: 1, pointerType: 'touch' });
+			expect(drag.x()).toBe(30);
+			expect(drag.y()).toBe(40);
 
 			cleanup();
 			el.remove();

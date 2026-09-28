@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.1] - 2026-09-28
+
+### Fixed
+
+- `useDraggable` stopped after a few pixels on touch devices: the browser took the gesture as a pan and fired `pointercancel`. While touch is allowed, `style()` now includes `touch-action: none` and the handle gets it inline on mount. It lives in `style()` because a `style={...}` binding overwrites the whole inline style, which broke every drag after the first (#27)
+- `useDraggable` no longer lets a second pointer (another finger) restart or hijack an active drag
+
 ## [1.2.0] - 2026-09-27
 
 ### Added
